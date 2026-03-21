@@ -1,0 +1,20 @@
+{
+  "siteName": "GoGet",
+  "heroTitle": "Delivery content you can manage from admin",
+  "heroSubtitle": "GoGet connects customers, merchants, and couriers with a single content source so the homepage can be updated without editing code.",
+  "logo": "/logo.png",
+  "features": [
+    {
+      "title": "Single JSON source",
+      "desc": "Homepage content is loaded from data/site.json for simple CMS-style control."
+    },
+    {
+      "title": "Fast admin editing",
+      "desc": "Update the hero title and subtitle from the admin page and save directly to disk."
+    },
+    {
+      "title": "Reusable API access",
+      "desc": "The same content is available through GET and POST endpoints for future integrations."
+    }
+  ]
+}
