@@ -5,3 +5,5 @@ node_modules
 .codex-guard
 .next-dev.log
 .next-dev.err.log
+.vercel
+.env*.local
