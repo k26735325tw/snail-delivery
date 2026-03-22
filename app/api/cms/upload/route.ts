@@ -4,22 +4,33 @@ import { NextResponse } from "next/server";
 export const dynamic = "force-dynamic";
 
 const allowedContentTypes = new Set(["image/jpeg", "image/png", "image/webp", "image/svg+xml"]);
+const overwriteUploadKeys = new Set([
+  "shared/logo",
+  "home/hero",
+  "consumer/hero",
+  "courier/hero",
+  "merchant/hero",
+]);
 
-function normalizeSection(section: string) {
-  const value = section.trim().toLowerCase();
+function normalizePath(value: string) {
+  return value.trim().toLowerCase().replace(/[^a-z0-9/-]+/g, "-");
+}
+
+function normalizeUploadKey(uploadKey: string) {
+  const value = normalizePath(uploadKey);
 
   if (!value) {
-    return "shared";
+    return "shared/logo";
   }
 
-  return value.replace(/[^a-z0-9/-]+/g, "-");
+  return value;
 }
 
 export async function POST(request: Request) {
   try {
     const formData = await request.formData();
     const file = formData.get("file");
-    const section = normalizeSection(String(formData.get("section") ?? "shared"));
+    const uploadKey = normalizeUploadKey(String(formData.get("uploadKey") ?? "shared/logo"));
 
     if (!(file instanceof File)) {
       return NextResponse.json({ error: "Missing upload file" }, { status: 400 });
@@ -30,10 +41,16 @@ export async function POST(request: Request) {
     }
 
     const filename = file.name.replace(/[^a-zA-Z0-9._-]+/g, "-");
-    const blob = await put(`cms/${section}/${Date.now()}-${filename}`, file, {
+    const extension = filename.includes(".") ? filename.slice(filename.lastIndexOf(".")) : "";
+    const shouldOverwrite = overwriteUploadKeys.has(uploadKey);
+    const blobPath = shouldOverwrite
+      ? `cms/${uploadKey}${extension}`
+      : `cms/${uploadKey}/${Date.now()}-${filename}`;
+    const blob = await put(blobPath, file, {
       access: "public",
       contentType: file.type,
       addRandomSuffix: false,
+      allowOverwrite: shouldOverwrite,
     });
 
     return NextResponse.json({

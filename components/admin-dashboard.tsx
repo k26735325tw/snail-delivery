@@ -20,6 +20,8 @@ type AdminDashboardProps = {
   initialData: CmsData;
 };
 
+type PendingUploadMap = Record<string, File | null>;
+
 function Field({
   label,
   value,
@@ -97,14 +99,16 @@ const emptyLaunchStep = (): CmsLaunchStep => ({
 
 function RolePageEditor({
   title,
-  sectionKey,
+  pendingFile,
   page,
   onChange,
+  onFileChange,
 }: {
   title: string;
-  sectionKey: string;
+  pendingFile: File | null;
   page: CmsRolePage;
   onChange: (page: CmsRolePage) => void;
+  onFileChange: (file: File | null) => void;
 }) {
   return (
     <Panel title={title} description="Hero, stats, image and repeatable sections for this page.">
@@ -167,9 +171,10 @@ function RolePageEditor({
 
       <AdminImageUpload
         label="Hero Image"
-        section={sectionKey}
         value={page.hero.heroImageUrl ?? ""}
-        onUploaded={(value) => onChange({ ...page, hero: { ...page.hero, heroImageUrl: value } })}
+        pendingFile={pendingFile}
+        onChange={(value) => onChange({ ...page, hero: { ...page.hero, heroImageUrl: value } })}
+        onFileChange={onFileChange}
       />
 
       <AdminArrayEditor
@@ -218,6 +223,7 @@ export function AdminDashboard({ initialData }: AdminDashboardProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [data, setData] = useState(initialData);
+  const [pendingUploads, setPendingUploads] = useState<PendingUploadMap>({});
   const [savedSnapshot, setSavedSnapshot] = useState(JSON.stringify(initialData));
   const [isSaving, setIsSaving] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
@@ -225,10 +231,91 @@ export function AdminDashboard({ initialData }: AdminDashboardProps) {
 
   useEffect(() => {
     setData(initialData);
+    setPendingUploads({});
     setSavedSnapshot(JSON.stringify(initialData));
   }, [initialData]);
 
-  const isDirty = JSON.stringify(data) !== savedSnapshot;
+  const hasPendingUploads = Object.keys(pendingUploads).length > 0;
+  const isDirty = JSON.stringify(data) !== savedSnapshot || hasPendingUploads;
+
+  function setPendingUpload(key: string, file: File | null) {
+    setPendingUploads((current) => {
+      if (!file) {
+        if (!(key in current)) {
+          return current;
+        }
+
+        const next = { ...current };
+        delete next[key];
+        return next;
+      }
+
+      return { ...current, [key]: file };
+    });
+  }
+
+  async function uploadImage(file: File, uploadKey: string) {
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("uploadKey", uploadKey);
+
+    const response = await fetch("/api/cms/upload", {
+      method: "POST",
+      body: formData,
+    });
+    const result = (await response.json()) as { error?: string; url?: string };
+
+    if (!response.ok || !result.url) {
+      throw new Error(result.error ?? "Upload failed");
+    }
+
+    return result.url;
+  }
+
+  async function prepareDataForSave() {
+    const nextData: CmsData = structuredClone(data);
+
+    if (pendingUploads["site.logo"]) {
+      nextData.site.logoUrl = await uploadImage(pendingUploads["site.logo"], "shared/logo");
+    }
+
+    if (pendingUploads["home.hero"]) {
+      nextData.home.hero.heroImageUrl = await uploadImage(pendingUploads["home.hero"], "home/hero");
+    }
+
+    if (pendingUploads["consumer.hero"]) {
+      nextData.consumer.hero.heroImageUrl = await uploadImage(
+        pendingUploads["consumer.hero"],
+        "consumer/hero",
+      );
+    }
+
+    if (pendingUploads["courier.hero"]) {
+      nextData.courier.hero.heroImageUrl = await uploadImage(
+        pendingUploads["courier.hero"],
+        "courier/hero",
+      );
+    }
+
+    if (pendingUploads["merchant.hero"]) {
+      nextData.merchant.hero.heroImageUrl = await uploadImage(
+        pendingUploads["merchant.hero"],
+        "merchant/hero",
+      );
+    }
+
+    for (const [index, card] of nextData.home.downloadCards.entries()) {
+      const pendingFile = pendingUploads[`home.downloadCards.${index}.image`];
+
+      if (!pendingFile) {
+        continue;
+      }
+
+      card.imageUrl = await uploadImage(pendingFile, `home/${card.key}`);
+    }
+
+    return nextData;
+  }
 
   async function handleSave() {
     setIsSaving(true);
@@ -236,12 +323,13 @@ export function AdminDashboard({ initialData }: AdminDashboardProps) {
     setError(null);
 
     try {
+      const nextData = await prepareDataForSave();
       const response = await fetch("/api/cms", {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(data),
+        body: JSON.stringify(nextData),
       });
       const result = (await response.json()) as { data?: CmsData; error?: string };
 
@@ -250,6 +338,7 @@ export function AdminDashboard({ initialData }: AdminDashboardProps) {
       }
 
       setData(result.data);
+      setPendingUploads({});
       setSavedSnapshot(JSON.stringify(result.data));
       setMessage("CMS saved and paths revalidated.");
       startTransition(() => {
@@ -275,9 +364,10 @@ export function AdminDashboard({ initialData }: AdminDashboardProps) {
         />
         <AdminImageUpload
           label="Logo URL"
-          section="shared"
           value={data.site.logoUrl}
-          onUploaded={(value) => setData({ ...data, site: { ...data.site, logoUrl: value } })}
+          pendingFile={pendingUploads["site.logo"] ?? null}
+          onChange={(value) => setData({ ...data, site: { ...data.site, logoUrl: value } })}
+          onFileChange={(file) => setPendingUpload("site.logo", file)}
         />
         <Field
           label="Footer Title"
@@ -308,14 +398,15 @@ export function AdminDashboard({ initialData }: AdminDashboardProps) {
         />
         <AdminImageUpload
           label="Hero Image"
-          section="home"
           value={data.home.hero.heroImageUrl ?? ""}
-          onUploaded={(value) =>
+          pendingFile={pendingUploads["home.hero"] ?? null}
+          onChange={(value) =>
             setData({
               ...data,
               home: { ...data.home, hero: { ...data.home.hero, heroImageUrl: value } },
             })
           }
+          onFileChange={(file) => setPendingUpload("home.hero", file)}
         />
         <Field
           label="Hero Title"
@@ -459,9 +550,10 @@ export function AdminDashboard({ initialData }: AdminDashboardProps) {
               />
               <AdminImageUpload
                 label="Card Image"
-                section={`home/${card.key}`}
                 value={card.imageUrl}
-                onUploaded={(value) => helpers.update({ ...card, imageUrl: value })}
+                pendingFile={pendingUploads[`home.downloadCards.${index}.image`] ?? null}
+                onChange={(value) => helpers.update({ ...card, imageUrl: value })}
+                onFileChange={(file) => setPendingUpload(`home.downloadCards.${index}.image`, file)}
               />
 
               <div className="grid gap-4 md:grid-cols-2">
@@ -550,21 +642,24 @@ export function AdminDashboard({ initialData }: AdminDashboardProps) {
 
       <RolePageEditor
         title="Consumer Page"
-        sectionKey="consumer"
+        pendingFile={pendingUploads["consumer.hero"] ?? null}
         page={data.consumer}
         onChange={(consumer) => setData({ ...data, consumer })}
+        onFileChange={(file) => setPendingUpload("consumer.hero", file)}
       />
       <RolePageEditor
         title="Courier Page"
-        sectionKey="courier"
+        pendingFile={pendingUploads["courier.hero"] ?? null}
         page={data.courier}
         onChange={(courier) => setData({ ...data, courier })}
+        onFileChange={(file) => setPendingUpload("courier.hero", file)}
       />
       <RolePageEditor
         title="Merchant Page"
-        sectionKey="merchant"
+        pendingFile={pendingUploads["merchant.hero"] ?? null}
         page={data.merchant}
         onChange={(merchant) => setData({ ...data, merchant })}
+        onFileChange={(file) => setPendingUpload("merchant.hero", file)}
       />
 
       <Panel title="Current JSON" description="Normalized payload written to Blob.">
