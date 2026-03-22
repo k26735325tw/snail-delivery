@@ -215,6 +215,7 @@ export async function seedCmsDataIfMissing() {
   const result = await put(CMS_CONTENT_PATH, JSON.stringify(cmsDefaults, null, 2), {
     access: "public",
     addRandomSuffix: false,
+    allowOverwrite: true,
     contentType: "application/json; charset=utf-8",
   });
 
@@ -241,6 +242,7 @@ export async function saveCmsData(data: CmsData) {
   const result = await put(CMS_CONTENT_PATH, JSON.stringify(normalized, null, 2), {
     access: "public",
     addRandomSuffix: false,
+    allowOverwrite: true,
     contentType: "application/json; charset=utf-8",
   });
 
@@ -249,4 +251,3 @@ export async function saveCmsData(data: CmsData) {
     url: result.url,
   };
 }
-
