@@ -13,16 +13,16 @@ export function Footer() {
               Snail Delivery
             </p>
             <h2 className="mt-3 text-3xl font-bold md:text-4xl">
-              讓每一次送達，都像官方級體驗一樣精準。
+              把品牌內容、配送流程與後台管理整合在同一個網站裡。
             </h2>
             <p className="mt-4 text-base leading-8 text-white/70">
-              蝸牛外送用更穩定的履約、更透明的制度與更乾淨的視覺語言，重新定義外送的品質標準。
+              前台提供清楚的服務說明，後台則讓團隊可以直接更新首頁資料，適合展示輕量型內容管理流程。
             </p>
           </div>
           <div className="flex flex-wrap gap-3 text-sm font-bold text-white/82">
-            <Link href="/courier">加入外送員</Link>
-            <Link href="/merchant">店家合作</Link>
-            <Link href="/consumer">立即訂餐</Link>
+            <Link href="/courier">成為配送員</Link>
+            <Link href="/merchant">商家合作</Link>
+            <Link href="/consumer">立即下單</Link>
           </div>
         </div>
       </div>

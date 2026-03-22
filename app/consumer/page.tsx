@@ -10,44 +10,44 @@ export default function ConsumerPage() {
       <SiteHeader />
       <PageHero
         badge="Consumer Experience"
-        title="把品質、安心與食安，做成消費者看得見的外送體驗。"
-        description="蝸牛外送不是追求最低成本的流程，而是讓訂餐從介面開始就更乾淨、更可靠。每一次下單，都應該感受到品質被認真對待。"
+        title="從下單到送達，每一步都看得見。"
+        description="GoGet 為消費者提供穩定透明的配送體驗，讓你知道餐點何時出發、何時抵達，以及誰正在為你配送。"
         primaryHref="/consumer"
-        primaryLabel="立即訂餐"
+        primaryLabel="開始訂購"
         secondaryHref="/merchant"
-        secondaryLabel="店家合作"
+        secondaryLabel="查看商家方案"
         asideTitle="Consumer Snapshot"
         stats={[
-          { label: "推薦店家篩選", value: "高品質優先" },
-          { label: "配送狀態", value: "即時透明" },
-          { label: "食安標準", value: "多層把關" },
+          { label: "平均等待時間", value: "28 分鐘" },
+          { label: "配送進度更新", value: "即時" },
+          { label: "客服回應", value: "7 x 12" },
         ]}
       />
 
       <SectionShell
         badge="Trusted Moments"
-        title="消費者最在意的三件事，就是品質、安心與食安。"
-        description="這個頁面聚焦在訂餐過程裡最關鍵的感受。不是單純說得安心，而是用清楚的結構把信任建立起來。"
+        title="把配送焦慮降到最低，讓使用者只需要等餐點。"
+        description="每一次狀態變更都會同步回到前台，使用者不需要反覆切換頁面或猜測配送進度。"
       >
         <div className="grid gap-5 md:grid-cols-3">
           <FeatureCard
             eyebrow="Quality"
-            title="品質優先"
-            description="店家呈現、菜單資訊與配送流程被統一整理，讓消費者更容易辨識值得信任的選擇。"
-            icon="質"
+            title="餐點狀態清楚"
+            description="從接單、製作、取餐到送達，每個節點都能追蹤，降低等待時的不確定感。"
+            icon="餐"
           />
           <FeatureCard
-            eyebrow="安心"
-            title="過程安心"
-            description="從下單確認到配送追蹤，每一步狀態都被清楚顯示，減少等待焦慮與資訊落差。"
-            icon="心"
+            eyebrow="Updates"
+            title="通知節奏剛好"
+            description="不過度打擾，也不讓人失聯。使用者只會在重要節點收到清楚的進度通知。"
+            icon="訊"
             delay={0.1}
           />
           <FeatureCard
             eyebrow="Food Safety"
-            title="食安把關"
-            description="平台以食安資訊、履約流程與合作標準建立更完整的保護層，讓用戶不只吃得快，也吃得放心。"
-            icon="食"
+            title="配送品質穩定"
+            description="透過標準化交接與明確路線安排，確保餐點能以合理狀態送到消費者手上。"
+            icon="安"
             delay={0.2}
           />
         </div>
@@ -55,8 +55,8 @@ export default function ConsumerPage() {
 
       <SectionShell
         badge="Visual Precision"
-        title="把外送介面做得更像科技品牌，而不是雜訊密集的促銷牆。"
-        description="頁面以 Apple 風格的留白與視覺秩序，讓消費者一眼抓到核心訊息。藍色負責建立穩定感，黃色負責強化品牌記憶點與 CTA。"
+        title="介面不是裝飾，而是幫助使用者快速理解狀態。"
+        description="從首頁主視覺到資訊卡片，設計都圍繞在資訊辨識效率與品牌記憶點。"
       >
         <div className="grid gap-5 md:grid-cols-[1.08fr_0.92fr]">
           <div className="rounded-[2.2rem] bg-blue p-8 text-white shadow-[0_24px_70px_rgba(11,79,212,0.26)]">
@@ -64,17 +64,17 @@ export default function ConsumerPage() {
               UX Principle
             </p>
             <h3 className="mt-4 text-3xl font-bold md:text-4xl">
-              每個區塊都只留下最重要的訊息，讓信任感被放大。
+              少一點干擾，多一點可預期，才是配送服務最重要的體驗。
             </h3>
             <p className="mt-4 max-w-2xl text-base leading-8 text-white/78">
-              我們避免過度堆砌的折扣訊號與壓迫式排版，改以精準層次、卡片留白與輕微動態，建立一種更成熟的數位品牌感。
+              當使用者能快速理解目前狀態、預估送達時間與可能延遲原因，信任感就不需要靠額外說服建立。
             </p>
           </div>
           <div className="grid gap-4">
             {[
-              "清楚的配送進度，降低等待不確定性",
-              "高品質店家敘事，提升下單信心",
-              "食安資訊不被隱藏，信任感更直接",
+              "重要資訊優先顯示，避免內容層級混亂。",
+              "配送進度與 CTA 使用明確視覺對比。",
+              "每個頁面都能在手機上快速完成任務。",
             ].map((item) => (
               <div
                 key={item}

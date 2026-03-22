@@ -1,20 +1,11 @@
 {
   "siteName": "GoGet",
-  "heroTitle": "Delivery content you can manage from admin",
-  "heroSubtitle": "GoGet connects customers, merchants, and couriers with a single content source so the homepage can be updated without editing code.",
-  "logo": "/logo.png",
+  "heroTitle": "一頁完成 GoGet 三種 App 下載導流",
+  "heroSubtitle": "首頁現在就是官方下載入口。無論你是外送員、店家或消費者，都能直接找到對應 App，手機裝置會自動導向正確商店。",
   "features": [
-    {
-      "title": "Single JSON source",
-      "desc": "Homepage content is loaded from data/site.json for simple CMS-style control."
-    },
-    {
-      "title": "Fast admin editing",
-      "desc": "Update the hero title and subtitle from the admin page and save directly to disk."
-    },
-    {
-      "title": "Reusable API access",
-      "desc": "The same content is available through GET and POST endpoints for future integrations."
-    }
-  ]
+    "首頁聚焦下載轉換，不再分散在多個說明頁",
+    "手機裝置自動判斷 iOS / Android 並導向商店",
+    "保留後台與 JSON 結構，方便後續再調整首頁文案"
+  ],
+  "logo": "/logo.png"
 }

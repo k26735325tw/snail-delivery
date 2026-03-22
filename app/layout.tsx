@@ -16,9 +16,8 @@ const notoSansTc = Noto_Sans_TC({
 });
 
 export const metadata: Metadata = {
-  title: "蝸牛外送 Snail Delivery",
-  description:
-    "蝸牛外送以藍黃品牌視覺重塑外送體驗，為消費者、外送員與店家建立更高的品質標準。",
+  title: "GoGet 官方下載頁",
+  description: "GoGet 外送員、店家與消費者 App 官方下載入口。",
 };
 
 export default function RootLayout({
@@ -27,7 +26,7 @@ export default function RootLayout({
   children: ReactNode;
 }>) {
   return (
-    <html lang="zh-Hant">
+    <html lang="zh-TW">
       <body
         className={`${manrope.variable} ${notoSansTc.variable} bg-cream font-[var(--font-noto-tc)] text-ink antialiased`}
       >

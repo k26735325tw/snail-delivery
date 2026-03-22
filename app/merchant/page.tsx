@@ -4,7 +4,7 @@ import { PageHero } from "@/components/page-hero";
 import { SectionShell } from "@/components/section-shell";
 import { SiteHeader } from "@/components/site-header";
 
-const zeroFeeItems = ["不收廣告費", "不收月費", "不收上架費"];
+const zeroFeeItems = ["月費 0 元", "上架費 0 元", "抽成方案透明"];
 
 export default function MerchantPage() {
   return (
@@ -12,24 +12,24 @@ export default function MerchantPage() {
       <SiteHeader />
       <PageHero
         badge="Merchant Experience"
-        title="讓店家把預算留給產品本身，而不是浪費在固定平台成本。"
-        description="蝸牛外送為店家設計的合作頁面，核心訊息非常直接。不收廣告費、不收月費、不收上架費，讓平台真正成為成長夥伴，而不是額外壓力來源。"
+        title="讓商家快速上線，也讓營運成本保持可控。"
+        description="GoGet 為商家整理出清楚的合作方案、曝光方式與後續管理流程，降低加入門檻。"
         primaryHref="/merchant"
-        primaryLabel="店家合作"
+        primaryLabel="查看合作方案"
         secondaryHref="/consumer"
-        secondaryLabel="立即訂餐"
+        secondaryLabel="查看前台體驗"
         asideTitle="Merchant Snapshot"
         stats={[
-          { label: "廣告費", value: "0 元" },
           { label: "月費", value: "0 元" },
           { label: "上架費", value: "0 元" },
+          { label: "開通時間", value: "3 天內" },
         ]}
       />
 
       <SectionShell
         badge="Zero Fixed Fees"
-        title="三個零成本承諾，直接定義蝸牛外送與其他平台的差異。"
-        description="這不是話術，而是最清楚的商業立場。平台不靠固定收費壓縮店家，而是讓好店用產品、服務與履約能力被看見。"
+        title="先讓商家開始賣，再討論如何把營運做大。"
+        description="對中小型餐飲品牌來說，最重要的不是華麗方案，而是成本結構夠清楚、夠容易理解。"
       >
         <div className="grid gap-5 md:grid-cols-3">
           {zeroFeeItems.map((item, index) => (
@@ -42,7 +42,7 @@ export default function MerchantPage() {
               </p>
               <h3 className="mt-4 text-3xl font-bold">{item}</h3>
               <p className="mt-4 text-base leading-8 text-white/78">
-                合作從一開始就降低負擔，讓店家能把資源集中在菜單品質、營運效率與品牌經營。
+                商家可以先驗證需求與訂單量，再決定擴大合作，不必一開始就承擔固定成本壓力。
               </p>
             </div>
           ))}
@@ -51,27 +51,27 @@ export default function MerchantPage() {
 
       <SectionShell
         badge="Merchant Tools"
-        title="不只費用透明，連合作訊息都要足夠清楚。"
-        description="店家頁面不是單向促銷，而是用更高級、更有秩序的方式說明合作價值，讓品牌形象與商業條件同時被看見。"
+        title="把曝光、營運與品牌呈現整合成一套可落地的流程。"
+        description="商家不需要複雜系統，也能用最少步驟完成上架、更新資訊與查看合作內容。"
       >
         <div className="grid gap-5 md:grid-cols-3">
           <FeatureCard
             eyebrow="Exposure"
-            title="不靠買廣告換曝光"
-            description="店家不需要因為預算多寡才能被發現，平台會用更公平的呈現方式讓好產品得到自然關注。"
-            icon="廣"
+            title="首頁與品牌曝光"
+            description="商家資訊能快速進入前台展示，幫助新品牌建立第一層能見度。"
+            icon="曝"
           />
           <FeatureCard
             eyebrow="Operations"
-            title="降低固定營運壓力"
-            description="沒有月費與上架費，代表合作門檻更低，店家可以更靈活地評估是否擴大線上通路。"
+            title="合作流程簡化"
+            description="從初次洽談、資料提交到上線，都用更精簡的步驟降低溝通成本。"
             icon="營"
             delay={0.1}
           />
           <FeatureCard
             eyebrow="Brand"
-            title="品牌價值被放大"
-            description="簡潔、科技感與高級留白的官方網站，也能反向提升合作店家的品牌感受與可信度。"
+            title="品牌內容可調整"
+            description="透過後台維護首頁資料，商家能更快更新文案與亮點，不必等待重新部署。"
             icon="牌"
             delay={0.2}
           />
@@ -80,18 +80,18 @@ export default function MerchantPage() {
 
       <SectionShell
         badge="Why It Matters"
-        title="真正好的平台合作，應該讓店家感到更自由，而不是更被綁住。"
-        description="當合作條件清楚、固定成本歸零，店家就能把注意力放回餐點品質、服務細節與回購體驗。這才是長期競爭力的來源。"
+        title="對商家來說，真正重要的是能否用低風險開始，並持續經營。"
+        description="好的商家頁面不是只說服合作，而是讓品牌理解加入後的實際運作方式。"
       >
         <div className="rounded-[2.4rem] border border-ink/8 bg-white/90 p-7 shadow-[0_22px_60px_rgba(14,29,56,0.06)] md:p-10">
           <p className="font-[var(--font-manrope)] text-xs font-extrabold uppercase tracking-[0.26em] text-blue">
             Merchant Promise
           </p>
           <h3 className="mt-4 text-3xl font-bold md:text-4xl">
-            不收廣告費，不收月費，不收上架費。
+            先把規則講清楚，再把合作做長久。
           </h3>
           <p className="mt-4 max-w-3xl text-base leading-8 text-ink/72">
-            這個承諾被放在店家頁最核心的位置，因為它不只是條件，更是品牌態度。蝸牛外送希望合作是健康的、長期的，也讓店家能真正感受到被尊重。
+            商家一旦知道費用、上線流程與內容更新方式，就能更快做出決策，也更願意把品牌交給平台一起經營。
           </p>
         </div>
       </SectionShell>

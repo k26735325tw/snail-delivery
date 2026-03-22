@@ -2,8 +2,8 @@ import Link from "next/link";
 
 const navItems = [
   { href: "/consumer", label: "消費者" },
-  { href: "/courier", label: "外送員" },
-  { href: "/merchant", label: "店家" },
+  { href: "/courier", label: "配送員" },
+  { href: "/merchant", label: "商家" },
 ];
 
 export function SiteHeader() {
@@ -20,7 +20,7 @@ export function SiteHeader() {
               <p className="font-[var(--font-manrope)] text-sm font-extrabold uppercase tracking-[0.28em] text-blue">
                 Snail Delivery
               </p>
-              <p className="text-sm text-ink/55">蝸牛外送</p>
+              <p className="text-sm text-ink/55">慢速，但值得信任的配送服務</p>
             </div>
           </Link>
 
@@ -40,7 +40,7 @@ export function SiteHeader() {
               href="/consumer"
               className="rounded-full bg-blue px-4 py-2 text-sm font-extrabold text-white transition hover:-translate-y-0.5"
             >
-              立即訂餐
+              立即體驗
             </Link>
           </div>
         </div>
