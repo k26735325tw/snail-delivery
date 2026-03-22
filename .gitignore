@@ -1,7 +1,7 @@
 node_modules
 .next
 .env
-node_modules
+.env.local
 .codex-guard
 .next-dev.log
 .next-dev.err.log
