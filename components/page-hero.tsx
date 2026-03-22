@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 
 import { FadeIn } from "@/components/fade-in";
@@ -13,6 +14,7 @@ type PageHeroProps = {
   secondaryLabel?: string;
   asideTitle: string;
   stats: Array<{ label: string; value: string }>;
+  heroImageUrl?: string;
 };
 
 export function PageHero({
@@ -25,6 +27,7 @@ export function PageHero({
   secondaryLabel,
   asideTitle,
   stats,
+  heroImageUrl,
 }: PageHeroProps) {
   return (
     <section className="hero-grid overflow-hidden">
@@ -76,7 +79,21 @@ export function PageHero({
                   ))}
                 </div>
               </div>
-              <SnailMascot compact />
+
+              {heroImageUrl ? (
+                <div className="overflow-hidden rounded-[2rem] border border-white/90 bg-white/75 shadow-[0_18px_50px_rgba(14,29,56,0.08)]">
+                  <Image
+                    src={heroImageUrl}
+                    alt={title}
+                    width={1200}
+                    height={1200}
+                    unoptimized
+                    className="h-[340px] w-full object-cover"
+                  />
+                </div>
+              ) : (
+                <SnailMascot compact />
+              )}
             </div>
           </div>
         </FadeIn>

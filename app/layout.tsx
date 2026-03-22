@@ -1,5 +1,5 @@
-import type { ReactNode } from "react";
 import type { Metadata } from "next";
+import type { ReactNode } from "react";
 import { Manrope, Noto_Sans_TC } from "next/font/google";
 
 import "@/app/globals.css";
@@ -16,8 +16,8 @@ const notoSansTc = Noto_Sans_TC({
 });
 
 export const metadata: Metadata = {
-  title: "GoGet 官方下載頁",
-  description: "GoGet 外送員、店家與消費者 App 官方下載入口。",
+  title: "GoGet CMS",
+  description: "Snail Delivery CMS with Vercel Blob storage and live content sync.",
 };
 
 export default function RootLayout({

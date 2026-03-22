@@ -20,7 +20,6 @@ export function SnailMascot({ compact = false }: SnailMascotProps) {
       />
 
       <div className="soft-panel absolute inset-x-0 bottom-0 top-8 rounded-[2.5rem] bg-white/50" />
-
       <div className="snail-shell absolute left-[18%] top-[18%] h-[54%] w-[54%] rounded-full" />
 
       <div className="snail-body absolute bottom-[22%] right-[12%] h-[30%] w-[48%] rounded-[999px_999px_38%_38%]">
@@ -36,7 +35,7 @@ export function SnailMascot({ compact = false }: SnailMascotProps) {
         Premium route
       </div>
       <div className="absolute bottom-[18%] right-[10%] rounded-full bg-yellow px-4 py-2 text-xs font-extrabold text-ink shadow-[0_18px_34px_rgba(255,216,74,0.38)]">
-        小蝸寶
+        Go faster
       </div>
     </div>
   );

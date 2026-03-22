@@ -1,8 +1,10 @@
 import { SiteHome } from "@/components/site-home";
-import { getSiteData } from "@/lib/site-data";
+import { getCmsData } from "@/lib/cms-store";
+
+export const dynamic = "force-dynamic";
 
 export default async function Page() {
-  const site = await getSiteData();
+  const site = await getCmsData();
 
   return <SiteHome site={site} />;
 }
