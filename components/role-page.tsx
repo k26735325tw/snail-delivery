@@ -10,9 +10,18 @@ type RolePageProps = {
   page: CmsRolePage;
   embedded?: boolean;
   focusSection?: string | null;
+  activeCardKey?: string | null;
+  activeCardIndex?: number | null;
 };
 
-export function RolePage({ site, page, embedded = false, focusSection = null }: RolePageProps) {
+export function RolePage({
+  site,
+  page,
+  embedded = false,
+  focusSection = null,
+  activeCardKey = null,
+  activeCardIndex = null,
+}: RolePageProps) {
   return (
     <main className="pb-10">
       <SiteHeader site={site} embedded={embedded} highlighted={focusSection === "header"} />
@@ -28,13 +37,21 @@ export function RolePage({ site, page, embedded = false, focusSection = null }: 
                 item={item}
                 icon={item.icon || "•"}
                 delay={index * 0.08}
+                highlighted={focusSection === section.id && activeCardKey === "role-card" && activeCardIndex === index}
+                previewCardKey="role-card"
+                previewCardIndex={index}
               />
             ))}
           </div>
         </SectionShell>
       ))}
 
-      <Footer site={site} highlighted={focusSection === "footer"} />
+      <Footer
+        site={site}
+        highlighted={focusSection === "footer"}
+        activeCardKey={focusSection === "footer" ? activeCardKey : null}
+        activeCardIndex={focusSection === "footer" ? activeCardIndex : null}
+      />
     </main>
   );
 }

@@ -14,7 +14,11 @@ type SiteHomeProps = {
   embedded?: boolean;
   previewViewport?: "desktop" | "mobile";
   focusSection?: "header" | "hero" | "features" | "launch-flow" | "footer" | null;
+  activeCardKey?: string | null;
+  activeCardIndex?: number | null;
 };
+
+const activeCardClass = "bg-[rgba(255,248,196,0.72)] ring-2 ring-[#1b6fff]/45 shadow-[0_24px_70px_rgba(27,111,255,0.16)] brightness-[1.02]";
 
 function getDeviceLabel(site: CmsData) {
   const device = detectDevice();
@@ -35,6 +39,8 @@ export function SiteHome({
   embedded = false,
   previewViewport = "desktop",
   focusSection = null,
+  activeCardKey = null,
+  activeCardIndex = null,
 }: SiteHomeProps) {
   const [deviceChoice, setDeviceChoice] = useState<{
     roleTitle: string;
@@ -181,15 +187,14 @@ export function SiteHome({
                   </div>
                 ) : null}
 
-                <div
-                  className={`grid gap-4 ${featureColumnClass}`}
-                  style={getBlockStyle(site.home.features.sectionStyle)}
-                >
-                  {site.home.features.cards.map((feature) => (
+                <div className={`grid gap-4 ${featureColumnClass}`} style={getBlockStyle(site.home.features.sectionStyle)}>
+                  {site.home.features.cards.map((feature, index) => (
                     <article
                       key={`${feature.eyebrow}-${feature.title}`}
-                      className="gradient-border flex h-full min-h-[220px] flex-col justify-between border transition duration-300 hover:-translate-y-1 hover:shadow-[0_24px_70px_rgba(14,29,56,0.14)]"
+                      className={`gradient-border flex h-full min-h-[220px] flex-col justify-between border transition duration-300 hover:-translate-y-1 hover:shadow-[0_24px_70px_rgba(14,29,56,0.14)] ${activeCardKey === "feature-card" && activeCardIndex === index ? activeCardClass : ""}`}
                       style={getBlockStyle(feature.blockStyle)}
+                      data-preview-card-key="feature-card"
+                      data-preview-card-index={index}
                     >
                       <div>
                         <p className="font-[var(--font-manrope)] uppercase tracking-[0.24em]" style={getTextStyle(feature.eyebrowStyle)}>
@@ -282,7 +287,11 @@ export function SiteHome({
           </section>
 
           <section id="launch-flow" ref={(node) => { sectionRefs.current["launch-flow"] = node; }} className={`grid gap-6 transition-shadow lg:grid-cols-[minmax(280px,0.9fr)_minmax(0,1.1fr)] ${focusSection === "launch-flow" ? "rounded-[2rem] ring-4 ring-blue/25" : ""}`} data-preview-section="launch-flow">
-            <div className="border" style={getBlockStyle(site.home.launchFlow.leftBlockStyle)}>
+            <div
+              className={`${activeCardKey === "launch-main" ? activeCardClass : ""} border transition-shadow`}
+              style={getBlockStyle(site.home.launchFlow.leftBlockStyle)}
+              data-preview-card-key="launch-main"
+            >
               <p className="uppercase tracking-[0.3em]" style={getTextStyle(site.home.launchFlow.eyebrowStyle)}>
                 {site.home.launchFlow.eyebrow}
               </p>
@@ -298,11 +307,13 @@ export function SiteHome({
               className={`grid gap-4 ${site.home.launchFlow.steps.length > 2 ? "md:grid-cols-3" : "md:grid-cols-2"}`}
               style={getBlockStyle(site.home.launchFlow.rightBlockStyle)}
             >
-              {site.home.launchFlow.steps.map((step) => (
+              {site.home.launchFlow.steps.map((step, index) => (
                 <article
                   key={step.index}
-                  className="gradient-border border transition duration-300 hover:-translate-y-1 hover:shadow-[0_24px_70px_rgba(14,29,56,0.14)]"
+                  className={`gradient-border border transition duration-300 hover:-translate-y-1 hover:shadow-[0_24px_70px_rgba(14,29,56,0.14)] ${activeCardKey === "launch-step" && activeCardIndex === index ? activeCardClass : ""}`}
                   style={getBlockStyle(step.blockStyle)}
+                  data-preview-card-key="launch-step"
+                  data-preview-card-index={index}
                 >
                   <p className="font-[var(--font-manrope)] tracking-[0.26em]" style={getTextStyle(step.indexStyle)}>
                     {step.index}
@@ -320,7 +331,12 @@ export function SiteHome({
         </div>
 
         <div ref={(node) => { sectionRefs.current.footer = node; }}>
-          <Footer site={site} highlighted={focusSection === "footer"} />
+          <Footer
+            site={site}
+            highlighted={focusSection === "footer"}
+            activeCardKey={focusSection === "footer" ? activeCardKey : null}
+            activeCardIndex={focusSection === "footer" ? activeCardIndex : null}
+          />
         </div>
 
         {!embedded && deviceChoice ? (

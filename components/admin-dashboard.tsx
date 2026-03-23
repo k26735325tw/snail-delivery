@@ -306,8 +306,8 @@ function RolePageEditor({
       <h3 className="text-base font-black text-slate-900">{title}</h3>
       <div
         className="space-y-5"
-        onMouseEnter={() => onPreviewTarget({ page: previewPage, section: "hero" })}
-        onFocusCapture={() => onPreviewTarget({ page: previewPage, section: "hero" })}
+        onMouseEnter={() => onPreviewTarget({ page: previewPage, section: "hero", fieldPath: `${previewPage}.hero`, cardKey: null, cardIndex: null })}
+        onFocusCapture={() => onPreviewTarget({ page: previewPage, section: "hero", fieldPath: `${previewPage}.hero`, cardKey: null, cardIndex: null })}
       >
         <Field label="Hero Badge" value={page.hero.badge} onChange={(value) => onChange({ ...page, hero: { ...page.hero, badge: value } })} />
         <Field label="Hero 標題" value={page.hero.title} onChange={(value) => onChange({ ...page, hero: { ...page.hero, title: value } })} multiline />
@@ -346,8 +346,8 @@ function RolePageEditor({
         />
       </div>
       <div
-        onMouseEnter={() => onPreviewTarget({ page: previewPage, section: page.sections[0]?.id ?? "hero" })}
-        onFocusCapture={() => onPreviewTarget({ page: previewPage, section: page.sections[0]?.id ?? "hero" })}
+        onMouseEnter={() => onPreviewTarget({ page: previewPage, section: page.sections[0]?.id ?? "hero", fieldPath: `${previewPage}.sections`, cardKey: null, cardIndex: null })}
+        onFocusCapture={() => onPreviewTarget({ page: previewPage, section: page.sections[0]?.id ?? "hero", fieldPath: `${previewPage}.sections`, cardKey: null, cardIndex: null })}
       >
         <AdminArrayEditor
           label="內容區塊"
@@ -357,8 +357,8 @@ function RolePageEditor({
           renderItem={(section, index, helpers) => (
             <div
               className="space-y-4"
-              onMouseEnter={() => onPreviewTarget({ page: previewPage, section: section.id || `section-${index + 1}` })}
-              onFocusCapture={() => onPreviewTarget({ page: previewPage, section: section.id || `section-${index + 1}` })}
+              onMouseEnter={() => onPreviewTarget({ page: previewPage, section: section.id || `section-${index + 1}`, fieldPath: `${previewPage}.sections.${index}`, cardKey: null, cardIndex: null })}
+              onFocusCapture={() => onPreviewTarget({ page: previewPage, section: section.id || `section-${index + 1}`, fieldPath: `${previewPage}.sections.${index}`, cardKey: null, cardIndex: null })}
             >
               <div className="grid gap-4 md:grid-cols-2">
                 <Field label="Section ID" value={section.id} onChange={(value) => helpers.update({ ...section, id: value })} />
@@ -376,7 +376,11 @@ function RolePageEditor({
                 createItem={emptySectionItem}
                 onChange={(items) => helpers.update({ ...section, items })}
                 renderItem={(item, itemIndex, itemHelpers) => (
-                  <div className="space-y-4">
+                  <div
+                    className="space-y-4"
+                    onMouseEnter={() => onPreviewTarget({ page: previewPage, section: section.id || `section-${index + 1}`, fieldPath: `${previewPage}.sections.${index}.items.${itemIndex}`, cardKey: "role-card", cardIndex: itemIndex })}
+                    onFocusCapture={() => onPreviewTarget({ page: previewPage, section: section.id || `section-${index + 1}`, fieldPath: `${previewPage}.sections.${index}.items.${itemIndex}`, cardKey: "role-card", cardIndex: itemIndex })}
+                  >
                     <div className="grid gap-4 md:grid-cols-2">
                       <Field label="Eyebrow" value={item.eyebrow} onChange={(value) => itemHelpers.update({ ...item, eyebrow: value })} />
                       <Field label="Icon" value={item.icon ?? ""} onChange={(value) => itemHelpers.update({ ...item, icon: value })} />
@@ -409,7 +413,7 @@ export function AdminDashboard({ initialData }: AdminDashboardProps) {
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [uploadingKeys, setUploadingKeys] = useState<Record<string, boolean>>({});
-  const [previewTarget, setPreviewTarget] = useState<PreviewTarget>({ page: "home", section: "hero" });
+  const [previewTarget, setPreviewTarget] = useState<PreviewTarget>({ page: "home", section: "hero", fieldPath: null, cardKey: null, cardIndex: null });
   const [previewViewport, setPreviewViewport] = useState<"desktop" | "mobile">("desktop");
 
   useEffect(() => {
@@ -540,7 +544,7 @@ export function AdminDashboard({ initialData }: AdminDashboardProps) {
   return (
     <div className="grid gap-6 xl:grid-cols-[minmax(0,1.2fr)_420px]">
       <div className="space-y-6">
-        <div onMouseEnter={() => setPreviewTarget({ page: "home", section: "footer" })} onFocusCapture={() => setPreviewTarget({ page: "home", section: "footer" })}>
+        <div onMouseEnter={() => setPreviewTarget({ page: "home", section: "footer", fieldPath: "site.footer.main", cardKey: "footer-main", cardIndex: null })} onFocusCapture={() => setPreviewTarget({ page: "home", section: "footer", fieldPath: "site.footer.main", cardKey: "footer-main", cardIndex: null })}>
         <Panel title="網站設定" description="全站共用品牌資料、網址、Footer 與預設 SEO 圖片。">
           <div className="grid gap-4 md:grid-cols-2">
             <Field label="網站名稱" value={data.site.siteName} onChange={(value) => setData({ ...data, site: { ...data.site, siteName: value } })} />
@@ -560,7 +564,7 @@ export function AdminDashboard({ initialData }: AdminDashboardProps) {
             createItem={emptyLinkGroup}
             onChange={(footerLinkGroups) => setData({ ...data, site: { ...data.site, footerLinkGroups } })}
             renderItem={(group, index, helpers) => (
-              <div className="space-y-4">
+              <div className="space-y-4" onMouseEnter={() => setPreviewTarget({ page: "home", section: "footer", fieldPath: `site.footerLinkGroups.${index}`, cardKey: "footer-link-group", cardIndex: index })} onFocusCapture={() => setPreviewTarget({ page: "home", section: "footer", fieldPath: `site.footerLinkGroups.${index}`, cardKey: "footer-link-group", cardIndex: index })}>
                 <Field label={`群組 ${index + 1} 標題`} value={group.title} onChange={(value) => helpers.update({ ...group, title: value })} />
                 <LinkListEditor title="連結" items={group.links} onChange={(links) => helpers.update({ ...group, links })} />
               </div>
@@ -569,7 +573,7 @@ export function AdminDashboard({ initialData }: AdminDashboardProps) {
         </Panel>
         </div>
 
-        <div onMouseEnter={() => setPreviewTarget({ page: "home", section: "header" })} onFocusCapture={() => setPreviewTarget({ page: "home", section: "header" })}>
+        <div onMouseEnter={() => setPreviewTarget({ page: "home", section: "header", fieldPath: "home.header", cardKey: null, cardIndex: null })} onFocusCapture={() => setPreviewTarget({ page: "home", section: "header", fieldPath: "home.header", cardKey: null, cardIndex: null })}>
         <Panel title="首頁 Header" description="導覽列、副標與右上 CTA。">
           <Field label="Header 副標" value={data.home.header.subtitle} onChange={(value) => setData({ ...data, home: { ...data.home, header: { ...data.home.header, subtitle: value } } })} />
           <TextStyleEditor label="Header 副標樣式" style={data.home.header.subtitleStyle} onChange={(subtitleStyle) => setData({ ...data, home: { ...data.home, header: { ...data.home.header, subtitleStyle } } })} />
@@ -582,7 +586,7 @@ export function AdminDashboard({ initialData }: AdminDashboardProps) {
         </Panel>
         </div>
 
-        <div onMouseEnter={() => setPreviewTarget({ page: "home", section: "hero" })} onFocusCapture={() => setPreviewTarget({ page: "home", section: "hero" })}>
+        <div onMouseEnter={() => setPreviewTarget({ page: "home", section: "hero", fieldPath: "home.hero", cardKey: null, cardIndex: null })} onFocusCapture={() => setPreviewTarget({ page: "home", section: "hero", fieldPath: "home.hero", cardKey: null, cardIndex: null })}>
         <Panel title="首頁 Hero" description="主視覺文案、Badge、按鈕與圖片。">
           <Field label="Hero Badge" value={data.home.hero.badge} onChange={(value) => setData({ ...data, home: { ...data.home, hero: { ...data.home.hero, badge: value } } })} />
           <Field label="Hero 標題" value={data.home.hero.title} onChange={(value) => setData({ ...data, home: { ...data.home, hero: { ...data.home.hero, title: value } } })} multiline />
@@ -607,7 +611,7 @@ export function AdminDashboard({ initialData }: AdminDashboardProps) {
         </Panel>
         </div>
 
-        <div onMouseEnter={() => setPreviewTarget({ page: "home", section: "features" })} onFocusCapture={() => setPreviewTarget({ page: "home", section: "features" })}>
+        <div onMouseEnter={() => setPreviewTarget({ page: "home", section: "features", fieldPath: "home.features", cardKey: null, cardIndex: null })} onFocusCapture={() => setPreviewTarget({ page: "home", section: "features", fieldPath: "home.features", cardKey: null, cardIndex: null })}>
         <Panel title="首頁特色卡片" description="Hero 右側 feature cards。">
           <BlockStyleEditor label="特色卡片容器樣式" style={data.home.features.sectionStyle} onChange={(sectionStyle) => setData({ ...data, home: { ...data.home, features: { ...data.home.features, sectionStyle } } })} />
           <AdminArrayEditor
@@ -616,7 +620,7 @@ export function AdminDashboard({ initialData }: AdminDashboardProps) {
             createItem={() => ({ eyebrow: "", title: "", description: "", eyebrowStyle: defaultTextStyle(), titleStyle: defaultTextStyle({ fontSize: "xl", fontWeight: "700" }), descriptionStyle: defaultTextStyle(), blockStyle: defaultBlockStyle() })}
             onChange={(cards) => setData({ ...data, home: { ...data.home, features: { ...data.home.features, cards } } })}
             renderItem={(card, index, helpers) => (
-              <div className="space-y-4">
+              <div className="space-y-4" onMouseEnter={() => setPreviewTarget({ page: "home", section: "features", fieldPath: `home.features.cards.${index}`, cardKey: "feature-card", cardIndex: index })} onFocusCapture={() => setPreviewTarget({ page: "home", section: "features", fieldPath: `home.features.cards.${index}`, cardKey: "feature-card", cardIndex: index })}>
                 <Field label={`卡片 ${index + 1} Eyebrow`} value={card.eyebrow} onChange={(value) => helpers.update({ ...card, eyebrow: value })} />
                 <Field label={`卡片 ${index + 1} 標題`} value={card.title} onChange={(value) => helpers.update({ ...card, title: value })} />
                 <Field label={`卡片 ${index + 1} 說明`} value={card.description} onChange={(value) => helpers.update({ ...card, description: value })} multiline />
@@ -630,7 +634,7 @@ export function AdminDashboard({ initialData }: AdminDashboardProps) {
         </Panel>
         </div>
 
-        <div onMouseEnter={() => setPreviewTarget({ page: "home", section: "features" })} onFocusCapture={() => setPreviewTarget({ page: "home", section: "features" })}>
+        <div onMouseEnter={() => setPreviewTarget({ page: "home", section: "features", fieldPath: "home.downloadCards", cardKey: null, cardIndex: null })} onFocusCapture={() => setPreviewTarget({ page: "home", section: "features", fieldPath: "home.downloadCards", cardKey: null, cardIndex: null })}>
         <Panel title="首頁下載卡" description="三個 App 下載卡與圖片。">
           <AdminArrayEditor
             label="下載卡"
@@ -671,7 +675,7 @@ export function AdminDashboard({ initialData }: AdminDashboardProps) {
         </Panel>
         </div>
 
-        <div onMouseEnter={() => setPreviewTarget({ page: "home", section: "launch-flow" })} onFocusCapture={() => setPreviewTarget({ page: "home", section: "launch-flow" })}>
+        <div onMouseEnter={() => setPreviewTarget({ page: "home", section: "launch-flow", fieldPath: "home.launchFlow.left", cardKey: "launch-main", cardIndex: null })} onFocusCapture={() => setPreviewTarget({ page: "home", section: "launch-flow", fieldPath: "home.launchFlow.left", cardKey: "launch-main", cardIndex: null })}>
         <Panel title="首頁 Launch Flow" description="左側介紹與右側步驟卡。">
           <Field label="左側 Eyebrow" value={data.home.launchFlow.eyebrow} onChange={(value) => setData({ ...data, home: { ...data.home, launchFlow: { ...data.home.launchFlow, eyebrow: value } } })} />
           <Field label="左側標題" value={data.home.launchFlow.title} onChange={(value) => setData({ ...data, home: { ...data.home, launchFlow: { ...data.home.launchFlow, title: value } } })} multiline />
@@ -687,7 +691,7 @@ export function AdminDashboard({ initialData }: AdminDashboardProps) {
             createItem={emptyLaunchStep}
             onChange={(steps) => setData({ ...data, home: { ...data.home, launchFlow: { ...data.home.launchFlow, steps } } })}
             renderItem={(step, index, helpers) => (
-              <div className="space-y-4">
+              <div className="space-y-4" onMouseEnter={() => setPreviewTarget({ page: "home", section: "launch-flow", fieldPath: `home.launchFlow.steps.${index}`, cardKey: "launch-step", cardIndex: index })} onFocusCapture={() => setPreviewTarget({ page: "home", section: "launch-flow", fieldPath: `home.launchFlow.steps.${index}`, cardKey: "launch-step", cardIndex: index })}>
                 <div className="grid gap-4 md:grid-cols-2">
                   <Field label="序號" value={step.index} onChange={(value) => helpers.update({ ...step, index: value })} />
                   <Field label="標題" value={step.title} onChange={(value) => helpers.update({ ...step, title: value })} />

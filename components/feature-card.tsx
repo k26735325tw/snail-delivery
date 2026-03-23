@@ -8,14 +8,19 @@ type FeatureCardProps = {
   item: CmsContentItem;
   icon: ReactNode;
   delay?: number;
+  highlighted?: boolean;
+  previewCardKey?: string;
+  previewCardIndex?: number;
 };
 
-export function FeatureCard({ item, icon, delay }: FeatureCardProps) {
+export function FeatureCard({ item, icon, delay, highlighted = false, previewCardKey, previewCardIndex }: FeatureCardProps) {
   return (
     <FadeIn
       delay={delay}
-      className="gradient-border relative border backdrop-blur-xl"
+      className={`gradient-border relative border backdrop-blur-xl transition-shadow ${highlighted ? "bg-[rgba(255,248,196,0.72)] ring-2 ring-[#1b6fff]/45 shadow-[0_24px_70px_rgba(27,111,255,0.16)] brightness-[1.02]" : ""}`}
       style={getBlockStyle(item.blockStyle)}
+      data-preview-card-key={previewCardKey}
+      data-preview-card-index={typeof previewCardIndex === "number" ? previewCardIndex : undefined}
     >
       <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-blue text-2xl text-white shadow-[0_16px_36px_rgba(27,111,255,0.28)]">
         {icon}

@@ -15,7 +15,7 @@ export function SiteHeader({ site, embedded = false, highlighted = false }: Site
 
   return (
     <header className={embedded ? "top-0 z-20" : "sticky top-0 z-50"}>
-      <div className="shell pt-5">
+      <div className="shell py-3 md:py-4">
         <div
           className={`flex flex-wrap items-center justify-between gap-4 border backdrop-blur transition-shadow ${highlighted ? "ring-4 ring-blue/25 shadow-[0_24px_70px_rgba(27,111,255,0.18)]" : ""}`}
           style={blockStyle}

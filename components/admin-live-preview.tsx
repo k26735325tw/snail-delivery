@@ -10,6 +10,9 @@ export type PreviewPage = "home" | "consumer" | "courier" | "merchant";
 export type PreviewTarget = {
   page: PreviewPage;
   section: string | null;
+  fieldPath?: string | null;
+  cardKey?: string | null;
+  cardIndex?: number | null;
 };
 
 type AdminLivePreviewProps = {
@@ -53,6 +56,33 @@ export function AdminLivePreview({ site, viewport, target }: AdminLivePreviewPro
     return () => observer.disconnect();
   }, [viewport, site, target]);
 
+  useEffect(() => {
+    const outer = outerRef.current;
+    const content = contentRef.current;
+
+    if (!outer || !content) {
+      return;
+    }
+
+    const exactCardSelector = target.cardKey
+      ? `[data-preview-card-key="${target.cardKey}"]${typeof target.cardIndex === "number" ? `[data-preview-card-index="${target.cardIndex}"]` : ""}`
+      : null;
+    const sectionSelector = target.section ? `[data-preview-section="${target.section}"]` : null;
+    const targetNode = (exactCardSelector ? content.querySelector(exactCardSelector) : null) ?? (sectionSelector ? content.querySelector(sectionSelector) : null);
+
+    if (targetNode instanceof HTMLElement) {
+      const outerRect = outer.getBoundingClientRect();
+      const targetRect = targetNode.getBoundingClientRect();
+      const targetTop = outer.scrollTop + (targetRect.top - outerRect.top);
+      const nextTop = Math.max(targetTop - Math.max((outer.clientHeight - targetRect.height) / 2, 48), 0);
+
+      outer.scrollTo({
+        top: nextTop,
+        behavior: "smooth",
+      });
+    }
+  }, [scale, target]);
+
   const canvasWidth = getCanvasWidth(viewport);
 
   return (
@@ -73,6 +103,8 @@ export function AdminLivePreview({ site, viewport, target }: AdminLivePreviewPro
                 embedded
                 previewViewport={viewport}
                 focusSection={target.section as "header" | "hero" | "features" | "launch-flow" | "footer" | null}
+                activeCardKey={target.cardKey ?? null}
+                activeCardIndex={target.cardIndex ?? null}
               />
             ) : (
               <RolePage
@@ -80,6 +112,8 @@ export function AdminLivePreview({ site, viewport, target }: AdminLivePreviewPro
                 page={site[target.page]}
                 embedded
                 focusSection={target.section}
+                activeCardKey={target.cardKey ?? null}
+                activeCardIndex={target.cardIndex ?? null}
               />
             )}
           </div>
