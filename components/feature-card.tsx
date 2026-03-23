@@ -1,5 +1,8 @@
+"use client";
+
 import type { ReactNode } from "react";
 
+import { EditableBlock, EditableText } from "@/components/cms-inline-edit";
 import { FadeIn } from "@/components/fade-in";
 import type { CmsContentItem } from "@/lib/cms-schema";
 import { getBlockStyle, getTextStyle } from "@/lib/cms-style";
@@ -11,29 +14,84 @@ type FeatureCardProps = {
   highlighted?: boolean;
   previewCardKey?: string;
   previewCardIndex?: number;
+  pathPrefix?: string;
+  label?: string;
 };
 
-export function FeatureCard({ item, icon, delay, highlighted = false, previewCardKey, previewCardIndex }: FeatureCardProps) {
+export function FeatureCard({
+  item,
+  icon,
+  delay,
+  highlighted = false,
+  previewCardKey,
+  previewCardIndex,
+  pathPrefix,
+  label = "卡片",
+}: FeatureCardProps) {
+  const blockId = pathPrefix ?? `${previewCardKey ?? "card"}.${previewCardIndex ?? 0}`;
+
   return (
-    <FadeIn
-      delay={delay}
-      className={`gradient-border relative border backdrop-blur-xl transition-shadow ${highlighted ? "bg-[rgba(255,248,196,0.72)] ring-2 ring-[#1b6fff]/45 shadow-[0_24px_70px_rgba(27,111,255,0.16)] brightness-[1.02]" : ""}`}
-      style={getBlockStyle(item.blockStyle)}
-      data-preview-card-key={previewCardKey}
-      data-preview-card-index={typeof previewCardIndex === "number" ? previewCardIndex : undefined}
+    <EditableBlock
+      selection={{
+        id: `${blockId}.block`,
+        kind: "block",
+        label: `${label}區塊`,
+        stylePath: pathPrefix ? `${pathPrefix}.blockStyle` : undefined,
+      }}
+      className={`${highlighted ? "bg-[rgba(255,248,196,0.72)] ring-2 ring-[#1b6fff]/45 shadow-[0_24px_70px_rgba(27,111,255,0.16)] brightness-[1.02]" : ""}`}
     >
-      <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-blue text-2xl text-white shadow-[0_16px_36px_rgba(27,111,255,0.28)]">
-        {icon}
-      </div>
-      <p className="mt-6 font-[var(--font-manrope)] uppercase tracking-[0.24em]" style={getTextStyle(item.eyebrowStyle)}>
-        {item.eyebrow}
-      </p>
-      <h3 className="mt-3" style={getTextStyle(item.titleStyle)}>
-        {item.title}
-      </h3>
-      <p className="mt-3" style={getTextStyle(item.descriptionStyle)}>
-        {item.description}
-      </p>
-    </FadeIn>
+      <FadeIn
+        delay={delay}
+        className="gradient-border relative border backdrop-blur-xl transition-shadow"
+        style={getBlockStyle(item.blockStyle)}
+        data-preview-card-key={previewCardKey}
+        data-preview-card-index={typeof previewCardIndex === "number" ? previewCardIndex : undefined}
+      >
+        <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-blue text-2xl text-white shadow-[0_16px_36px_rgba(27,111,255,0.28)]">
+          {icon}
+        </div>
+        <EditableText
+          as="p"
+          value={item.eyebrow}
+          className="mt-6 font-[var(--font-manrope)] uppercase tracking-[0.24em]"
+          style={getTextStyle(item.eyebrowStyle)}
+          selection={{
+            id: `${blockId}.eyebrow`,
+            kind: "text",
+            label: `${label} Eyebrow`,
+            fieldPath: pathPrefix ? `${pathPrefix}.eyebrow` : undefined,
+            stylePath: pathPrefix ? `${pathPrefix}.eyebrowStyle` : undefined,
+          }}
+        />
+        <EditableText
+          as="h3"
+          value={item.title}
+          className="mt-3"
+          style={getTextStyle(item.titleStyle)}
+          selection={{
+            id: `${blockId}.title`,
+            kind: "text",
+            label: `${label}標題`,
+            fieldPath: pathPrefix ? `${pathPrefix}.title` : undefined,
+            stylePath: pathPrefix ? `${pathPrefix}.titleStyle` : undefined,
+          }}
+        />
+        <EditableText
+          as="p"
+          value={item.description}
+          className="mt-3"
+          style={getTextStyle(item.descriptionStyle)}
+          multiline
+          selection={{
+            id: `${blockId}.description`,
+            kind: "text",
+            label: `${label}說明`,
+            fieldPath: pathPrefix ? `${pathPrefix}.description` : undefined,
+            stylePath: pathPrefix ? `${pathPrefix}.descriptionStyle` : undefined,
+            multiline: true,
+          }}
+        />
+      </FadeIn>
+    </EditableBlock>
   );
 }

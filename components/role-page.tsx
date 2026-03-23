@@ -1,3 +1,5 @@
+"use client";
+
 import { FeatureCard } from "@/components/feature-card";
 import { Footer } from "@/components/footer";
 import { PageHero } from "@/components/page-hero";
@@ -8,6 +10,7 @@ import type { CmsData, CmsRolePage } from "@/lib/cms-schema";
 type RolePageProps = {
   site: CmsData;
   page: CmsRolePage;
+  pageKey?: "consumer" | "courier" | "merchant";
   embedded?: boolean;
   focusSection?: string | null;
   activeCardKey?: string | null;
@@ -17,6 +20,7 @@ type RolePageProps = {
 export function RolePage({
   site,
   page,
+  pageKey = "consumer",
   embedded = false,
   focusSection = null,
   activeCardKey = null,
@@ -26,10 +30,15 @@ export function RolePage({
     <main className="pb-10">
       <SiteHeader site={site} embedded={embedded} highlighted={focusSection === "header"} />
 
-      <PageHero hero={page.hero} highlighted={focusSection === "hero"} />
+      <PageHero hero={page.hero} highlighted={focusSection === "hero"} pathPrefix={`${pageKey}.hero`} />
 
-      {page.sections.map((section) => (
-        <SectionShell key={section.id} section={section} highlighted={focusSection === section.id}>
+      {page.sections.map((section, sectionIndex) => (
+        <SectionShell
+          key={section.id}
+          section={section}
+          highlighted={focusSection === section.id}
+          pathPrefix={`${pageKey}.sections.${sectionIndex}`}
+        >
           <div className="grid gap-5 md:grid-cols-3">
             {section.items.map((item, index) => (
               <FeatureCard
@@ -40,6 +49,8 @@ export function RolePage({
                 highlighted={focusSection === section.id && activeCardKey === "role-card" && activeCardIndex === index}
                 previewCardKey="role-card"
                 previewCardIndex={index}
+                pathPrefix={`${pageKey}.sections.${sectionIndex}.items.${index}`}
+                label={`${section.title} 卡片 ${index + 1}`}
               />
             ))}
           </div>

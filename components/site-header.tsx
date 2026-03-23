@@ -1,6 +1,10 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
 
+import { EditableBlock, EditableImageFrame, EditableLink, EditableText } from "@/components/cms-inline-edit";
+import { useCmsVisualEditor } from "@/components/cms-visual-context";
 import type { CmsData } from "@/lib/cms-schema";
 import { getBlockStyle, getImageStyle, getTextStyle } from "@/lib/cms-style";
 
@@ -11,18 +15,33 @@ type SiteHeaderProps = {
 };
 
 export function SiteHeader({ site, embedded = false, highlighted = false }: SiteHeaderProps) {
+  const editor = useCmsVisualEditor();
   const blockStyle = getBlockStyle(site.home.header.blockStyle);
+  const topOffset = embedded ? 0 : editor?.editorTopOffset ?? 0;
 
   return (
-    <header className={embedded ? "top-0 z-20" : "sticky top-0 z-50"}>
+    <header className={embedded ? "top-0 z-20" : "sticky z-50"} style={embedded ? undefined : { top: `${topOffset}px` }}>
       <div className="shell py-3 md:py-4">
-        <div
+        <EditableBlock
+          selection={{
+            id: "home.header.block",
+            kind: "block",
+            label: "首頁 Header 區塊",
+            stylePath: "home.header.blockStyle",
+          }}
           className={`flex flex-wrap items-center justify-between gap-4 border backdrop-blur transition-shadow ${highlighted ? "ring-4 ring-blue/25 shadow-[0_24px_70px_rgba(27,111,255,0.18)]" : ""}`}
           style={blockStyle}
-          data-preview-section="header"
         >
           <Link href="/" className="flex min-w-0 items-center gap-3">
-            <div className="relative h-11 w-11 shrink-0 overflow-hidden rounded-full bg-blue/10">
+            <EditableImageFrame
+              selection={{
+                id: "site.logo",
+                kind: "image",
+                label: "網站 Logo",
+                imagePath: "site.logo",
+              }}
+              className="relative h-11 w-11 shrink-0 overflow-hidden rounded-full bg-blue/10"
+            >
               <Image
                 src={site.site.logo.url}
                 alt={site.site.logo.alt}
@@ -32,37 +51,61 @@ export function SiteHeader({ site, embedded = false, highlighted = false }: Site
                 className="h-full w-full"
                 style={getImageStyle(site.site.logo)}
               />
-            </div>
+            </EditableImageFrame>
+
             <div className="min-w-0">
               <p className="truncate font-[var(--font-manrope)] text-sm font-extrabold uppercase tracking-[0.28em] text-blue">
                 {site.site.siteName}
               </p>
-              <p className="truncate" style={getTextStyle(site.home.header.subtitleStyle)}>
-                {site.home.header.subtitle}
-              </p>
+              <EditableText
+                as="p"
+                value={site.home.header.subtitle}
+                className="truncate"
+                style={getTextStyle(site.home.header.subtitleStyle)}
+                selection={{
+                  id: "home.header.subtitle",
+                  kind: "text",
+                  label: "Header 副標",
+                  fieldPath: "home.header.subtitle",
+                  stylePath: "home.header.subtitleStyle",
+                }}
+              />
             </div>
           </Link>
 
           <div className="flex flex-wrap items-center justify-end gap-2">
             <nav className="hidden items-center gap-1 md:flex">
-              {site.home.header.navItems.map((item) => (
-                <Link
-                  key={`${item.href}-${item.label}`}
+              {site.home.header.navItems.map((item, index) => (
+                <EditableLink
+                  key={`${item.href}-${item.label}-${index}`}
                   href={item.href}
+                  value={item.label}
                   className="rounded-full px-4 py-2 text-sm font-bold text-ink/68 transition hover:bg-white hover:text-blue"
-                >
-                  {item.label}
-                </Link>
+                  selection={{
+                    id: `home.header.navItems.${index}`,
+                    kind: "link",
+                    label: `Header 導航 ${index + 1}`,
+                    fieldPath: `home.header.navItems.${index}.label`,
+                    hrefPath: `home.header.navItems.${index}.href`,
+                  }}
+                />
               ))}
             </nav>
-            <Link
+
+            <EditableLink
               href={site.home.header.cta.href}
+              value={site.home.header.cta.label}
               className="rounded-full bg-blue px-4 py-2 text-sm font-extrabold text-white transition hover:-translate-y-0.5"
-            >
-              {site.home.header.cta.label}
-            </Link>
+              selection={{
+                id: "home.header.cta",
+                kind: "link",
+                label: "Header CTA",
+                fieldPath: "home.header.cta.label",
+                hrefPath: "home.header.cta.href",
+              }}
+            />
           </div>
-        </div>
+        </EditableBlock>
       </div>
     </header>
   );

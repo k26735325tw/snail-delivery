@@ -1,7 +1,7 @@
 import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
 
-import { getCmsData, normalizeCmsData, saveCmsData } from "@/lib/cms-store";
+import { getCmsData, saveCmsData } from "@/lib/cms-store";
 import type { CmsData } from "@/lib/cms-schema";
 
 export const dynamic = "force-dynamic";
@@ -12,6 +12,7 @@ function revalidateCmsPaths() {
   revalidatePath("/courier");
   revalidatePath("/merchant");
   revalidatePath("/admin");
+  revalidatePath("/admin/visual");
   revalidatePath("/api/site");
 }
 
@@ -31,8 +32,8 @@ export async function GET() {
 
 export async function PUT(request: Request) {
   try {
-    const payload = (await request.json()) as CmsData;
-    const { data, url } = await saveCmsData(normalizeCmsData(payload));
+    const payload = (await request.json()) as { data: CmsData; dirtyPaths?: string[] };
+    const { data, url } = await saveCmsData(payload.data, payload.dirtyPaths ?? []);
 
     revalidateCmsPaths();
 
@@ -50,4 +51,3 @@ export async function PUT(request: Request) {
     );
   }
 }
-

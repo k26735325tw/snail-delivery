@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 
+import { EditableBlock, EditableImageFrame, EditableLink, EditableText } from "@/components/cms-inline-edit";
 import { Footer } from "@/components/footer";
 import { SiteHeader } from "@/components/site-header";
 import type { CmsData, CmsDownloadCard } from "@/lib/cms-schema";
@@ -82,20 +83,26 @@ export function SiteHome({
   }
 
   const featureColumnClass = site.home.features.cards.length > 2 ? "lg:grid-cols-3" : "lg:grid-cols-2";
-  const previewScaleClass = "";
 
   return (
-    <div className={previewScaleClass}>
-      <main className="min-h-screen pb-10">
-        <div ref={(node) => { sectionRefs.current.header = node; }}>
-          <SiteHeader site={site} embedded={embedded} highlighted={focusSection === "header"} />
-        </div>
+    <main className="min-h-screen pb-10">
+      <div ref={(node) => { sectionRefs.current.header = node; }}>
+        <SiteHeader site={site} embedded={embedded} highlighted={focusSection === "header"} />
+      </div>
 
-        <div className="shell mt-6 space-y-8">
+      <div className="shell mt-6 space-y-8">
+        <EditableBlock
+          selection={{
+            id: "home.hero.block",
+            kind: "block",
+            label: "首頁 Hero 區塊",
+            stylePath: "home.hero.sectionStyle",
+          }}
+          className={`relative overflow-hidden border transition-shadow ${focusSection === "hero" ? "ring-4 ring-blue/25 shadow-[0_24px_80px_rgba(27,111,255,0.18)]" : ""}`}
+          style={getBlockStyle(site.home.hero.sectionStyle)}
+        >
           <section
             ref={(node) => { sectionRefs.current.hero = node; }}
-            className={`relative overflow-hidden border transition-shadow ${focusSection === "hero" ? "ring-4 ring-blue/25 shadow-[0_24px_80px_rgba(27,111,255,0.18)]" : ""}`}
-            style={getBlockStyle(site.home.hero.sectionStyle)}
             data-preview-section="hero"
           >
             <div className="absolute -left-24 top-0 h-72 w-72 rounded-full bg-[#ffd84a]/30 blur-3xl" />
@@ -105,7 +112,15 @@ export function SiteHome({
             <div className="relative grid gap-8 xl:grid-cols-[minmax(0,1.02fr)_minmax(320px,0.98fr)] xl:items-start">
               <div className="min-w-0">
                 <div className="inline-flex max-w-full items-center gap-4 rounded-[2rem] border border-[#0e1d38]/8 bg-white/84 px-4 py-3 shadow-[0_18px_40px_rgba(14,29,56,0.06)]">
-                  <div className="relative flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-[1.5rem] bg-[#0b4fd4] shadow-[0_20px_44px_rgba(11,79,212,0.32)]">
+                  <EditableImageFrame
+                    selection={{
+                      id: "site.logo.hero",
+                      kind: "image",
+                      label: "首頁 Logo",
+                      imagePath: "site.logo",
+                    }}
+                    className="relative flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-[1.5rem] bg-[#0b4fd4] shadow-[0_20px_44px_rgba(11,79,212,0.32)]"
+                  >
                     <Image
                       src={site.site.logo.url}
                       alt={site.site.logo.alt}
@@ -115,61 +130,126 @@ export function SiteHome({
                       className="h-full w-full"
                       style={getImageStyle(site.site.logo)}
                     />
-                  </div>
+                  </EditableImageFrame>
                   <div className="min-w-0">
                     <p className="truncate font-[var(--font-manrope)] text-xs font-extrabold uppercase tracking-[0.34em] text-[#0b4fd4]">
                       {site.site.siteName}
                     </p>
-                    <p className="break-words" style={getTextStyle(site.home.hero.badgeStyle)}>
-                      {site.home.hero.badge}
-                    </p>
+                    <EditableText
+                      as="p"
+                      value={site.home.hero.badge}
+                      className="break-words"
+                      style={getTextStyle(site.home.hero.badgeStyle)}
+                      selection={{
+                        id: "home.hero.badge",
+                        kind: "text",
+                        label: "Hero Badge",
+                        fieldPath: "home.hero.badge",
+                        stylePath: "home.hero.badgeStyle",
+                      }}
+                    />
                   </div>
                 </div>
 
-                <h1
+                <EditableText
+                  as="h1"
+                  value={site.home.hero.title}
                   className="mt-8 max-w-4xl break-words font-[var(--font-manrope)] tracking-[-0.08em]"
                   style={getTextStyle(site.home.hero.titleStyle)}
-                >
-                  {site.home.hero.title}
-                </h1>
-                <p className="mt-5 max-w-3xl break-words" style={getTextStyle(site.home.hero.subtitleStyle)}>
-                  {site.home.hero.subtitle}
-                </p>
+                  multiline
+                  selection={{
+                    id: "home.hero.title",
+                    kind: "text",
+                    label: "Hero 主標題",
+                    fieldPath: "home.hero.title",
+                    stylePath: "home.hero.titleStyle",
+                    multiline: true,
+                  }}
+                />
+                <EditableText
+                  as="p"
+                  value={site.home.hero.subtitle}
+                  className="mt-5 max-w-3xl break-words"
+                  style={getTextStyle(site.home.hero.subtitleStyle)}
+                  multiline
+                  selection={{
+                    id: "home.hero.subtitle",
+                    kind: "text",
+                    label: "Hero 副標題",
+                    fieldPath: "home.hero.subtitle",
+                    stylePath: "home.hero.subtitleStyle",
+                    multiline: true,
+                  }}
+                />
 
                 <div className="mt-8 flex flex-wrap items-center gap-3">
-                  <span
+                  <EditableText
+                    as="span"
+                    value={getDeviceLabel(site)}
                     className="rounded-full bg-[#0e1d38] px-4 py-2"
                     style={getTextStyle(site.home.hero.deviceBadgeStyle)}
-                  >
-                    {getDeviceLabel(site)}
-                  </span>
-                  <span
+                    selection={{
+                      id: "home.hero.deviceBadge",
+                      kind: "text",
+                      label: "Hero 裝置 Badge",
+                      fieldPath: "home.hero.deviceBadge",
+                      stylePath: "home.hero.deviceBadgeStyle",
+                    }}
+                  />
+                  <EditableText
+                    as="span"
+                    value={site.home.hero.secondaryBadge}
                     className="rounded-full bg-[#ffd84a] px-4 py-2"
                     style={getTextStyle(site.home.hero.secondaryBadgeStyle)}
-                  >
-                    {site.home.hero.secondaryBadge}
-                  </span>
+                    selection={{
+                      id: "home.hero.secondaryBadge",
+                      kind: "text",
+                      label: "Hero 第二 Badge",
+                      fieldPath: "home.hero.secondaryBadge",
+                      stylePath: "home.hero.secondaryBadgeStyle",
+                    }}
+                  />
                 </div>
 
                 <div className="mt-8 flex flex-wrap gap-3">
-                  <a
+                  <EditableLink
                     href={site.home.hero.primaryHref}
+                    value={site.home.hero.primaryLabel}
                     className="inline-flex items-center justify-center rounded-full bg-[#0e1d38] px-6 py-3.5 text-base font-black text-white transition hover:bg-[#16325f]"
-                  >
-                    {site.home.hero.primaryLabel}
-                  </a>
-                  <a
+                    selection={{
+                      id: "home.hero.primary",
+                      kind: "link",
+                      label: "Hero 主按鈕",
+                      fieldPath: "home.hero.primaryLabel",
+                      hrefPath: "home.hero.primaryHref",
+                    }}
+                  />
+                  <EditableLink
                     href={site.home.hero.secondaryHref}
+                    value={site.home.hero.secondaryLabel}
                     className="inline-flex items-center justify-center rounded-full border border-[#0e1d38]/12 bg-white/84 px-6 py-3.5 text-base font-black text-[#0e1d38] transition hover:border-[#0b4fd4] hover:text-[#0b4fd4]"
-                  >
-                    {site.home.hero.secondaryLabel}
-                  </a>
+                    selection={{
+                      id: "home.hero.secondary",
+                      kind: "link",
+                      label: "Hero 次按鈕",
+                      fieldPath: "home.hero.secondaryLabel",
+                      hrefPath: "home.hero.secondaryHref",
+                    }}
+                  />
                 </div>
               </div>
 
               <div ref={(node) => { sectionRefs.current.features = node; }} className={`grid gap-4 transition-shadow ${focusSection === "features" ? "rounded-[2rem] ring-4 ring-blue/25" : ""}`} data-preview-section="features">
                 {site.home.hero.heroImage.url ? (
-                  <div className="overflow-hidden rounded-[2rem] border border-white/80 bg-white/84 shadow-[0_24px_70px_rgba(14,29,56,0.12)]">
+                  <EditableImageFrame
+                    selection={{
+                      id: "home.hero.image",
+                      kind: "image",
+                      label: "首頁 Hero 圖片",
+                      imagePath: "home.hero.heroImage",
+                    }}
+                    className="overflow-hidden rounded-[2rem] border border-white/80 bg-white/84 shadow-[0_24px_70px_rgba(14,29,56,0.12)]"
+                  >
                     <div className="relative w-full">
                       <Image
                         src={site.home.hero.heroImage.url}
@@ -184,197 +264,327 @@ export function SiteHome({
                         }}
                       />
                     </div>
-                  </div>
+                  </EditableImageFrame>
                 ) : null}
 
-                <div className={`grid gap-4 ${featureColumnClass}`} style={getBlockStyle(site.home.features.sectionStyle)}>
+                <EditableBlock
+                  selection={{
+                    id: "home.features.block",
+                    kind: "block",
+                    label: "首頁 Features 區塊",
+                    stylePath: "home.features.sectionStyle",
+                  }}
+                  className={`grid gap-4 ${featureColumnClass}`}
+                  style={getBlockStyle(site.home.features.sectionStyle)}
+                >
                   {site.home.features.cards.map((feature, index) => (
-                    <article
+                    <EditableBlock
                       key={`${feature.eyebrow}-${feature.title}`}
+                      selection={{
+                        id: `home.features.cards.${index}.block`,
+                        kind: "block",
+                        label: `Feature 卡片 ${index + 1}`,
+                        stylePath: `home.features.cards.${index}.blockStyle`,
+                      }}
                       className={`gradient-border flex h-full min-h-[220px] flex-col justify-between border transition duration-300 hover:-translate-y-1 hover:shadow-[0_24px_70px_rgba(14,29,56,0.14)] ${activeCardKey === "feature-card" && activeCardIndex === index ? activeCardClass : ""}`}
                       style={getBlockStyle(feature.blockStyle)}
-                      data-preview-card-key="feature-card"
-                      data-preview-card-index={index}
                     >
-                      <div>
-                        <p className="font-[var(--font-manrope)] uppercase tracking-[0.24em]" style={getTextStyle(feature.eyebrowStyle)}>
-                          {feature.eyebrow}
-                        </p>
-                        <h2 className="mt-3 break-words" style={getTextStyle(feature.titleStyle)}>
-                          {feature.title}
-                        </h2>
-                        <p className="mt-3 break-words" style={getTextStyle(feature.descriptionStyle)}>
-                          {feature.description}
-                        </p>
-                      </div>
-                    </article>
+                      <article data-preview-card-key="feature-card" data-preview-card-index={index}>
+                        <EditableText
+                          as="p"
+                          value={feature.eyebrow}
+                          className="font-[var(--font-manrope)] uppercase tracking-[0.24em]"
+                          style={getTextStyle(feature.eyebrowStyle)}
+                          selection={{
+                            id: `home.features.cards.${index}.eyebrow`,
+                            kind: "text",
+                            label: `Feature 卡片 ${index + 1} Eyebrow`,
+                            fieldPath: `home.features.cards.${index}.eyebrow`,
+                            stylePath: `home.features.cards.${index}.eyebrowStyle`,
+                          }}
+                        />
+                        <EditableText
+                          as="h2"
+                          value={feature.title}
+                          className="mt-3 break-words"
+                          style={getTextStyle(feature.titleStyle)}
+                          selection={{
+                            id: `home.features.cards.${index}.title`,
+                            kind: "text",
+                            label: `Feature 卡片 ${index + 1} 標題`,
+                            fieldPath: `home.features.cards.${index}.title`,
+                            stylePath: `home.features.cards.${index}.titleStyle`,
+                          }}
+                        />
+                        <EditableText
+                          as="p"
+                          value={feature.description}
+                          className="mt-3 break-words"
+                          style={getTextStyle(feature.descriptionStyle)}
+                          multiline
+                          selection={{
+                            id: `home.features.cards.${index}.description`,
+                            kind: "text",
+                            label: `Feature 卡片 ${index + 1} 說明`,
+                            fieldPath: `home.features.cards.${index}.description`,
+                            stylePath: `home.features.cards.${index}.descriptionStyle`,
+                            multiline: true,
+                          }}
+                        />
+                      </article>
+                    </EditableBlock>
                   ))}
-                </div>
+                </EditableBlock>
               </div>
             </div>
           </section>
+        </EditableBlock>
 
-          <section id="download-cards" className="grid gap-6 lg:grid-cols-3">
-            {site.home.downloadCards.map((card) => (
-              <article
-                key={card.key}
-                className="group gradient-border relative overflow-hidden border transition duration-300 hover:-translate-y-1 hover:shadow-[0_26px_80px_rgba(14,29,56,0.16)]"
-                style={getBlockStyle(card.blockStyle)}
+        <section id="download-cards" className="grid gap-6 lg:grid-cols-3">
+          {site.home.downloadCards.map((card) => (
+            <article
+              key={card.key}
+              className="group gradient-border relative overflow-hidden border transition duration-300 hover:-translate-y-1 hover:shadow-[0_26px_80px_rgba(14,29,56,0.16)]"
+              style={getBlockStyle(card.blockStyle)}
+            >
+              <div className="absolute inset-x-6 top-0 h-24 rounded-b-[2rem] bg-gradient-to-b from-[#ffd84a]/45 to-transparent" />
+              <div className="relative flex h-full flex-col">
+                <div className="overflow-hidden rounded-[1.6rem] bg-[#eef5ff]">
+                  <div className="relative w-full">
+                    <Image
+                      src={card.image.url}
+                      alt={card.image.alt}
+                      width={1200}
+                      height={isMobilePreview ? card.image.mobileHeight : card.image.desktopHeight}
+                      unoptimized
+                      className="w-full transition duration-500 group-hover:scale-[1.03]"
+                      style={{
+                        ...getImageStyle(card.image, isMobilePreview),
+                        height: getImageHeight(card.image, isMobilePreview),
+                      }}
+                    />
+                  </div>
+                </div>
+
+                <div className="mt-5 flex flex-1 flex-col">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="min-w-0">
+                      <p className="uppercase tracking-[0.26em]" style={getTextStyle(card.eyebrowStyle)}>
+                        {card.eyebrow}
+                      </p>
+                      <h2 className="mt-2 break-words" style={getTextStyle(card.titleStyle)}>
+                        {card.title}
+                      </h2>
+                    </div>
+                    <div className="shrink-0 rounded-full bg-[#0e1d38] px-3 py-2 text-xs font-bold text-white">
+                      APP
+                    </div>
+                  </div>
+
+                  <p className="mt-3" style={getTextStyle(card.audienceStyle)}>
+                    {card.audience}
+                  </p>
+                  <p className="mt-4 flex-1 break-words" style={getTextStyle(card.descriptionStyle)}>
+                    {card.description}
+                  </p>
+
+                  <div className="mt-5 flex flex-wrap gap-2">
+                    {card.highlights.map((highlight) => (
+                      <span
+                        key={highlight}
+                        className="rounded-full bg-[#edf4ff] px-3 py-1.5 text-xs font-bold text-[#0b4fd4]"
+                      >
+                        {highlight}
+                      </span>
+                    ))}
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => handleDownload(card)}
+                    className="mt-6 inline-flex w-full items-center justify-center rounded-full bg-[#ffd84a] px-5 py-3.5 text-base font-black text-[#0e1d38] shadow-[0_18px_34px_rgba(255,216,74,0.38)] transition hover:bg-[#ffe68e]"
+                  >
+                    下載 {card.title}
+                  </button>
+                </div>
+              </div>
+            </article>
+          ))}
+        </section>
+
+        <section id="launch-flow" ref={(node) => { sectionRefs.current["launch-flow"] = node; }} className={`grid gap-6 transition-shadow lg:grid-cols-[minmax(280px,0.9fr)_minmax(0,1.1fr)] ${focusSection === "launch-flow" ? "rounded-[2rem] ring-4 ring-blue/25" : ""}`} data-preview-section="launch-flow">
+          <EditableBlock
+            selection={{
+              id: "home.launchFlow.left",
+              kind: "block",
+              label: "Launch Flow 左側主卡",
+              stylePath: "home.launchFlow.leftBlockStyle",
+            }}
+            className={`${activeCardKey === "launch-main" ? activeCardClass : ""} border transition-shadow`}
+            style={getBlockStyle(site.home.launchFlow.leftBlockStyle)}
+          >
+            <div data-preview-card-key="launch-main">
+              <EditableText
+                as="p"
+                value={site.home.launchFlow.eyebrow}
+                className="uppercase tracking-[0.3em]"
+                style={getTextStyle(site.home.launchFlow.eyebrowStyle)}
+                selection={{
+                  id: "home.launchFlow.eyebrow",
+                  kind: "text",
+                  label: "Launch Flow 左側 Eyebrow",
+                  fieldPath: "home.launchFlow.eyebrow",
+                  stylePath: "home.launchFlow.eyebrowStyle",
+                }}
+              />
+              <EditableText
+                as="h2"
+                value={site.home.launchFlow.title}
+                className="mt-3 break-words"
+                style={getTextStyle(site.home.launchFlow.titleStyle)}
+                multiline
+                selection={{
+                  id: "home.launchFlow.title",
+                  kind: "text",
+                  label: "Launch Flow 左側標題",
+                  fieldPath: "home.launchFlow.title",
+                  stylePath: "home.launchFlow.titleStyle",
+                  multiline: true,
+                }}
+              />
+              <EditableText
+                as="p"
+                value={site.home.launchFlow.description}
+                className="mt-4 break-words"
+                style={getTextStyle(site.home.launchFlow.descriptionStyle)}
+                multiline
+                selection={{
+                  id: "home.launchFlow.description",
+                  kind: "text",
+                  label: "Launch Flow 左側內容",
+                  fieldPath: "home.launchFlow.description",
+                  stylePath: "home.launchFlow.descriptionStyle",
+                  multiline: true,
+                }}
+              />
+            </div>
+          </EditableBlock>
+
+          <EditableBlock
+            selection={{
+              id: "home.launchFlow.right",
+              kind: "block",
+              label: "Launch Flow 右側容器",
+              stylePath: "home.launchFlow.rightBlockStyle",
+            }}
+            className={`grid gap-4 ${site.home.launchFlow.steps.length > 2 ? "md:grid-cols-3" : "md:grid-cols-2"}`}
+            style={getBlockStyle(site.home.launchFlow.rightBlockStyle)}
+          >
+            {site.home.launchFlow.steps.map((step, index) => (
+              <EditableBlock
+                key={step.index}
+                selection={{
+                  id: `home.launchFlow.steps.${index}.block`,
+                  kind: "block",
+                  label: `Launch Flow 步驟卡 ${index + 1}`,
+                  stylePath: `home.launchFlow.steps.${index}.blockStyle`,
+                }}
+                className={`gradient-border border transition duration-300 hover:-translate-y-1 hover:shadow-[0_24px_70px_rgba(14,29,56,0.14)] ${activeCardKey === "launch-step" && activeCardIndex === index ? activeCardClass : ""}`}
+                style={getBlockStyle(step.blockStyle)}
               >
-                <div className="absolute inset-x-6 top-0 h-24 rounded-b-[2rem] bg-gradient-to-b from-[#ffd84a]/45 to-transparent" />
-                <div className="relative flex h-full flex-col">
-                  <div className="overflow-hidden rounded-[1.6rem] bg-[#eef5ff]">
-                    <div className="relative w-full">
-                      <Image
-                        src={card.image.url}
-                        alt={card.image.alt}
-                        width={1200}
-                        height={isMobilePreview ? card.image.mobileHeight : card.image.desktopHeight}
-                        unoptimized
-                        className="w-full transition duration-500 group-hover:scale-[1.03]"
-                        style={{
-                          ...getImageStyle(card.image, isMobilePreview),
-                          height: getImageHeight(card.image, isMobilePreview),
-                        }}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="mt-5 flex flex-1 flex-col">
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="min-w-0">
-                        <p className="uppercase tracking-[0.26em]" style={getTextStyle(card.eyebrowStyle)}>
-                          {card.eyebrow}
-                        </p>
-                        <h2 className="mt-2 break-words" style={getTextStyle(card.titleStyle)}>
-                          {card.title}
-                        </h2>
-                      </div>
-                      <div className="shrink-0 rounded-full bg-[#0e1d38] px-3 py-2 text-xs font-bold text-white">
-                        APP
-                      </div>
-                    </div>
-
-                    <p className="mt-3" style={getTextStyle(card.audienceStyle)}>
-                      {card.audience}
-                    </p>
-                    <p className="mt-4 flex-1 break-words" style={getTextStyle(card.descriptionStyle)}>
-                      {card.description}
-                    </p>
-
-                    <div className="mt-5 flex flex-wrap gap-2">
-                      {card.highlights.map((highlight) => (
-                        <span
-                          key={highlight}
-                          className="rounded-full bg-[#edf4ff] px-3 py-1.5 text-xs font-bold text-[#0b4fd4]"
-                        >
-                          {highlight}
-                        </span>
-                      ))}
-                    </div>
-
-                    <button
-                      type="button"
-                      onClick={() => handleDownload(card)}
-                      className="mt-6 inline-flex w-full items-center justify-center rounded-full bg-[#ffd84a] px-5 py-3.5 text-base font-black text-[#0e1d38] shadow-[0_18px_34px_rgba(255,216,74,0.38)] transition hover:bg-[#ffe68e]"
-                    >
-                      下載 {card.title}
-                    </button>
-                  </div>
-                </div>
-              </article>
-            ))}
-          </section>
-
-          <section id="launch-flow" ref={(node) => { sectionRefs.current["launch-flow"] = node; }} className={`grid gap-6 transition-shadow lg:grid-cols-[minmax(280px,0.9fr)_minmax(0,1.1fr)] ${focusSection === "launch-flow" ? "rounded-[2rem] ring-4 ring-blue/25" : ""}`} data-preview-section="launch-flow">
-            <div
-              className={`${activeCardKey === "launch-main" ? activeCardClass : ""} border transition-shadow`}
-              style={getBlockStyle(site.home.launchFlow.leftBlockStyle)}
-              data-preview-card-key="launch-main"
-            >
-              <p className="uppercase tracking-[0.3em]" style={getTextStyle(site.home.launchFlow.eyebrowStyle)}>
-                {site.home.launchFlow.eyebrow}
-              </p>
-              <h2 className="mt-3 break-words" style={getTextStyle(site.home.launchFlow.titleStyle)}>
-                {site.home.launchFlow.title}
-              </h2>
-              <p className="mt-4 break-words" style={getTextStyle(site.home.launchFlow.descriptionStyle)}>
-                {site.home.launchFlow.description}
-              </p>
-            </div>
-
-            <div
-              className={`grid gap-4 ${site.home.launchFlow.steps.length > 2 ? "md:grid-cols-3" : "md:grid-cols-2"}`}
-              style={getBlockStyle(site.home.launchFlow.rightBlockStyle)}
-            >
-              {site.home.launchFlow.steps.map((step, index) => (
-                <article
-                  key={step.index}
-                  className={`gradient-border border transition duration-300 hover:-translate-y-1 hover:shadow-[0_24px_70px_rgba(14,29,56,0.14)] ${activeCardKey === "launch-step" && activeCardIndex === index ? activeCardClass : ""}`}
-                  style={getBlockStyle(step.blockStyle)}
-                  data-preview-card-key="launch-step"
-                  data-preview-card-index={index}
-                >
-                  <p className="font-[var(--font-manrope)] tracking-[0.26em]" style={getTextStyle(step.indexStyle)}>
-                    {step.index}
-                  </p>
-                  <h3 className="mt-4 break-words" style={getTextStyle(step.titleStyle)}>
-                    {step.title}
-                  </h3>
-                  <p className="mt-3 break-words" style={getTextStyle(step.descriptionStyle)}>
-                    {step.description}
-                  </p>
+                <article data-preview-card-key="launch-step" data-preview-card-index={index}>
+                  <EditableText
+                    as="p"
+                    value={step.index}
+                    className="font-[var(--font-manrope)] tracking-[0.26em]"
+                    style={getTextStyle(step.indexStyle)}
+                    selection={{
+                      id: `home.launchFlow.steps.${index}.index`,
+                      kind: "text",
+                      label: `Launch Flow 步驟 ${index + 1} 編號`,
+                      fieldPath: `home.launchFlow.steps.${index}.index`,
+                      stylePath: `home.launchFlow.steps.${index}.indexStyle`,
+                    }}
+                  />
+                  <EditableText
+                    as="h3"
+                    value={step.title}
+                    className="mt-4 break-words"
+                    style={getTextStyle(step.titleStyle)}
+                    selection={{
+                      id: `home.launchFlow.steps.${index}.title`,
+                      kind: "text",
+                      label: `Launch Flow 步驟 ${index + 1} 標題`,
+                      fieldPath: `home.launchFlow.steps.${index}.title`,
+                      stylePath: `home.launchFlow.steps.${index}.titleStyle`,
+                    }}
+                  />
+                  <EditableText
+                    as="p"
+                    value={step.description}
+                    className="mt-3 break-words"
+                    style={getTextStyle(step.descriptionStyle)}
+                    multiline
+                    selection={{
+                      id: `home.launchFlow.steps.${index}.description`,
+                      kind: "text",
+                      label: `Launch Flow 步驟 ${index + 1} 說明`,
+                      fieldPath: `home.launchFlow.steps.${index}.description`,
+                      stylePath: `home.launchFlow.steps.${index}.descriptionStyle`,
+                      multiline: true,
+                    }}
+                  />
                 </article>
-              ))}
-            </div>
-          </section>
-        </div>
+              </EditableBlock>
+            ))}
+          </EditableBlock>
+        </section>
+      </div>
 
-        <div ref={(node) => { sectionRefs.current.footer = node; }}>
-          <Footer
-            site={site}
-            highlighted={focusSection === "footer"}
-            activeCardKey={focusSection === "footer" ? activeCardKey : null}
-            activeCardIndex={focusSection === "footer" ? activeCardIndex : null}
-          />
-        </div>
+      <div ref={(node) => { sectionRefs.current.footer = node; }}>
+        <Footer
+          site={site}
+          highlighted={focusSection === "footer"}
+          activeCardKey={focusSection === "footer" ? activeCardKey : null}
+          activeCardIndex={focusSection === "footer" ? activeCardIndex : null}
+        />
+      </div>
 
-        {!embedded && deviceChoice ? (
-          <div className="fixed inset-0 z-50 flex items-end bg-[#0e1d38]/40 p-4 backdrop-blur-sm md:items-center md:justify-center">
-            <div className="w-full max-w-md rounded-[2rem] bg-white p-6 shadow-[0_30px_90px_rgba(14,29,56,0.22)]">
-              <p className="text-sm font-extrabold uppercase tracking-[0.26em] text-[#0b4fd4]">
-                選擇下載平台
-              </p>
-              <h3 className="mt-2 text-3xl font-black text-[#0e1d38]">{deviceChoice.roleTitle}</h3>
-              <p className="mt-3 text-base leading-8 text-[#0e1d38]/68">
-                目前裝置無法自動判斷，請直接選擇 App Store 或 Google Play。
-              </p>
+      {!embedded && deviceChoice ? (
+        <div className="fixed inset-0 z-50 flex items-end bg-[#0e1d38]/40 p-4 backdrop-blur-sm md:items-center md:justify-center">
+          <div className="w-full max-w-md rounded-[2rem] bg-white p-6 shadow-[0_30px_90px_rgba(14,29,56,0.22)]">
+            <p className="text-sm font-extrabold uppercase tracking-[0.26em] text-[#0b4fd4]">
+              選擇下載平台
+            </p>
+            <h3 className="mt-2 text-3xl font-black text-[#0e1d38]">{deviceChoice.roleTitle}</h3>
+            <p className="mt-3 text-base leading-8 text-[#0e1d38]/68">
+              請依照你的裝置選擇 App Store 或 Google Play，前往對應下載頁面。
+            </p>
 
-              <div className="mt-6 grid gap-3">
-                <a
-                  href={deviceChoice.iosUrl}
-                  className="inline-flex items-center justify-center rounded-full bg-[#0e1d38] px-5 py-3.5 text-base font-bold text-white transition hover:bg-[#16325f]"
-                >
-                  前往 App Store
-                </a>
-                <a
-                  href={deviceChoice.androidUrl}
-                  className="inline-flex items-center justify-center rounded-full bg-[#ffd84a] px-5 py-3.5 text-base font-bold text-[#0e1d38] transition hover:bg-[#ffe68e]"
-                >
-                  前往 Google Play
-                </a>
-                <button
-                  type="button"
-                  onClick={() => setDeviceChoice(null)}
-                  className="inline-flex items-center justify-center rounded-full border border-[#0e1d38]/10 px-5 py-3.5 text-base font-bold text-[#0e1d38] transition hover:border-[#0b4fd4] hover:text-[#0b4fd4]"
-                >
-                  關閉
-                </button>
-              </div>
+            <div className="mt-6 grid gap-3">
+              <a
+                href={deviceChoice.iosUrl}
+                className="inline-flex items-center justify-center rounded-full bg-[#0e1d38] px-5 py-3.5 text-base font-bold text-white transition hover:bg-[#16325f]"
+              >
+                前往 App Store
+              </a>
+              <a
+                href={deviceChoice.androidUrl}
+                className="inline-flex items-center justify-center rounded-full bg-[#ffd84a] px-5 py-3.5 text-base font-bold text-[#0e1d38] transition hover:bg-[#ffe68e]"
+              >
+                前往 Google Play
+              </a>
+              <button
+                type="button"
+                onClick={() => setDeviceChoice(null)}
+                className="inline-flex items-center justify-center rounded-full border border-[#0e1d38]/10 px-5 py-3.5 text-base font-bold text-[#0e1d38] transition hover:border-[#0b4fd4] hover:text-[#0b4fd4]"
+              >
+                關閉
+              </button>
             </div>
           </div>
-        ) : null}
-      </main>
-    </div>
+        </div>
+      ) : null}
+    </main>
   );
 }

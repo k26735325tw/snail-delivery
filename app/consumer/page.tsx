@@ -22,7 +22,7 @@ export default async function ConsumerPage() {
           dangerouslySetInnerHTML={{ __html: JSON.stringify(item) }}
         />
       ))}
-      <RolePage site={cms} page={cms.consumer} />
+      <RolePage site={cms} page={cms.consumer} pageKey="consumer" />
     </>
   );
 }

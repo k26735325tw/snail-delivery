@@ -22,7 +22,7 @@ export default async function CourierPage() {
           dangerouslySetInnerHTML={{ __html: JSON.stringify(item) }}
         />
       ))}
-      <RolePage site={cms} page={cms.courier} />
+      <RolePage site={cms} page={cms.courier} pageKey="courier" />
     </>
   );
 }
