@@ -16,8 +16,9 @@ const notoSansTc = Noto_Sans_TC({
 });
 
 export const metadata: Metadata = {
-  title: "GoGet CMS",
-  description: "Snail Delivery CMS with Vercel Blob storage and live content sync.",
+  metadataBase: new URL("https://snail-delivery.vercel.app"),
+  title: "GoGet 蝸牛外送",
+  description: "GoGet 蝸牛外送提供消費者、騎手、店家三端入口與 CMS V2 內容管理後台。",
 };
 
 export default function RootLayout({
@@ -26,7 +27,7 @@ export default function RootLayout({
   children: ReactNode;
 }>) {
   return (
-    <html lang="zh-TW">
+    <html lang="zh-Hant-TW">
       <body
         className={`${manrope.variable} ${notoSansTc.variable} bg-cream font-[var(--font-noto-tc)] text-ink antialiased`}
       >

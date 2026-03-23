@@ -3,31 +3,39 @@
 import Image from "next/image";
 import { useEffect, useMemo, useRef, useState } from "react";
 
+import type { CmsImageAsset } from "@/lib/cms-schema";
+
 type AdminImageUploadProps = {
   label: string;
-  value: string;
+  image: CmsImageAsset;
   pendingFile: File | null;
-  onChange: (url: string) => void;
+  onChange: (image: CmsImageAsset) => void;
   onFileChange: (file: File | null) => void;
+  recommendation: {
+    dimensions: string;
+    ratio: string;
+    format: string;
+  };
 };
 
 export function AdminImageUpload({
   label,
-  value,
+  image,
   pendingFile,
   onChange,
   onFileChange,
+  recommendation,
 }: AdminImageUploadProps) {
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const previewUrl = useMemo(() => {
     if (!pendingFile) {
-      return value;
+      return image.url;
     }
 
     return URL.createObjectURL(pendingFile);
-  }, [pendingFile, value]);
+  }, [image.url, pendingFile]);
 
   useEffect(() => {
     if (!pendingFile && inputRef.current) {
@@ -55,7 +63,7 @@ export function AdminImageUpload({
     setError(null);
 
     if (!file.type.startsWith("image/")) {
-      setError("Unsupported image type");
+      setError("僅支援圖片格式");
       return;
     }
 
@@ -63,13 +71,16 @@ export function AdminImageUpload({
   }
 
   return (
-    <div className="space-y-3">
-      <div className="flex items-center justify-between gap-3">
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-          {label}
-        </p>
+    <div className="space-y-3 rounded-[1.5rem] border border-slate-200 bg-slate-50 p-4">
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <p className="text-sm font-extrabold text-slate-900">{label}</p>
+          <p className="mt-1 text-xs text-slate-500">
+            建議尺寸：{recommendation.dimensions} ｜ 比例：{recommendation.ratio} ｜ 格式：{recommendation.format}
+          </p>
+        </div>
         <label className="cursor-pointer rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 transition hover:border-blue-500 hover:text-blue-600">
-          {pendingFile ? "Replace Pending Image" : "Choose Image"}
+          {pendingFile ? "更換待上傳圖片" : "選擇圖片"}
           <input
             ref={inputRef}
             type="file"
@@ -79,27 +90,157 @@ export function AdminImageUpload({
           />
         </label>
       </div>
-      <input
-        value={value}
-        onChange={(event) => {
-          onFileChange(null);
-          onChange(event.target.value);
-        }}
-        className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none transition focus:border-blue-500 focus:bg-white"
-        placeholder="https://..."
-      />
+
+      <div className="grid gap-4 md:grid-cols-2">
+        <label className="space-y-2">
+          <span className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+            圖片網址
+          </span>
+          <input
+            value={image.url}
+            onChange={(event) => {
+              onFileChange(null);
+              onChange({ ...image, url: event.target.value });
+            }}
+            className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-blue-500"
+            placeholder="https://..."
+          />
+        </label>
+        <label className="space-y-2">
+          <span className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+            ALT 文字
+          </span>
+          <input
+            value={image.alt}
+            onChange={(event) => onChange({ ...image, alt: event.target.value })}
+            className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-blue-500"
+            placeholder="請描述圖片內容"
+          />
+        </label>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        <label className="space-y-2">
+          <span className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+            Object Fit
+          </span>
+          <select
+            value={image.objectFit}
+            onChange={(event) =>
+              onChange({
+                ...image,
+                objectFit: event.target.value as CmsImageAsset["objectFit"],
+              })
+            }
+            className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-blue-500"
+          >
+            <option value="cover">cover</option>
+            <option value="contain">contain</option>
+          </select>
+        </label>
+        <label className="space-y-2">
+          <span className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+            Focal X
+          </span>
+          <input
+            type="number"
+            min={0}
+            max={100}
+            value={image.focalX}
+            onChange={(event) => onChange({ ...image, focalX: Number(event.target.value) || 0 })}
+            className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-blue-500"
+          />
+        </label>
+        <label className="space-y-2">
+          <span className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+            Focal Y
+          </span>
+          <input
+            type="number"
+            min={0}
+            max={100}
+            value={image.focalY}
+            onChange={(event) => onChange({ ...image, focalY: Number(event.target.value) || 0 })}
+            className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-blue-500"
+          />
+        </label>
+        <label className="space-y-2">
+          <span className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+            桌機高度
+          </span>
+          <input
+            type="number"
+            min={80}
+            max={1200}
+            value={image.desktopHeight}
+            onChange={(event) =>
+              onChange({ ...image, desktopHeight: Number(event.target.value) || 80 })
+            }
+            className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-blue-500"
+          />
+        </label>
+        <label className="space-y-2">
+          <span className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+            手機高度
+          </span>
+          <input
+            type="number"
+            min={80}
+            max={1200}
+            value={image.mobileHeight}
+            onChange={(event) =>
+              onChange({ ...image, mobileHeight: Number(event.target.value) || 80 })
+            }
+            className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-blue-500"
+          />
+        </label>
+      </div>
+
       {pendingFile ? (
         <p className="text-xs font-medium text-amber-700">
-          New image selected: {pendingFile.name}. It will upload when you save.
+          已選擇新圖片：{pendingFile.name}，按下儲存後會上傳至 Blob。
         </p>
       ) : null}
+
       {previewUrl ? (
-        <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
-          <div className="relative h-40 w-full">
-            <Image src={previewUrl} alt={label} fill unoptimized className="object-cover" />
+        <div className="grid gap-4 lg:grid-cols-2">
+          <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
+            <div className="border-b border-slate-200 px-4 py-2 text-xs font-semibold text-slate-500">
+              原始預覽
+            </div>
+            <div className="relative h-48 w-full">
+              <Image
+                src={previewUrl}
+                alt={image.alt || label}
+                fill
+                unoptimized
+                className="object-contain"
+              />
+            </div>
+          </div>
+          <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
+            <div className="border-b border-slate-200 px-4 py-2 text-xs font-semibold text-slate-500">
+              前台裁切預估
+            </div>
+            <div
+              className="relative w-full bg-slate-100"
+              style={{ height: `${Math.min(image.desktopHeight, 260)}px` }}
+            >
+              <Image
+                src={previewUrl}
+                alt={image.alt || label}
+                fill
+                unoptimized
+                style={{
+                  objectFit: image.objectFit,
+                  objectPosition: `${image.focalX}% ${image.focalY}%`,
+                }}
+              />
+            </div>
           </div>
         </div>
       ) : null}
+
       {error ? <p className="text-xs font-medium text-red-600">{error}</p> : null}
     </div>
   );

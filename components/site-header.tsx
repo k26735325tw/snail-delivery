@@ -1,47 +1,51 @@
 import Image from "next/image";
 import Link from "next/link";
 
+import type { CmsData } from "@/lib/cms-schema";
+import { getBlockStyle, getImageStyle, getTextStyle } from "@/lib/cms-style";
+
 type SiteHeaderProps = {
-  siteName: string;
-  logoUrl: string;
+  site: CmsData;
+  embedded?: boolean;
 };
 
-const navItems = [
-  { href: "/consumer", label: "消費者" },
-  { href: "/courier", label: "騎手" },
-  { href: "/merchant", label: "店家" },
-  { href: "/admin", label: "CMS" },
-];
+export function SiteHeader({ site, embedded = false }: SiteHeaderProps) {
+  const blockStyle = getBlockStyle(site.home.header.blockStyle);
 
-export function SiteHeader({ siteName, logoUrl }: SiteHeaderProps) {
   return (
-    <header className="sticky top-0 z-50">
+    <header className={embedded ? "top-0 z-20" : "sticky top-0 z-50"}>
       <div className="shell pt-5">
-        <div className="glass flex items-center justify-between rounded-full px-4 py-3 md:px-6">
-          <Link href="/" className="flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center overflow-hidden rounded-full bg-blue">
+        <div
+          className="flex flex-wrap items-center justify-between gap-4 border backdrop-blur"
+          style={blockStyle}
+        >
+          <Link href="/" className="flex min-w-0 items-center gap-3">
+            <div className="relative h-11 w-11 shrink-0 overflow-hidden rounded-full bg-blue/10">
               <Image
-                src={logoUrl}
-                alt={siteName}
-                width={44}
-                height={44}
+                src={site.site.logo.url}
+                alt={site.site.logo.alt}
+                width={88}
+                height={88}
                 unoptimized
-                className="h-full w-full object-cover"
+                className="h-full w-full"
+                style={getImageStyle(site.site.logo)}
               />
             </div>
-            <div>
-              <p className="font-[var(--font-manrope)] text-sm font-extrabold uppercase tracking-[0.28em] text-blue">
-                {siteName}
+            <div className="min-w-0">
+              <p className="truncate font-[var(--font-manrope)] text-sm font-extrabold uppercase tracking-[0.28em] text-blue">
+                {site.site.siteName}
               </p>
-              <p className="text-sm text-ink/55">CMS 驅動的外送品牌站</p>
+              <p className="truncate" style={getTextStyle(site.home.header.subtitleStyle)}>
+                {site.home.header.subtitle}
+              </p>
             </div>
           </Link>
 
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center justify-end gap-2">
             <nav className="hidden items-center gap-1 md:flex">
-              {navItems.map((item) => (
+              {site.home.header.navItems.map((item) => (
                 <Link
-                  key={item.href}
+                  key={`${item.href}-${item.label}`}
                   href={item.href}
                   className="rounded-full px-4 py-2 text-sm font-bold text-ink/68 transition hover:bg-white hover:text-blue"
                 >
@@ -50,10 +54,10 @@ export function SiteHeader({ siteName, logoUrl }: SiteHeaderProps) {
               ))}
             </nav>
             <Link
-              href="/consumer"
+              href={site.home.header.cta.href}
               className="rounded-full bg-blue px-4 py-2 text-sm font-extrabold text-white transition hover:-translate-y-0.5"
             >
-              下載 App
+              {site.home.header.cta.label}
             </Link>
           </div>
         </div>

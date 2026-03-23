@@ -3,55 +3,27 @@ import { Footer } from "@/components/footer";
 import { PageHero } from "@/components/page-hero";
 import { SectionShell } from "@/components/section-shell";
 import { SiteHeader } from "@/components/site-header";
-import type { CmsRolePage } from "@/lib/cms-schema";
+import type { CmsData, CmsRolePage } from "@/lib/cms-schema";
 
 type RolePageProps = {
-  siteName: string;
-  logoUrl: string;
-  footerTitle: string;
-  footerDescription: string;
+  site: CmsData;
   page: CmsRolePage;
 };
 
-export function RolePage({
-  siteName,
-  logoUrl,
-  footerTitle,
-  footerDescription,
-  page,
-}: RolePageProps) {
+export function RolePage({ site, page }: RolePageProps) {
   return (
     <main className="pb-10">
-      <SiteHeader siteName={siteName} logoUrl={logoUrl} />
+      <SiteHeader site={site} />
 
-      <PageHero
-        badge={page.hero.badge}
-        title={page.hero.title}
-        description={page.hero.description}
-        primaryHref={page.hero.primaryHref}
-        primaryLabel={page.hero.primaryLabel}
-        secondaryHref={page.hero.secondaryHref}
-        secondaryLabel={page.hero.secondaryLabel}
-        asideTitle={page.hero.asideTitle}
-        stats={page.hero.stats}
-        heroImageUrl={page.hero.heroImageUrl}
-      />
+      <PageHero hero={page.hero} />
 
       {page.sections.map((section) => (
-        <SectionShell
-          key={section.id}
-          id={section.id}
-          badge={section.badge}
-          title={section.title}
-          description={section.description}
-        >
+        <SectionShell key={section.id} section={section}>
           <div className="grid gap-5 md:grid-cols-3">
             {section.items.map((item, index) => (
               <FeatureCard
                 key={`${section.id}-${item.title}-${index}`}
-                eyebrow={item.eyebrow ?? "Highlight"}
-                title={item.title}
-                description={item.description}
+                item={item}
                 icon={item.icon || "•"}
                 delay={index * 0.08}
               />
@@ -60,11 +32,7 @@ export function RolePage({
         </SectionShell>
       ))}
 
-      <Footer
-        siteName={siteName}
-        title={footerTitle}
-        description={footerDescription}
-      />
+      <Footer site={site} />
     </main>
   );
 }

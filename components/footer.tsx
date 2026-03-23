@@ -1,30 +1,50 @@
 import Link from "next/link";
 
+import type { CmsData } from "@/lib/cms-schema";
+import { getBlockStyle, getTextStyle } from "@/lib/cms-style";
+
 type FooterProps = {
-  siteName: string;
-  title: string;
-  description: string;
+  site: CmsData;
 };
 
-export function Footer({ siteName, title, description }: FooterProps) {
+export function Footer({ site }: FooterProps) {
   return (
     <footer className="shell pb-10 pt-16">
-      <div className="relative overflow-hidden rounded-[2.8rem] bg-[#09152d] px-6 py-9 text-white md:px-10 md:py-12">
+      <div
+        className="relative overflow-hidden border"
+        style={getBlockStyle(site.site.footerStyle)}
+      >
         <div className="absolute -left-10 top-8 h-44 w-44 rounded-full bg-blue/25 blur-3xl" />
         <div className="absolute bottom-0 right-0 h-52 w-52 rounded-full bg-yellow/20 blur-3xl" />
 
-        <div className="relative flex flex-col gap-8 md:flex-row md:items-end md:justify-between">
+        <div className="relative grid gap-8 lg:grid-cols-[minmax(0,1.3fr)_minmax(0,0.9fr)] lg:items-start">
           <div className="max-w-2xl">
             <p className="font-[var(--font-manrope)] text-sm font-extrabold uppercase tracking-[0.26em] text-yellow">
-              {siteName}
+              {site.site.siteName}
             </p>
-            <h2 className="mt-3 text-3xl font-bold md:text-4xl">{title}</h2>
-            <p className="mt-4 text-base leading-8 text-white/70">{description}</p>
+            <h2 className="mt-3" style={getTextStyle(site.site.footerTitleStyle)}>
+              {site.site.footerTitle}
+            </h2>
+            <p className="mt-4" style={getTextStyle(site.site.footerDescriptionStyle)}>
+              {site.site.footerDescription}
+            </p>
           </div>
-          <div className="flex flex-wrap gap-3 text-sm font-bold text-white/82">
-            <Link href="/courier">騎手入口</Link>
-            <Link href="/merchant">店家合作</Link>
-            <Link href="/consumer">消費者下載</Link>
+
+          <div className="grid gap-6 sm:grid-cols-2">
+            {site.site.footerLinkGroups.map((group) => (
+              <div key={group.title} className="min-w-0">
+                <p className="text-sm font-extrabold uppercase tracking-[0.2em] text-yellow/90">
+                  {group.title}
+                </p>
+                <div className="mt-4 grid gap-3 text-sm font-bold text-white/82">
+                  {group.links.map((link) => (
+                    <Link key={`${group.title}-${link.href}-${link.label}`} href={link.href}>
+                      {link.label}
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </div>
