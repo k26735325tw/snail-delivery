@@ -153,11 +153,11 @@ export function resolveColor(value: string, fallback = "#0e1d38") {
 
 export function getTextStyle(style: CmsTextStyle) {
   return {
-    fontSize: fontSizeMap[style.fontSize],
-    fontWeight: fontWeightMap[style.fontWeight],
-    textAlign: style.textAlign,
+    fontSize: fontSizeMap[style.fontSize] ?? fontSizeMap.base,
+    fontWeight: fontWeightMap[style.fontWeight] ?? fontWeightMap["500"],
+    textAlign: (["left", "center", "right"].includes(style.textAlign) ? style.textAlign : "left"),
     color: resolveColor(style.textColor),
-    lineHeight: lineHeightMap[style.lineHeight],
+    lineHeight: lineHeightMap[style.lineHeight] ?? lineHeightMap.normal,
   } as const;
 }
 
@@ -166,12 +166,12 @@ export function getBlockStyle(style: CmsBlockStyle) {
     backgroundColor: resolveColor(style.backgroundColor, "transparent"),
     color: resolveColor(style.foregroundColor),
     borderColor: resolveColor(style.borderColor, "transparent"),
-    borderRadius: radiusMap[style.borderRadius],
-    paddingLeft: spacingMap[style.paddingX],
-    paddingRight: spacingMap[style.paddingX],
-    paddingTop: spacingMap[style.paddingY],
-    paddingBottom: spacingMap[style.paddingY],
-    boxShadow: shadowMap[style.shadow],
+    borderRadius: radiusMap[style.borderRadius] ?? radiusMap.xl,
+    paddingLeft: spacingMap[style.paddingX] ?? spacingMap["6"],
+    paddingRight: spacingMap[style.paddingX] ?? spacingMap["6"],
+    paddingTop: spacingMap[style.paddingY] ?? spacingMap["6"],
+    paddingBottom: spacingMap[style.paddingY] ?? spacingMap["6"],
+    boxShadow: shadowMap[style.shadow] ?? shadowMap.sm,
     borderWidth: style.borderColor === "transparent" ? "0px" : "1px",
     borderStyle: "solid",
   } as const;
@@ -179,11 +179,12 @@ export function getBlockStyle(style: CmsBlockStyle) {
 
 export function getImageStyle(image: CmsImageAsset, mobile = false) {
   return {
-    objectFit: image.objectFit,
-    objectPosition: `${image.focalX}% ${image.focalY}%`,
+    objectFit: image.objectFit === "contain" ? "contain" : "cover",
+    objectPosition: `${Number.isFinite(image.focalX) ? image.focalX : 50}% ${Number.isFinite(image.focalY) ? image.focalY : 50}%`,
   } as const;
 }
 
 export function getImageHeight(image: CmsImageAsset, mobile = false) {
-  return `${mobile ? image.mobileHeight : image.desktopHeight}px`;
+  const height = mobile ? image.mobileHeight : image.desktopHeight;
+  return `${Number.isFinite(height) ? height : mobile ? 240 : 360}px`;
 }

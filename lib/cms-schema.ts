@@ -41,6 +41,7 @@ export type CmsLinkItem = {
 };
 
 export type CmsLinkGroup = {
+  id?: string;
   title: string;
   links: CmsLinkItem[];
 };
@@ -51,6 +52,7 @@ export type CmsStat = {
 };
 
 export type CmsContentItem = {
+  id?: string;
   eyebrow: string;
   title: string;
   description: string;
@@ -74,7 +76,8 @@ export type CmsSection = {
 };
 
 export type CmsDownloadCard = {
-  key: "consumer" | "courier" | "merchant";
+  id?: string;
+  key: string;
   eyebrow: string;
   title: string;
   description: string;
@@ -91,6 +94,7 @@ export type CmsDownloadCard = {
 };
 
 export type CmsHomeFeatureCard = {
+  id?: string;
   eyebrow: string;
   title: string;
   description: string;
@@ -101,6 +105,7 @@ export type CmsHomeFeatureCard = {
 };
 
 export type CmsLaunchStep = {
+  id?: string;
   index: string;
   title: string;
   description: string;

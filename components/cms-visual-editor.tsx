@@ -5,6 +5,7 @@ import { useRef } from "react";
 import { CmsVisualEditorProvider, useCmsVisualEditor, type VisualPageKey } from "@/components/cms-visual-context";
 import { RolePage } from "@/components/role-page";
 import { SiteHome } from "@/components/site-home";
+import type { CmsArrayCollectionPath } from "@/lib/cms-data";
 import type { CmsBlockStyle, CmsData, CmsImageAsset, CmsTextStyle } from "@/lib/cms-schema";
 import {
   BRAND_COLOR_OPTIONS,
@@ -163,7 +164,7 @@ function BlockStylePanel({ path, value }: { path: string; value: CmsBlockStyle }
   );
 }
 
-function ImagePanel({ path, value }: { path: string; value: CmsImageAsset }) {
+function ImagePanel({ path, value, uploadKey }: { path: string; value: CmsImageAsset; uploadKey?: string }) {
   const editor = useCmsVisualEditor();
   const uploadRef = useRef<HTMLInputElement | null>(null);
 
@@ -192,7 +193,7 @@ function ImagePanel({ path, value }: { path: string; value: CmsImageAsset }) {
           const file = event.target.files?.[0];
 
           if (file) {
-            await editor.uploadImage(path, file);
+            await editor.uploadImage(path, file, uploadKey);
           }
 
           event.target.value = "";
@@ -204,6 +205,141 @@ function ImagePanel({ path, value }: { path: string; value: CmsImageAsset }) {
       <Field label="Focal Y" type="number" value={value.focalY} onChange={(next) => editor.updateValue(`${path}.focalY`, Number(next))} />
       <Field label="桌機高度" type="number" value={value.desktopHeight} onChange={(next) => editor.updateValue(`${path}.desktopHeight`, Number(next))} />
       <Field label="手機高度" type="number" value={value.mobileHeight} onChange={(next) => editor.updateValue(`${path}.mobileHeight`, Number(next))} />
+    </div>
+  );
+}
+
+function CardCrudPanel({
+  collectionPath,
+  itemId,
+  itemIndex,
+}: {
+  collectionPath: CmsArrayCollectionPath;
+  itemId?: string;
+  itemIndex?: number;
+}) {
+  const editor = useCmsVisualEditor();
+  const items = editor?.getValue(collectionPath);
+  const total = Array.isArray(items) ? items.length : 0;
+
+  if (!editor) {
+    return null;
+  }
+
+  return (
+    <div className="space-y-3 rounded-[1.5rem] border border-slate-200 bg-slate-50 p-4">
+      <div className="flex items-center justify-between gap-3">
+        <p className="text-sm font-bold text-slate-900">卡片 CRUD</p>
+        <button
+          type="button"
+          onClick={() => editor.addArrayItem(collectionPath, itemId ?? null)}
+          className="rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-black text-slate-700"
+        >
+          Add Item
+        </button>
+      </div>
+
+      {itemId ? (
+        <div className="grid grid-cols-2 gap-2">
+          <button
+            type="button"
+            onClick={() => editor.moveArrayItem(collectionPath, itemId, "up")}
+            disabled={!itemIndex}
+            className="rounded-full border border-slate-300 bg-white px-3 py-2 text-xs font-bold text-slate-700 disabled:opacity-40"
+          >
+            上移
+          </button>
+          <button
+            type="button"
+            onClick={() => editor.moveArrayItem(collectionPath, itemId, "down")}
+            disabled={typeof itemIndex !== "number" || itemIndex >= total - 1}
+            className="rounded-full border border-slate-300 bg-white px-3 py-2 text-xs font-bold text-slate-700 disabled:opacity-40"
+          >
+            下移
+          </button>
+          <button
+            type="button"
+            onClick={() => editor.duplicateArrayItem(collectionPath, itemId)}
+            className="rounded-full border border-slate-300 bg-white px-3 py-2 text-xs font-bold text-slate-700"
+          >
+            Duplicate
+          </button>
+          <button
+            type="button"
+            onClick={() => editor.removeArrayItem(collectionPath, itemId)}
+            className="rounded-full border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-bold text-rose-700"
+          >
+            Delete
+          </button>
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+function ItemEditorPanel({ itemPath, uploadKey }: { itemPath: string; uploadKey?: string }) {
+  const editor = useCmsVisualEditor();
+  const item = editor?.getValue(itemPath);
+
+  if (!editor || !item || typeof item !== "object") {
+    return null;
+  }
+
+  const record = item as Record<string, unknown>;
+
+  return (
+    <div className="space-y-4 rounded-[1.5rem] border border-slate-200 bg-slate-50 p-4">
+      <p className="text-sm font-bold text-slate-900">卡片專屬設定</p>
+
+      {"icon" in record && typeof record.icon === "string" ? (
+        <Field label="Icon / 小圖示文字" value={record.icon} onChange={(next) => editor.updateValue(`${itemPath}.icon`, next)} />
+      ) : null}
+      {"index" in record && typeof record.index === "string" ? (
+        <Field label="編號" value={record.index} onChange={(next) => editor.updateValue(`${itemPath}.index`, next)} />
+      ) : null}
+      {"eyebrow" in record && typeof record.eyebrow === "string" ? (
+        <Field label="Eyebrow" value={record.eyebrow} onChange={(next) => editor.updateValue(`${itemPath}.eyebrow`, next)} />
+      ) : null}
+      {"title" in record && typeof record.title === "string" ? (
+        <Field label="標題" value={record.title} onChange={(next) => editor.updateValue(`${itemPath}.title`, next)} multiline />
+      ) : null}
+      {"audience" in record && typeof record.audience === "string" ? (
+        <Field label="受眾" value={record.audience} onChange={(next) => editor.updateValue(`${itemPath}.audience`, next)} />
+      ) : null}
+      {"description" in record && typeof record.description === "string" ? (
+        <Field label="說明" value={record.description} onChange={(next) => editor.updateValue(`${itemPath}.description`, next)} multiline />
+      ) : null}
+      {"image" in record && record.image && typeof record.image === "object" && "url" in record.image ? (
+        <ImagePanel path={`${itemPath}.image`} value={record.image as CmsImageAsset} uploadKey={uploadKey} />
+      ) : null}
+      {"highlights" in record && Array.isArray(record.highlights) ? (
+        <div className="space-y-3">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Highlights</p>
+          {record.highlights.map((highlight, index) => (
+            <Field
+              key={`${itemPath}.highlights.${index}`}
+              label={`Highlight ${index + 1}`}
+              value={String(highlight)}
+              onChange={(next) => editor.updateValue(`${itemPath}.highlights.${index}`, next)}
+            />
+          ))}
+        </div>
+      ) : null}
+      {"links" in record && Array.isArray(record.links) ? (
+        <div className="space-y-3">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Links</p>
+          {record.links.map((entry, index) => {
+            const link = entry as { label?: string; href?: string };
+
+            return (
+              <div key={`${itemPath}.links.${index}`} className="grid gap-3">
+                <Field label={`連結 ${index + 1} 文字`} value={link.label ?? ""} onChange={(next) => editor.updateValue(`${itemPath}.links.${index}.label`, next)} />
+                <Field label={`連結 ${index + 1} URL`} value={link.href ?? ""} onChange={(next) => editor.updateValue(`${itemPath}.links.${index}.href`, next)} />
+              </div>
+            );
+          })}
+        </div>
+      ) : null}
     </div>
   );
 }
@@ -226,7 +362,7 @@ function VisualSidebar() {
       <div>
         <p className="text-xs font-semibold uppercase tracking-[0.24em] text-blue-600">CMS V3 Visual</p>
         <h2 className="mt-2 text-xl font-black text-slate-900">前台即後台</h2>
-        <p className="mt-2 text-sm leading-6 text-slate-500">點文字直接改內容，點圖片更換資產，點區塊調整樣式，儲存後直接寫入正式 Blob CMS。</p>
+        <p className="mt-2 text-sm leading-6 text-slate-500">點文字直接改內容，點圖片更換資產，點整張卡片進行 CRUD 與卡片專屬設定。</p>
       </div>
 
       {selection ? (
@@ -234,7 +370,16 @@ function VisualSidebar() {
           <div className="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-4">
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">目前選取</p>
             <p className="mt-2 text-base font-black text-slate-900">{selection.label}</p>
+            {selection.itemId ? <p className="mt-2 text-xs font-mono text-slate-500">{selection.itemId}</p> : null}
           </div>
+
+          {selection.collectionPath ? (
+            <CardCrudPanel collectionPath={selection.collectionPath} itemId={selection.itemId} itemIndex={selection.itemIndex} />
+          ) : null}
+
+          {selection.itemPath ? (
+            <ItemEditorPanel itemPath={selection.itemPath} uploadKey={selection.uploadKey} />
+          ) : null}
 
           {selection.fieldPath && typeof fieldValue === "string" ? (
             <Field
@@ -258,12 +403,12 @@ function VisualSidebar() {
           ) : null}
 
           {selection.imagePath && imageValue && typeof imageValue === "object" && "url" in (imageValue as object) ? (
-            <ImagePanel path={selection.imagePath} value={imageValue as CmsImageAsset} />
+            <ImagePanel path={selection.imagePath} value={imageValue as CmsImageAsset} uploadKey={selection.uploadKey} />
           ) : null}
         </div>
       ) : (
         <div className="rounded-[1.5rem] border border-dashed border-slate-300 bg-slate-50 p-5 text-sm leading-7 text-slate-500">
-          先在左側前台畫面點選文字、圖片或區塊，這裡就會出現對應設定。
+          先在左側前台畫面點選文字、圖片或整張卡片，這裡會出現對應設定與 CRUD。
         </div>
       )}
 
@@ -330,7 +475,7 @@ function VisualCanvas() {
       </div>
 
       <div className="mx-auto max-w-[1720px] px-4 pb-10 pt-28 md:px-6 xl:pr-[410px]">
-        <div className="overflow-hidden rounded-[2.2rem] border border-slate-200 bg-white shadow-[0_28px_90px_rgba(15,23,42,0.08)]">
+        <div className="rounded-[2.2rem] border border-slate-200 bg-white shadow-[0_28px_90px_rgba(15,23,42,0.08)]">
           {editor.currentPage === "home" ? (
             <SiteHome site={editor.data} />
           ) : (

@@ -159,6 +159,7 @@ export function PageHero({ hero, highlighted = false, pathPrefix = "role.hero" }
                       kind: "image",
                       label: "Hero 圖片",
                       imagePath: `${pathPrefix}.heroImage`,
+                      uploadKey: `${pathPrefix.split(".")[0]}/hero`,
                     }}
                     className="overflow-hidden rounded-[2rem] border border-white/90 bg-white/75 shadow-[0_18px_50px_rgba(14,29,56,0.08)]"
                   >

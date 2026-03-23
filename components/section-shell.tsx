@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 
 import { EditableBlock, EditableText } from "@/components/cms-inline-edit";
 import { FadeIn } from "@/components/fade-in";
+import type { CmsArrayCollectionPath } from "@/lib/cms-data";
 import type { CmsSection } from "@/lib/cms-schema";
 import { getBlockStyle, getTextStyle } from "@/lib/cms-style";
 
@@ -15,6 +16,8 @@ type SectionShellProps = {
 };
 
 export function SectionShell({ section, children, highlighted = false, pathPrefix }: SectionShellProps) {
+  const collectionPath = pathPrefix ? `${pathPrefix}.items` as CmsArrayCollectionPath : undefined;
+
   return (
     <section
       id={section.id}
@@ -27,6 +30,7 @@ export function SectionShell({ section, children, highlighted = false, pathPrefi
           kind: "block",
           label: `${section.title} 區塊`,
           stylePath: pathPrefix ? `${pathPrefix}.blockStyle` : undefined,
+          collectionPath,
         }}
       >
         <FadeIn className="mb-10 max-w-3xl space-y-4 md:mb-14" style={getBlockStyle(section.blockStyle)}>

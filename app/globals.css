@@ -11,6 +11,8 @@
   --color-cream: 251 252 255;
   --color-line: 14 29 56;
   --page-width: 1200px;
+  --font-manrope: "Manrope", "Avenir Next", "Segoe UI", sans-serif;
+  --font-noto-tc: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
 }
 
 * {

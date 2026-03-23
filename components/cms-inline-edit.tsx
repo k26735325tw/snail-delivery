@@ -6,15 +6,21 @@ import { useId, useRef } from "react";
 import { useCmsVisualEditor, type CmsVisualSelection } from "@/components/cms-visual-context";
 
 const interactiveClass =
-  "relative rounded-[1rem] transition duration-200 after:pointer-events-none after:absolute after:inset-0 after:rounded-[inherit] after:border after:border-dashed after:border-transparent";
+  "relative rounded-[1rem] outline-none transition duration-200 after:pointer-events-none after:absolute after:inset-0 after:rounded-[inherit] after:border-2 after:border-dashed after:border-transparent";
 const hoverClass =
-  "hover:bg-[#fff7c4]/55 hover:shadow-[0_16px_40px_rgba(27,111,255,0.08)] hover:after:border-[#1b6fff]/45";
+  "hover:bg-[#fff7c4]/58 hover:shadow-[0_16px_40px_rgba(27,111,255,0.08)] hover:after:border-[#1b6fff]/55";
 const selectedClass =
-  "bg-[#fff7c4]/72 shadow-[0_20px_54px_rgba(27,111,255,0.14)] ring-2 ring-[#1b6fff]/45 after:border-[#1b6fff]/55";
+  "bg-[#fff7c4]/76 shadow-[0_20px_54px_rgba(27,111,255,0.16)] ring-4 ring-[#1b6fff]/28 after:border-[#1b6fff]/70";
 
 function useSelection(selection: CmsVisualSelection) {
   const editor = useCmsVisualEditor();
-  const selected = Boolean(editor && editor.selected?.id === selection.id);
+  const selected = Boolean(
+    editor &&
+      (editor.selected?.id === selection.id ||
+        (selection.kind === "block" &&
+          selection.itemPath &&
+          editor.selected?.itemPath === selection.itemPath)),
+  );
 
   function handleSelect(event?: { preventDefault?: () => void; stopPropagation?: () => void }) {
     event?.preventDefault?.();
@@ -191,7 +197,7 @@ export function EditableImageFrame({
           const file = event.target.files?.[0];
 
           if (file && selection.imagePath) {
-            await editor.uploadImage(selection.imagePath, file);
+            await editor.uploadImage(selection.imagePath, file, selection.uploadKey);
           }
 
           event.target.value = "";

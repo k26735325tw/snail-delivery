@@ -22,6 +22,7 @@ export function Footer({ site, highlighted = false, activeCardKey = null, active
           kind: "block",
           label: "Footer 區塊",
           stylePath: "site.footerStyle",
+          collectionPath: "site.footerLinkGroups",
         }}
         className={`relative overflow-hidden border transition-shadow ${highlighted ? "ring-4 ring-blue/25 shadow-[0_24px_70px_rgba(27,111,255,0.18)]" : ""}`}
         style={getBlockStyle(site.site.footerStyle)}
@@ -31,9 +32,17 @@ export function Footer({ site, highlighted = false, activeCardKey = null, active
 
         <div className="relative grid gap-8 lg:grid-cols-[minmax(0,1.3fr)_minmax(0,0.9fr)] lg:items-start">
           <div className={`max-w-2xl transition-shadow ${activeCardKey === "footer-main" ? activeCardClass : ""}`} data-preview-card-key="footer-main">
-            <p className="font-[var(--font-manrope)] text-sm font-extrabold uppercase tracking-[0.26em] text-yellow">
-              {site.site.siteName}
-            </p>
+            <EditableText
+              as="p"
+              value={site.site.siteName}
+              className="font-[var(--font-manrope)] text-sm font-extrabold uppercase tracking-[0.26em] text-yellow"
+              selection={{
+                id: "site.siteName.footer",
+                kind: "text",
+                label: "Footer 品牌名稱",
+                fieldPath: "site.siteName",
+              }}
+            />
             <EditableText
               as="h2"
               value={site.site.footerTitle}
@@ -68,21 +77,32 @@ export function Footer({ site, highlighted = false, activeCardKey = null, active
 
           <div className="grid gap-6 sm:grid-cols-2">
             {site.site.footerLinkGroups.map((group, groupIndex) => (
-              <div
-                key={group.title}
+              <EditableBlock
+                key={group.id}
+                selection={{
+                  id: `site.footerLinkGroups.${group.id}.block`,
+                  kind: "block",
+                  label: `Footer 連結群組 ${groupIndex + 1}`,
+                  collectionPath: "site.footerLinkGroups",
+                  itemPath: `site.footerLinkGroups.${groupIndex}`,
+                  itemId: group.id,
+                  itemIndex: groupIndex,
+                }}
                 className={`min-w-0 transition-shadow ${activeCardKey === "footer-link-group" && activeCardIndex === groupIndex ? activeCardClass : ""}`}
-                data-preview-card-key="footer-link-group"
-                data-preview-card-index={groupIndex}
               >
                 <EditableText
                   as="p"
                   value={group.title}
                   className="text-sm font-extrabold uppercase tracking-[0.2em] text-yellow/90"
                   selection={{
-                    id: `site.footerLinkGroups.${groupIndex}.title`,
+                    id: `site.footerLinkGroups.${group.id}.title`,
                     kind: "text",
                     label: `Footer 連結群組 ${groupIndex + 1}`,
                     fieldPath: `site.footerLinkGroups.${groupIndex}.title`,
+                    collectionPath: "site.footerLinkGroups",
+                    itemPath: `site.footerLinkGroups.${groupIndex}`,
+                    itemId: group.id,
+                    itemIndex: groupIndex,
                   }}
                 />
                 <div className="mt-4 grid gap-3 text-sm font-bold text-white/82">
@@ -92,16 +112,20 @@ export function Footer({ site, highlighted = false, activeCardKey = null, active
                       href={link.href}
                       value={link.label}
                       selection={{
-                        id: `site.footerLinkGroups.${groupIndex}.links.${linkIndex}`,
+                        id: `site.footerLinkGroups.${group.id}.links.${linkIndex}`,
                         kind: "link",
                         label: `Footer 連結 ${groupIndex + 1}-${linkIndex + 1}`,
                         fieldPath: `site.footerLinkGroups.${groupIndex}.links.${linkIndex}.label`,
                         hrefPath: `site.footerLinkGroups.${groupIndex}.links.${linkIndex}.href`,
+                        collectionPath: "site.footerLinkGroups",
+                        itemPath: `site.footerLinkGroups.${groupIndex}`,
+                        itemId: group.id,
+                        itemIndex: groupIndex,
                       }}
                     />
                   ))}
                 </div>
-              </div>
+              </EditableBlock>
             ))}
           </div>
         </div>

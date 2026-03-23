@@ -20,7 +20,10 @@ export function SiteHeader({ site, embedded = false, highlighted = false }: Site
   const topOffset = embedded ? 0 : editor?.editorTopOffset ?? 0;
 
   return (
-    <header className={embedded ? "top-0 z-20" : "sticky z-50"} style={embedded ? undefined : { top: `${topOffset}px` }}>
+    <header
+      className={`z-50 w-full ${embedded ? "top-0" : "sticky"}`}
+      style={embedded ? undefined : { top: `${topOffset}px` }}
+    >
       <div className="shell py-3 md:py-4">
         <EditableBlock
           selection={{
@@ -29,7 +32,7 @@ export function SiteHeader({ site, embedded = false, highlighted = false }: Site
             label: "首頁 Header 區塊",
             stylePath: "home.header.blockStyle",
           }}
-          className={`flex flex-wrap items-center justify-between gap-4 border backdrop-blur transition-shadow ${highlighted ? "ring-4 ring-blue/25 shadow-[0_24px_70px_rgba(27,111,255,0.18)]" : ""}`}
+          className={`flex flex-wrap items-center justify-between gap-4 border bg-white/90 backdrop-blur transition-shadow ${highlighted ? "ring-4 ring-blue/25 shadow-[0_24px_70px_rgba(27,111,255,0.18)]" : ""}`}
           style={blockStyle}
         >
           <Link href="/" className="flex min-w-0 items-center gap-3">
@@ -39,6 +42,7 @@ export function SiteHeader({ site, embedded = false, highlighted = false }: Site
                 kind: "image",
                 label: "網站 Logo",
                 imagePath: "site.logo",
+                uploadKey: "shared/logo",
               }}
               className="relative h-11 w-11 shrink-0 overflow-hidden rounded-full bg-blue/10"
             >
@@ -54,9 +58,17 @@ export function SiteHeader({ site, embedded = false, highlighted = false }: Site
             </EditableImageFrame>
 
             <div className="min-w-0">
-              <p className="truncate font-[var(--font-manrope)] text-sm font-extrabold uppercase tracking-[0.28em] text-blue">
-                {site.site.siteName}
-              </p>
+              <EditableText
+                as="p"
+                value={site.site.siteName}
+                className="truncate font-[var(--font-manrope)] text-sm font-extrabold uppercase tracking-[0.28em] text-blue"
+                selection={{
+                  id: "site.siteName.header",
+                  kind: "text",
+                  label: "網站名稱",
+                  fieldPath: "site.siteName",
+                }}
+              />
               <EditableText
                 as="p"
                 value={site.home.header.subtitle}

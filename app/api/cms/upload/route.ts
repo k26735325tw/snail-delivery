@@ -12,6 +12,10 @@ const overwriteUploadKeys = new Set([
   "merchant/hero",
 ]);
 
+function shouldOverwriteUpload(uploadKey: string) {
+  return overwriteUploadKeys.has(uploadKey) || uploadKey.startsWith("home/download-cards/");
+}
+
 function normalizePath(value: string) {
   return value.trim().toLowerCase().replace(/[^a-z0-9/-]+/g, "-");
 }
@@ -42,7 +46,7 @@ export async function POST(request: Request) {
 
     const filename = file.name.replace(/[^a-zA-Z0-9._-]+/g, "-");
     const extension = filename.includes(".") ? filename.slice(filename.lastIndexOf(".")) : "";
-    const shouldOverwrite = overwriteUploadKeys.has(uploadKey);
+    const shouldOverwrite = shouldOverwriteUpload(uploadKey);
     const blobPath = shouldOverwrite
       ? `cms/${uploadKey}${extension}`
       : `cms/${uploadKey}/${Date.now()}-${filename}`;

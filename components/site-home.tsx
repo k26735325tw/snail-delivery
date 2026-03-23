@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 
 import { EditableBlock, EditableImageFrame, EditableLink, EditableText } from "@/components/cms-inline-edit";
+import { useCmsVisualEditor } from "@/components/cms-visual-context";
 import { Footer } from "@/components/footer";
 import { SiteHeader } from "@/components/site-header";
 import type { CmsData, CmsDownloadCard } from "@/lib/cms-schema";
@@ -43,6 +44,7 @@ export function SiteHome({
   activeCardKey = null,
   activeCardIndex = null,
 }: SiteHomeProps) {
+  const editor = useCmsVisualEditor();
   const [deviceChoice, setDeviceChoice] = useState<{
     roleTitle: string;
     iosUrl: string;
@@ -118,6 +120,7 @@ export function SiteHome({
                       kind: "image",
                       label: "首頁 Logo",
                       imagePath: "site.logo",
+                      uploadKey: "shared/logo",
                     }}
                     className="relative flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-[1.5rem] bg-[#0b4fd4] shadow-[0_20px_44px_rgba(11,79,212,0.32)]"
                   >
@@ -132,9 +135,17 @@ export function SiteHome({
                     />
                   </EditableImageFrame>
                   <div className="min-w-0">
-                    <p className="truncate font-[var(--font-manrope)] text-xs font-extrabold uppercase tracking-[0.34em] text-[#0b4fd4]">
-                      {site.site.siteName}
-                    </p>
+                    <EditableText
+                      as="p"
+                      value={site.site.siteName}
+                      className="truncate font-[var(--font-manrope)] text-xs font-extrabold uppercase tracking-[0.34em] text-[#0b4fd4]"
+                      selection={{
+                        id: "site.siteName.hero",
+                        kind: "text",
+                        label: "首頁品牌名稱",
+                        fieldPath: "site.siteName",
+                      }}
+                    />
                     <EditableText
                       as="p"
                       value={site.home.hero.badge}
@@ -185,7 +196,7 @@ export function SiteHome({
                 <div className="mt-8 flex flex-wrap items-center gap-3">
                   <EditableText
                     as="span"
-                    value={getDeviceLabel(site)}
+                    value={editor ? site.home.hero.deviceBadge : getDeviceLabel(site)}
                     className="rounded-full bg-[#0e1d38] px-4 py-2"
                     style={getTextStyle(site.home.hero.deviceBadgeStyle)}
                     selection={{
@@ -247,6 +258,7 @@ export function SiteHome({
                       kind: "image",
                       label: "首頁 Hero 圖片",
                       imagePath: "home.hero.heroImage",
+                      uploadKey: "home/hero",
                     }}
                     className="overflow-hidden rounded-[2rem] border border-white/80 bg-white/84 shadow-[0_24px_70px_rgba(14,29,56,0.12)]"
                   >
@@ -273,6 +285,7 @@ export function SiteHome({
                     kind: "block",
                     label: "首頁 Features 區塊",
                     stylePath: "home.features.sectionStyle",
+                    collectionPath: "home.features.cards",
                   }}
                   className={`grid gap-4 ${featureColumnClass}`}
                   style={getBlockStyle(site.home.features.sectionStyle)}
@@ -281,10 +294,14 @@ export function SiteHome({
                     <EditableBlock
                       key={`${feature.eyebrow}-${feature.title}`}
                       selection={{
-                        id: `home.features.cards.${index}.block`,
+                        id: `home.features.cards.${feature.id}.block`,
                         kind: "block",
                         label: `Feature 卡片 ${index + 1}`,
                         stylePath: `home.features.cards.${index}.blockStyle`,
+                        collectionPath: "home.features.cards",
+                        itemPath: `home.features.cards.${index}`,
+                        itemId: feature.id,
+                        itemIndex: index,
                       }}
                       className={`gradient-border flex h-full min-h-[220px] flex-col justify-between border transition duration-300 hover:-translate-y-1 hover:shadow-[0_24px_70px_rgba(14,29,56,0.14)] ${activeCardKey === "feature-card" && activeCardIndex === index ? activeCardClass : ""}`}
                       style={getBlockStyle(feature.blockStyle)}
@@ -296,11 +313,15 @@ export function SiteHome({
                           className="font-[var(--font-manrope)] uppercase tracking-[0.24em]"
                           style={getTextStyle(feature.eyebrowStyle)}
                           selection={{
-                            id: `home.features.cards.${index}.eyebrow`,
+                            id: `home.features.cards.${feature.id}.eyebrow`,
                             kind: "text",
                             label: `Feature 卡片 ${index + 1} Eyebrow`,
                             fieldPath: `home.features.cards.${index}.eyebrow`,
                             stylePath: `home.features.cards.${index}.eyebrowStyle`,
+                            collectionPath: "home.features.cards",
+                            itemPath: `home.features.cards.${index}`,
+                            itemId: feature.id,
+                            itemIndex: index,
                           }}
                         />
                         <EditableText
@@ -309,11 +330,15 @@ export function SiteHome({
                           className="mt-3 break-words"
                           style={getTextStyle(feature.titleStyle)}
                           selection={{
-                            id: `home.features.cards.${index}.title`,
+                            id: `home.features.cards.${feature.id}.title`,
                             kind: "text",
                             label: `Feature 卡片 ${index + 1} 標題`,
                             fieldPath: `home.features.cards.${index}.title`,
                             stylePath: `home.features.cards.${index}.titleStyle`,
+                            collectionPath: "home.features.cards",
+                            itemPath: `home.features.cards.${index}`,
+                            itemId: feature.id,
+                            itemIndex: index,
                           }}
                         />
                         <EditableText
@@ -323,12 +348,16 @@ export function SiteHome({
                           style={getTextStyle(feature.descriptionStyle)}
                           multiline
                           selection={{
-                            id: `home.features.cards.${index}.description`,
+                            id: `home.features.cards.${feature.id}.description`,
                             kind: "text",
                             label: `Feature 卡片 ${index + 1} 說明`,
                             fieldPath: `home.features.cards.${index}.description`,
                             stylePath: `home.features.cards.${index}.descriptionStyle`,
                             multiline: true,
+                            collectionPath: "home.features.cards",
+                            itemPath: `home.features.cards.${index}`,
+                            itemId: feature.id,
+                            itemIndex: index,
                           }}
                         />
                       </article>
@@ -340,16 +369,47 @@ export function SiteHome({
           </section>
         </EditableBlock>
 
-        <section id="download-cards" className="grid gap-6 lg:grid-cols-3">
-          {site.home.downloadCards.map((card) => (
-            <article
-              key={card.key}
+        <EditableBlock
+          selection={{
+            id: "home.downloadCards.collection",
+            kind: "block",
+            label: "首頁下載卡區塊",
+            collectionPath: "home.downloadCards",
+          }}
+          className="grid gap-6 lg:grid-cols-3"
+        >
+          {site.home.downloadCards.map((card, index) => (
+            <EditableBlock
+              key={card.id}
+              selection={{
+                id: `home.downloadCards.${card.id}.block`,
+                kind: "block",
+                label: `下載卡 ${index + 1}`,
+                stylePath: `home.downloadCards.${index}.blockStyle`,
+                collectionPath: "home.downloadCards",
+                itemPath: `home.downloadCards.${index}`,
+                itemId: card.id,
+                itemIndex: index,
+              }}
               className="group gradient-border relative overflow-hidden border transition duration-300 hover:-translate-y-1 hover:shadow-[0_26px_80px_rgba(14,29,56,0.16)]"
               style={getBlockStyle(card.blockStyle)}
             >
               <div className="absolute inset-x-6 top-0 h-24 rounded-b-[2rem] bg-gradient-to-b from-[#ffd84a]/45 to-transparent" />
               <div className="relative flex h-full flex-col">
-                <div className="overflow-hidden rounded-[1.6rem] bg-[#eef5ff]">
+                <EditableImageFrame
+                  selection={{
+                    id: `home.downloadCards.${card.id}.image`,
+                    kind: "image",
+                    label: `下載卡 ${index + 1} 圖片`,
+                    imagePath: `home.downloadCards.${index}.image`,
+                    uploadKey: `home/download-cards/${card.id}`,
+                    collectionPath: "home.downloadCards",
+                    itemPath: `home.downloadCards.${index}`,
+                    itemId: card.id,
+                    itemIndex: index,
+                  }}
+                  className="overflow-hidden rounded-[1.6rem] bg-[#eef5ff]"
+                >
                   <div className="relative w-full">
                     <Image
                       src={card.image.url}
@@ -364,38 +424,106 @@ export function SiteHome({
                       }}
                     />
                   </div>
-                </div>
+                </EditableImageFrame>
 
                 <div className="mt-5 flex flex-1 flex-col">
                   <div className="flex items-start justify-between gap-4">
                     <div className="min-w-0">
-                      <p className="uppercase tracking-[0.26em]" style={getTextStyle(card.eyebrowStyle)}>
-                        {card.eyebrow}
-                      </p>
-                      <h2 className="mt-2 break-words" style={getTextStyle(card.titleStyle)}>
-                        {card.title}
-                      </h2>
+                      <EditableText
+                        as="p"
+                        value={card.eyebrow}
+                        className="uppercase tracking-[0.26em]"
+                        style={getTextStyle(card.eyebrowStyle)}
+                        selection={{
+                          id: `home.downloadCards.${card.id}.eyebrow`,
+                          kind: "text",
+                          label: `下載卡 ${index + 1} Eyebrow`,
+                          fieldPath: `home.downloadCards.${index}.eyebrow`,
+                          stylePath: `home.downloadCards.${index}.eyebrowStyle`,
+                          collectionPath: "home.downloadCards",
+                          itemPath: `home.downloadCards.${index}`,
+                          itemId: card.id,
+                          itemIndex: index,
+                        }}
+                      />
+                      <EditableText
+                        as="h2"
+                        value={card.title}
+                        className="mt-2 break-words"
+                        style={getTextStyle(card.titleStyle)}
+                        selection={{
+                          id: `home.downloadCards.${card.id}.title`,
+                          kind: "text",
+                          label: `下載卡 ${index + 1} 標題`,
+                          fieldPath: `home.downloadCards.${index}.title`,
+                          stylePath: `home.downloadCards.${index}.titleStyle`,
+                          collectionPath: "home.downloadCards",
+                          itemPath: `home.downloadCards.${index}`,
+                          itemId: card.id,
+                          itemIndex: index,
+                        }}
+                      />
                     </div>
                     <div className="shrink-0 rounded-full bg-[#0e1d38] px-3 py-2 text-xs font-bold text-white">
                       APP
                     </div>
                   </div>
 
-                  <p className="mt-3" style={getTextStyle(card.audienceStyle)}>
-                    {card.audience}
-                  </p>
-                  <p className="mt-4 flex-1 break-words" style={getTextStyle(card.descriptionStyle)}>
-                    {card.description}
-                  </p>
+                  <EditableText
+                    as="p"
+                    value={card.audience}
+                    className="mt-3"
+                    style={getTextStyle(card.audienceStyle)}
+                    selection={{
+                      id: `home.downloadCards.${card.id}.audience`,
+                      kind: "text",
+                      label: `下載卡 ${index + 1} 受眾`,
+                      fieldPath: `home.downloadCards.${index}.audience`,
+                      stylePath: `home.downloadCards.${index}.audienceStyle`,
+                      collectionPath: "home.downloadCards",
+                      itemPath: `home.downloadCards.${index}`,
+                      itemId: card.id,
+                      itemIndex: index,
+                    }}
+                  />
+                  <EditableText
+                    as="p"
+                    value={card.description}
+                    className="mt-4 flex-1 break-words"
+                    style={getTextStyle(card.descriptionStyle)}
+                    multiline
+                    selection={{
+                      id: `home.downloadCards.${card.id}.description`,
+                      kind: "text",
+                      label: `下載卡 ${index + 1} 說明`,
+                      fieldPath: `home.downloadCards.${index}.description`,
+                      stylePath: `home.downloadCards.${index}.descriptionStyle`,
+                      multiline: true,
+                      collectionPath: "home.downloadCards",
+                      itemPath: `home.downloadCards.${index}`,
+                      itemId: card.id,
+                      itemIndex: index,
+                    }}
+                  />
 
                   <div className="mt-5 flex flex-wrap gap-2">
-                    {card.highlights.map((highlight) => (
-                      <span
-                        key={highlight}
+                    {card.highlights.map((highlight, highlightIndex) => (
+                      <EditableText
+                        key={`${card.id}-${highlightIndex}`}
+                        as="span"
+                        value={highlight}
                         className="rounded-full bg-[#edf4ff] px-3 py-1.5 text-xs font-bold text-[#0b4fd4]"
-                      >
-                        {highlight}
-                      </span>
+                        selection={{
+                          id: `home.downloadCards.${card.id}.highlights.${highlightIndex}`,
+                          kind: "text",
+                          label: `下載卡 ${index + 1} Highlight ${highlightIndex + 1}`,
+                          fieldPath: `home.downloadCards.${index}.highlights.${highlightIndex}`,
+                          collectionPath: "home.downloadCards",
+                          itemPath: `home.downloadCards.${index}`,
+                          itemId: card.id,
+                          itemIndex: index,
+                        }}
+                      />
                     ))}
                   </div>
 
@@ -408,9 +536,9 @@ export function SiteHome({
                   </button>
                 </div>
               </div>
-            </article>
+            </EditableBlock>
           ))}
-        </section>
+        </EditableBlock>
 
         <section id="launch-flow" ref={(node) => { sectionRefs.current["launch-flow"] = node; }} className={`grid gap-6 transition-shadow lg:grid-cols-[minmax(280px,0.9fr)_minmax(0,1.1fr)] ${focusSection === "launch-flow" ? "rounded-[2rem] ring-4 ring-blue/25" : ""}`} data-preview-section="launch-flow">
           <EditableBlock
@@ -476,18 +604,23 @@ export function SiteHome({
               kind: "block",
               label: "Launch Flow 右側容器",
               stylePath: "home.launchFlow.rightBlockStyle",
+              collectionPath: "home.launchFlow.steps",
             }}
             className={`grid gap-4 ${site.home.launchFlow.steps.length > 2 ? "md:grid-cols-3" : "md:grid-cols-2"}`}
             style={getBlockStyle(site.home.launchFlow.rightBlockStyle)}
           >
             {site.home.launchFlow.steps.map((step, index) => (
               <EditableBlock
-                key={step.index}
+                key={step.id}
                 selection={{
-                  id: `home.launchFlow.steps.${index}.block`,
+                  id: `home.launchFlow.steps.${step.id}.block`,
                   kind: "block",
                   label: `Launch Flow 步驟卡 ${index + 1}`,
                   stylePath: `home.launchFlow.steps.${index}.blockStyle`,
+                  collectionPath: "home.launchFlow.steps",
+                  itemPath: `home.launchFlow.steps.${index}`,
+                  itemId: step.id,
+                  itemIndex: index,
                 }}
                 className={`gradient-border border transition duration-300 hover:-translate-y-1 hover:shadow-[0_24px_70px_rgba(14,29,56,0.14)] ${activeCardKey === "launch-step" && activeCardIndex === index ? activeCardClass : ""}`}
                 style={getBlockStyle(step.blockStyle)}
@@ -499,11 +632,15 @@ export function SiteHome({
                     className="font-[var(--font-manrope)] tracking-[0.26em]"
                     style={getTextStyle(step.indexStyle)}
                     selection={{
-                      id: `home.launchFlow.steps.${index}.index`,
+                      id: `home.launchFlow.steps.${step.id}.index`,
                       kind: "text",
                       label: `Launch Flow 步驟 ${index + 1} 編號`,
                       fieldPath: `home.launchFlow.steps.${index}.index`,
                       stylePath: `home.launchFlow.steps.${index}.indexStyle`,
+                      collectionPath: "home.launchFlow.steps",
+                      itemPath: `home.launchFlow.steps.${index}`,
+                      itemId: step.id,
+                      itemIndex: index,
                     }}
                   />
                   <EditableText
@@ -512,11 +649,15 @@ export function SiteHome({
                     className="mt-4 break-words"
                     style={getTextStyle(step.titleStyle)}
                     selection={{
-                      id: `home.launchFlow.steps.${index}.title`,
+                      id: `home.launchFlow.steps.${step.id}.title`,
                       kind: "text",
                       label: `Launch Flow 步驟 ${index + 1} 標題`,
                       fieldPath: `home.launchFlow.steps.${index}.title`,
                       stylePath: `home.launchFlow.steps.${index}.titleStyle`,
+                      collectionPath: "home.launchFlow.steps",
+                      itemPath: `home.launchFlow.steps.${index}`,
+                      itemId: step.id,
+                      itemIndex: index,
                     }}
                   />
                   <EditableText
@@ -526,12 +667,16 @@ export function SiteHome({
                     style={getTextStyle(step.descriptionStyle)}
                     multiline
                     selection={{
-                      id: `home.launchFlow.steps.${index}.description`,
+                      id: `home.launchFlow.steps.${step.id}.description`,
                       kind: "text",
                       label: `Launch Flow 步驟 ${index + 1} 說明`,
                       fieldPath: `home.launchFlow.steps.${index}.description`,
                       stylePath: `home.launchFlow.steps.${index}.descriptionStyle`,
                       multiline: true,
+                      collectionPath: "home.launchFlow.steps",
+                      itemPath: `home.launchFlow.steps.${index}`,
+                      itemId: step.id,
+                      itemIndex: index,
                     }}
                   />
                 </article>

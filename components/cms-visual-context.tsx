@@ -3,6 +3,13 @@
 import type { ReactNode } from "react";
 import { createContext, useContext, useRef, useState } from "react";
 
+import {
+  cloneArrayItemWithFreshIds,
+  cloneValue,
+  createArrayItemTemplate,
+  getImageUploadKey,
+  type CmsArrayCollectionPath,
+} from "@/lib/cms-data";
 import type { CmsData } from "@/lib/cms-schema";
 
 export type VisualPageKey = "home" | "consumer" | "courier" | "merchant";
@@ -15,7 +22,12 @@ export type CmsVisualSelection = {
   stylePath?: string;
   hrefPath?: string;
   imagePath?: string;
+  uploadKey?: string;
   multiline?: boolean;
+  collectionPath?: CmsArrayCollectionPath;
+  itemPath?: string;
+  itemId?: string;
+  itemIndex?: number;
 };
 
 type CmsVisualContextValue = {
@@ -27,8 +39,12 @@ type CmsVisualContextValue = {
   select: (selection: CmsVisualSelection) => void;
   updateValue: (path: string, value: unknown) => void;
   getValue: (path: string) => unknown;
-  uploadImage: (imagePath: string, file: File) => Promise<void>;
+  uploadImage: (imagePath: string, file: File, uploadKey?: string) => Promise<void>;
   save: () => Promise<void>;
+  addArrayItem: (collectionPath: CmsArrayCollectionPath, afterItemId?: string | null) => void;
+  duplicateArrayItem: (collectionPath: CmsArrayCollectionPath, itemId: string) => void;
+  removeArrayItem: (collectionPath: CmsArrayCollectionPath, itemId: string) => void;
+  moveArrayItem: (collectionPath: CmsArrayCollectionPath, itemId: string, direction: "up" | "down") => void;
   isSaving: boolean;
   isDirty: boolean;
   message: string | null;
@@ -43,10 +59,6 @@ function splitPath(path: string) {
   return path.split(".").filter(Boolean);
 }
 
-function cloneData<T>(value: T): T {
-  return JSON.parse(JSON.stringify(value)) as T;
-}
-
 function getAtPath(source: unknown, path: string) {
   return splitPath(path).reduce<unknown>((current, part) => {
     if (current && typeof current === "object") {
@@ -58,7 +70,7 @@ function getAtPath(source: unknown, path: string) {
 }
 
 function setAtPath<T>(source: T, path: string, value: unknown) {
-  const next = cloneData(source);
+  const next = cloneValue(source);
   const parts = splitPath(path);
 
   if (parts.length === 0) {
@@ -82,8 +94,14 @@ function setAtPath<T>(source: T, path: string, value: unknown) {
   return next;
 }
 
-function pathToUploadKey(path: string) {
-  return path.replace(/\.(\d+)/g, "/$1").replace(/\./g, "/").replace(/\/url$/, "");
+function replacePathPrefix(value: string | undefined, previousPrefix: string, nextPrefix: string) {
+  if (!value) {
+    return value;
+  }
+
+  return value === previousPrefix || value.startsWith(`${previousPrefix}.`)
+    ? `${nextPrefix}${value.slice(previousPrefix.length)}`
+    : value;
 }
 
 export function CmsVisualEditorProvider({
@@ -115,8 +133,125 @@ export function CmsVisualEditorProvider({
     setError(null);
   }
 
-  async function uploadImage(imagePath: string, file: File) {
-    const uploadKey = pathToUploadKey(imagePath);
+  function getCollectionItems(collectionPath: CmsArrayCollectionPath, source = data) {
+    return (getAtPath(source, collectionPath) as Array<{ id?: string }> | undefined) ?? [];
+  }
+
+  function syncSelectionAfterCollectionChange(
+    collectionPath: CmsArrayCollectionPath,
+    nextItems: Array<{ id?: string }>,
+  ) {
+    setSelected((current) => {
+      if (!current || current.collectionPath !== collectionPath || !current.itemPath || !current.itemId) {
+        return current;
+      }
+
+      const nextIndex = nextItems.findIndex((item) => item.id === current.itemId);
+
+      if (nextIndex < 0) {
+        return null;
+      }
+
+      const nextItemPath = `${collectionPath}.${nextIndex}`;
+
+      return {
+        ...current,
+        itemIndex: nextIndex,
+        itemPath: nextItemPath,
+        fieldPath: replacePathPrefix(current.fieldPath, current.itemPath, nextItemPath),
+        stylePath: replacePathPrefix(current.stylePath, current.itemPath, nextItemPath),
+        hrefPath: replacePathPrefix(current.hrefPath, current.itemPath, nextItemPath),
+        imagePath: replacePathPrefix(current.imagePath, current.itemPath, nextItemPath),
+      };
+    });
+  }
+
+  function updateCollection(collectionPath: CmsArrayCollectionPath, nextItems: unknown[]) {
+    setData((current) => setAtPath(current, collectionPath, nextItems));
+    markDirty(collectionPath);
+    syncSelectionAfterCollectionChange(collectionPath, nextItems as Array<{ id?: string }>);
+    setMessage(null);
+    setError(null);
+  }
+
+  function addArrayItem(collectionPath: CmsArrayCollectionPath, afterItemId?: string | null) {
+    const currentItems = [...getCollectionItems(collectionPath)];
+    const nextItem = createArrayItemTemplate(collectionPath, data);
+
+    if (!nextItem) {
+      setError("這個區塊目前不支援新增項目。");
+      return;
+    }
+
+    const insertIndex = afterItemId
+      ? Math.max(currentItems.findIndex((item) => item.id === afterItemId) + 1, 0)
+      : currentItems.length;
+
+    const nextItems = [...currentItems];
+    nextItems.splice(insertIndex, 0, nextItem as { id?: string });
+    updateCollection(collectionPath, nextItems);
+
+    setSelected({
+      id: `${collectionPath}.${(nextItem as { id: string }).id}.block`,
+      kind: "block",
+      label: "新卡片",
+      stylePath: `${collectionPath}.${insertIndex}.blockStyle`,
+      collectionPath,
+      itemPath: `${collectionPath}.${insertIndex}`,
+      itemId: (nextItem as { id: string }).id,
+      itemIndex: insertIndex,
+    });
+  }
+
+  function duplicateArrayItem(collectionPath: CmsArrayCollectionPath, itemId: string) {
+    const currentItems = [...getCollectionItems(collectionPath)];
+    const sourceIndex = currentItems.findIndex((item) => item.id === itemId);
+
+    if (sourceIndex < 0) {
+      return;
+    }
+
+    const duplicate = cloneArrayItemWithFreshIds(currentItems[sourceIndex]);
+    const nextItems = [...currentItems];
+    nextItems.splice(sourceIndex + 1, 0, duplicate as { id?: string });
+    updateCollection(collectionPath, nextItems);
+  }
+
+  function removeArrayItem(collectionPath: CmsArrayCollectionPath, itemId: string) {
+    const currentItems = [...getCollectionItems(collectionPath)];
+
+    if (currentItems.length <= 1) {
+      setError("至少要保留一個項目，避免公開頁內容整塊消失。");
+      return;
+    }
+
+    const nextItems = currentItems.filter((item) => item.id !== itemId);
+    updateCollection(collectionPath, nextItems);
+  }
+
+  function moveArrayItem(collectionPath: CmsArrayCollectionPath, itemId: string, direction: "up" | "down") {
+    const currentItems = [...getCollectionItems(collectionPath)];
+    const currentIndex = currentItems.findIndex((item) => item.id === itemId);
+
+    if (currentIndex < 0) {
+      return;
+    }
+
+    const targetIndex = direction === "up" ? currentIndex - 1 : currentIndex + 1;
+
+    if (targetIndex < 0 || targetIndex >= currentItems.length) {
+      return;
+    }
+
+    const nextItems = [...currentItems];
+    const [moved] = nextItems.splice(currentIndex, 1);
+    nextItems.splice(targetIndex, 0, moved);
+    updateCollection(collectionPath, nextItems);
+  }
+
+  async function uploadImage(imagePath: string, file: File, uploadKey?: string) {
+    const finalUploadKey = uploadKey ?? getImageUploadKey(imagePath, selected?.itemId);
+
     setUploadingPaths((current) => ({ ...current, [imagePath]: true }));
     setError(null);
     setMessage(null);
@@ -124,7 +259,7 @@ export function CmsVisualEditorProvider({
     try {
       const formData = new FormData();
       formData.append("file", file);
-      formData.append("uploadKey", uploadKey);
+      formData.append("uploadKey", finalUploadKey);
 
       const response = await fetch("/api/cms/upload", {
         method: "POST",
@@ -197,6 +332,10 @@ export function CmsVisualEditorProvider({
     getValue: (path) => getAtPath(data, path),
     uploadImage,
     save,
+    addArrayItem,
+    duplicateArrayItem,
+    removeArrayItem,
+    moveArrayItem,
     isSaving,
     isDirty: dirtyPathsRef.current.size > 0 || Object.keys(uploadingPaths).length > 0,
     message,

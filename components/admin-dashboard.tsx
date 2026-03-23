@@ -35,6 +35,7 @@ import {
   SPACING_OPTIONS,
   TEXT_ALIGN_OPTIONS,
 } from "@/lib/cms-style";
+import { createCmsId } from "@/lib/cms-data";
 
 type AdminDashboardProps = {
   initialData: CmsData;
@@ -235,9 +236,10 @@ const imageSuggestionMap = {
   card: { dimensions: "1200 x 900 px", ratio: "4:3", format: "WebP / JPG" },
 };
 
-const emptyLinkGroup = (): CmsLinkGroup => ({ title: "", links: [{ label: "", href: "" }] });
+const emptyLinkGroup = (): CmsLinkGroup => ({ id: createCmsId("footer-group", "group"), title: "", links: [{ label: "", href: "" }] });
 const emptyStat = (): CmsStat => ({ label: "", value: "" });
 const emptySectionItem = (): CmsContentItem => ({
+  id: createCmsId("role-card", "card"),
   eyebrow: "",
   title: "",
   description: "",
@@ -259,6 +261,7 @@ const emptySection = (): CmsSection => ({
   items: [emptySectionItem()],
 });
 const emptyLaunchStep = (): CmsLaunchStep => ({
+  id: createCmsId("launch-step", "step"),
   index: "",
   title: "",
   description: "",
@@ -268,7 +271,8 @@ const emptyLaunchStep = (): CmsLaunchStep => ({
   blockStyle: defaultBlockStyle(),
 });
 const emptyDownloadCard = (): CmsDownloadCard => ({
-  key: "consumer",
+  id: createCmsId("download-card", "download"),
+  key: "download-card",
   eyebrow: "",
   title: "",
   description: "",
@@ -617,7 +621,7 @@ export function AdminDashboard({ initialData }: AdminDashboardProps) {
           <AdminArrayEditor
             label="Feature Cards"
             items={data.home.features.cards}
-            createItem={() => ({ eyebrow: "", title: "", description: "", eyebrowStyle: defaultTextStyle(), titleStyle: defaultTextStyle({ fontSize: "xl", fontWeight: "700" }), descriptionStyle: defaultTextStyle(), blockStyle: defaultBlockStyle() })}
+            createItem={() => ({ id: createCmsId("feature-card", "feature"), eyebrow: "", title: "", description: "", eyebrowStyle: defaultTextStyle(), titleStyle: defaultTextStyle({ fontSize: "xl", fontWeight: "700" }), descriptionStyle: defaultTextStyle(), blockStyle: defaultBlockStyle() })}
             onChange={(cards) => setData({ ...data, home: { ...data.home, features: { ...data.home.features, cards } } })}
             renderItem={(card, index, helpers) => (
               <div className="space-y-4" onMouseEnter={() => setPreviewTarget({ page: "home", section: "features", fieldPath: `home.features.cards.${index}`, cardKey: "feature-card", cardIndex: index })} onFocusCapture={() => setPreviewTarget({ page: "home", section: "features", fieldPath: `home.features.cards.${index}`, cardKey: "feature-card", cardIndex: index })}>

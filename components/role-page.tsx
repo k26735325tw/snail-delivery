@@ -42,7 +42,7 @@ export function RolePage({
           <div className="grid gap-5 md:grid-cols-3">
             {section.items.map((item, index) => (
               <FeatureCard
-                key={`${section.id}-${item.title}-${index}`}
+                key={item.id ?? `${section.id}-${index}`}
                 item={item}
                 icon={item.icon || "•"}
                 delay={index * 0.08}
