@@ -7,11 +7,16 @@ import { getBlockStyle, getTextStyle } from "@/lib/cms-style";
 type SectionShellProps = {
   section: CmsSection;
   children: ReactNode;
+  highlighted?: boolean;
 };
 
-export function SectionShell({ section, children }: SectionShellProps) {
+export function SectionShell({ section, children, highlighted = false }: SectionShellProps) {
   return (
-    <section id={section.id} className="shell py-14 md:py-20">
+    <section
+      id={section.id}
+      className={`shell py-14 transition-shadow md:py-20 ${highlighted ? "rounded-[2rem] ring-4 ring-blue/25" : ""}`}
+      data-preview-section={section.id}
+    >
       <FadeIn className="mb-10 max-w-3xl space-y-4 md:mb-14" style={getBlockStyle(section.blockStyle)}>
         <span className="pill bg-white shadow-sm" style={getTextStyle(section.badgeStyle)}>
           {section.badge}

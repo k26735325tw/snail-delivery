@@ -5,14 +5,16 @@ import { getBlockStyle, getTextStyle } from "@/lib/cms-style";
 
 type FooterProps = {
   site: CmsData;
+  highlighted?: boolean;
 };
 
-export function Footer({ site }: FooterProps) {
+export function Footer({ site, highlighted = false }: FooterProps) {
   return (
     <footer className="shell pb-10 pt-16">
       <div
-        className="relative overflow-hidden border"
+        className={`relative overflow-hidden border transition-shadow ${highlighted ? "ring-4 ring-blue/25 shadow-[0_24px_70px_rgba(27,111,255,0.18)]" : ""}`}
         style={getBlockStyle(site.site.footerStyle)}
+        data-preview-section="footer"
       >
         <div className="absolute -left-10 top-8 h-44 w-44 rounded-full bg-blue/25 blur-3xl" />
         <div className="absolute bottom-0 right-0 h-52 w-52 rounded-full bg-yellow/20 blur-3xl" />

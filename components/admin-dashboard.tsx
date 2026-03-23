@@ -5,9 +5,9 @@ import { useEffect, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 
 import { AdminArrayEditor } from "@/components/admin-array-editor";
+import { AdminLivePreview, type PreviewTarget } from "@/components/admin-live-preview";
 import { AdminImageUpload } from "@/components/admin-image-upload";
 import { AdminSaveBar } from "@/components/admin-save-bar";
-import { SiteHome } from "@/components/site-home";
 import type {
   CmsBlockStyle,
   CmsContentItem,
@@ -41,7 +41,6 @@ type AdminDashboardProps = {
 };
 
 type PendingUploadMap = Record<string, File | null>;
-type PreviewSection = "header" | "hero" | "features" | "launch-flow" | "footer" | null;
 
 function Panel({ title, description, children }: { title: string; description?: string; children: ReactNode }) {
   return (
@@ -287,95 +286,114 @@ const emptyDownloadCard = (): CmsDownloadCard => ({
 
 function RolePageEditor({
   title,
+  previewPage,
   page,
   pendingFile,
   onChange,
   onFileChange,
+  onPreviewTarget,
 }: {
   title: string;
+  previewPage: PreviewTarget["page"];
   page: CmsRolePage;
   pendingFile: File | null;
   onChange: (page: CmsRolePage) => void;
   onFileChange: (file: File | null) => void;
+  onPreviewTarget: (target: PreviewTarget) => void;
 }) {
   return (
     <div className="space-y-5 rounded-[1.5rem] border border-slate-200 bg-slate-50 p-4">
       <h3 className="text-base font-black text-slate-900">{title}</h3>
-      <Field label="Hero Badge" value={page.hero.badge} onChange={(value) => onChange({ ...page, hero: { ...page.hero, badge: value } })} />
-      <Field label="Hero 標題" value={page.hero.title} onChange={(value) => onChange({ ...page, hero: { ...page.hero, title: value } })} multiline />
-      <Field label="Hero 說明" value={page.hero.description} onChange={(value) => onChange({ ...page, hero: { ...page.hero, description: value } })} multiline />
-      <div className="grid gap-4 md:grid-cols-2">
-        <Field label="主要按鈕文字" value={page.hero.primaryLabel} onChange={(value) => onChange({ ...page, hero: { ...page.hero, primaryLabel: value } })} />
-        <Field label="主要按鈕連結" value={page.hero.primaryHref} onChange={(value) => onChange({ ...page, hero: { ...page.hero, primaryHref: value } })} />
-        <Field label="次要按鈕文字" value={page.hero.secondaryLabel} onChange={(value) => onChange({ ...page, hero: { ...page.hero, secondaryLabel: value } })} />
-        <Field label="次要按鈕連結" value={page.hero.secondaryHref} onChange={(value) => onChange({ ...page, hero: { ...page.hero, secondaryHref: value } })} />
-      </div>
-      <Field label="右側摘要標題" value={page.hero.asideTitle} onChange={(value) => onChange({ ...page, hero: { ...page.hero, asideTitle: value } })} />
-      <AdminImageUpload
-        label="Hero 圖片"
-        image={page.hero.heroImage}
-        pendingFile={pendingFile}
-        onChange={(heroImage) => onChange({ ...page, hero: { ...page.hero, heroImage } })}
-        onFileChange={onFileChange}
-        recommendation={imageSuggestionMap.hero}
-      />
-      <TextStyleEditor label="Hero Badge 樣式" style={page.hero.badgeStyle} onChange={(badgeStyle) => onChange({ ...page, hero: { ...page.hero, badgeStyle } })} />
-      <TextStyleEditor label="Hero 標題樣式" style={page.hero.titleStyle} onChange={(titleStyle) => onChange({ ...page, hero: { ...page.hero, titleStyle } })} />
-      <TextStyleEditor label="Hero 說明樣式" style={page.hero.descriptionStyle} onChange={(descriptionStyle) => onChange({ ...page, hero: { ...page.hero, descriptionStyle } })} />
-      <TextStyleEditor label="摘要標題樣式" style={page.hero.asideTitleStyle} onChange={(asideTitleStyle) => onChange({ ...page, hero: { ...page.hero, asideTitleStyle } })} />
-      <BlockStyleEditor label="Hero 區塊樣式" style={page.hero.sectionStyle} onChange={(sectionStyle) => onChange({ ...page, hero: { ...page.hero, sectionStyle } })} />
-      <AdminArrayEditor
-        label="Hero 統計"
-        items={page.hero.stats}
-        createItem={emptyStat}
-        onChange={(stats) => onChange({ ...page, hero: { ...page.hero, stats } })}
-        renderItem={(item, index, helpers) => (
-          <div className="grid gap-4 md:grid-cols-2">
-            <Field label={`統計 ${index + 1} 標題`} value={item.label} onChange={(value) => helpers.update({ ...item, label: value })} />
-            <Field label={`統計 ${index + 1} 內容`} value={item.value} onChange={(value) => helpers.update({ ...item, value })} />
-          </div>
-        )}
-      />
-      <AdminArrayEditor
-        label="內容區塊"
-        items={page.sections}
-        createItem={emptySection}
-        onChange={(sections) => onChange({ ...page, sections })}
-        renderItem={(section, index, helpers) => (
-          <div className="space-y-4">
+      <div
+        className="space-y-5"
+        onMouseEnter={() => onPreviewTarget({ page: previewPage, section: "hero" })}
+        onFocusCapture={() => onPreviewTarget({ page: previewPage, section: "hero" })}
+      >
+        <Field label="Hero Badge" value={page.hero.badge} onChange={(value) => onChange({ ...page, hero: { ...page.hero, badge: value } })} />
+        <Field label="Hero 標題" value={page.hero.title} onChange={(value) => onChange({ ...page, hero: { ...page.hero, title: value } })} multiline />
+        <Field label="Hero 說明" value={page.hero.description} onChange={(value) => onChange({ ...page, hero: { ...page.hero, description: value } })} multiline />
+        <div className="grid gap-4 md:grid-cols-2">
+          <Field label="主要按鈕文字" value={page.hero.primaryLabel} onChange={(value) => onChange({ ...page, hero: { ...page.hero, primaryLabel: value } })} />
+          <Field label="主要按鈕連結" value={page.hero.primaryHref} onChange={(value) => onChange({ ...page, hero: { ...page.hero, primaryHref: value } })} />
+          <Field label="次要按鈕文字" value={page.hero.secondaryLabel} onChange={(value) => onChange({ ...page, hero: { ...page.hero, secondaryLabel: value } })} />
+          <Field label="次要按鈕連結" value={page.hero.secondaryHref} onChange={(value) => onChange({ ...page, hero: { ...page.hero, secondaryHref: value } })} />
+        </div>
+        <Field label="右側摘要標題" value={page.hero.asideTitle} onChange={(value) => onChange({ ...page, hero: { ...page.hero, asideTitle: value } })} />
+        <AdminImageUpload
+          label="Hero 圖片"
+          image={page.hero.heroImage}
+          pendingFile={pendingFile}
+          onChange={(heroImage) => onChange({ ...page, hero: { ...page.hero, heroImage } })}
+          onFileChange={onFileChange}
+          recommendation={imageSuggestionMap.hero}
+        />
+        <TextStyleEditor label="Hero Badge 樣式" style={page.hero.badgeStyle} onChange={(badgeStyle) => onChange({ ...page, hero: { ...page.hero, badgeStyle } })} />
+        <TextStyleEditor label="Hero 標題樣式" style={page.hero.titleStyle} onChange={(titleStyle) => onChange({ ...page, hero: { ...page.hero, titleStyle } })} />
+        <TextStyleEditor label="Hero 說明樣式" style={page.hero.descriptionStyle} onChange={(descriptionStyle) => onChange({ ...page, hero: { ...page.hero, descriptionStyle } })} />
+        <TextStyleEditor label="摘要標題樣式" style={page.hero.asideTitleStyle} onChange={(asideTitleStyle) => onChange({ ...page, hero: { ...page.hero, asideTitleStyle } })} />
+        <BlockStyleEditor label="Hero 區塊樣式" style={page.hero.sectionStyle} onChange={(sectionStyle) => onChange({ ...page, hero: { ...page.hero, sectionStyle } })} />
+        <AdminArrayEditor
+          label="Hero 統計"
+          items={page.hero.stats}
+          createItem={emptyStat}
+          onChange={(stats) => onChange({ ...page, hero: { ...page.hero, stats } })}
+          renderItem={(item, index, helpers) => (
             <div className="grid gap-4 md:grid-cols-2">
-              <Field label="Section ID" value={section.id} onChange={(value) => helpers.update({ ...section, id: value })} />
-              <Field label="Badge" value={section.badge} onChange={(value) => helpers.update({ ...section, badge: value })} />
+              <Field label={`統計 ${index + 1} 標題`} value={item.label} onChange={(value) => helpers.update({ ...item, label: value })} />
+              <Field label={`統計 ${index + 1} 內容`} value={item.value} onChange={(value) => helpers.update({ ...item, value })} />
             </div>
-            <Field label="標題" value={section.title} onChange={(value) => helpers.update({ ...section, title: value })} />
-            <Field label="說明" value={section.description} onChange={(value) => helpers.update({ ...section, description: value })} multiline />
-            <TextStyleEditor label="Section Badge 樣式" style={section.badgeStyle} onChange={(badgeStyle) => helpers.update({ ...section, badgeStyle })} />
-            <TextStyleEditor label="Section 標題樣式" style={section.titleStyle} onChange={(titleStyle) => helpers.update({ ...section, titleStyle })} />
-            <TextStyleEditor label="Section 說明樣式" style={section.descriptionStyle} onChange={(descriptionStyle) => helpers.update({ ...section, descriptionStyle })} />
-            <BlockStyleEditor label="Section 區塊樣式" style={section.blockStyle} onChange={(blockStyle) => helpers.update({ ...section, blockStyle })} />
-            <AdminArrayEditor
-              label="卡片"
-              items={section.items}
-              createItem={emptySectionItem}
-              onChange={(items) => helpers.update({ ...section, items })}
-              renderItem={(item, itemIndex, itemHelpers) => (
-                <div className="space-y-4">
-                  <div className="grid gap-4 md:grid-cols-2">
-                    <Field label="Eyebrow" value={item.eyebrow} onChange={(value) => itemHelpers.update({ ...item, eyebrow: value })} />
-                    <Field label="Icon" value={item.icon ?? ""} onChange={(value) => itemHelpers.update({ ...item, icon: value })} />
+          )}
+        />
+      </div>
+      <div
+        onMouseEnter={() => onPreviewTarget({ page: previewPage, section: page.sections[0]?.id ?? "hero" })}
+        onFocusCapture={() => onPreviewTarget({ page: previewPage, section: page.sections[0]?.id ?? "hero" })}
+      >
+        <AdminArrayEditor
+          label="內容區塊"
+          items={page.sections}
+          createItem={emptySection}
+          onChange={(sections) => onChange({ ...page, sections })}
+          renderItem={(section, index, helpers) => (
+            <div
+              className="space-y-4"
+              onMouseEnter={() => onPreviewTarget({ page: previewPage, section: section.id || `section-${index + 1}` })}
+              onFocusCapture={() => onPreviewTarget({ page: previewPage, section: section.id || `section-${index + 1}` })}
+            >
+              <div className="grid gap-4 md:grid-cols-2">
+                <Field label="Section ID" value={section.id} onChange={(value) => helpers.update({ ...section, id: value })} />
+                <Field label="Badge" value={section.badge} onChange={(value) => helpers.update({ ...section, badge: value })} />
+              </div>
+              <Field label="標題" value={section.title} onChange={(value) => helpers.update({ ...section, title: value })} />
+              <Field label="說明" value={section.description} onChange={(value) => helpers.update({ ...section, description: value })} multiline />
+              <TextStyleEditor label="Section Badge 樣式" style={section.badgeStyle} onChange={(badgeStyle) => helpers.update({ ...section, badgeStyle })} />
+              <TextStyleEditor label="Section 標題樣式" style={section.titleStyle} onChange={(titleStyle) => helpers.update({ ...section, titleStyle })} />
+              <TextStyleEditor label="Section 說明樣式" style={section.descriptionStyle} onChange={(descriptionStyle) => helpers.update({ ...section, descriptionStyle })} />
+              <BlockStyleEditor label="Section 區塊樣式" style={section.blockStyle} onChange={(blockStyle) => helpers.update({ ...section, blockStyle })} />
+              <AdminArrayEditor
+                label="卡片"
+                items={section.items}
+                createItem={emptySectionItem}
+                onChange={(items) => helpers.update({ ...section, items })}
+                renderItem={(item, itemIndex, itemHelpers) => (
+                  <div className="space-y-4">
+                    <div className="grid gap-4 md:grid-cols-2">
+                      <Field label="Eyebrow" value={item.eyebrow} onChange={(value) => itemHelpers.update({ ...item, eyebrow: value })} />
+                      <Field label="Icon" value={item.icon ?? ""} onChange={(value) => itemHelpers.update({ ...item, icon: value })} />
+                    </div>
+                    <Field label="標題" value={item.title} onChange={(value) => itemHelpers.update({ ...item, title: value })} />
+                    <Field label="說明" value={item.description} onChange={(value) => itemHelpers.update({ ...item, description: value })} multiline />
+                    <TextStyleEditor label={`卡片 ${itemIndex + 1} Eyebrow 樣式`} style={item.eyebrowStyle} onChange={(eyebrowStyle) => itemHelpers.update({ ...item, eyebrowStyle })} />
+                    <TextStyleEditor label={`卡片 ${itemIndex + 1} 標題樣式`} style={item.titleStyle} onChange={(titleStyle) => itemHelpers.update({ ...item, titleStyle })} />
+                    <TextStyleEditor label={`卡片 ${itemIndex + 1} 說明樣式`} style={item.descriptionStyle} onChange={(descriptionStyle) => itemHelpers.update({ ...item, descriptionStyle })} />
+                    <BlockStyleEditor label={`卡片 ${itemIndex + 1} 區塊樣式`} style={item.blockStyle} onChange={(blockStyle) => itemHelpers.update({ ...item, blockStyle })} />
                   </div>
-                  <Field label="標題" value={item.title} onChange={(value) => itemHelpers.update({ ...item, title: value })} />
-                  <Field label="說明" value={item.description} onChange={(value) => itemHelpers.update({ ...item, description: value })} multiline />
-                  <TextStyleEditor label={`卡片 ${itemIndex + 1} Eyebrow 樣式`} style={item.eyebrowStyle} onChange={(eyebrowStyle) => itemHelpers.update({ ...item, eyebrowStyle })} />
-                  <TextStyleEditor label={`卡片 ${itemIndex + 1} 標題樣式`} style={item.titleStyle} onChange={(titleStyle) => itemHelpers.update({ ...item, titleStyle })} />
-                  <TextStyleEditor label={`卡片 ${itemIndex + 1} 說明樣式`} style={item.descriptionStyle} onChange={(descriptionStyle) => itemHelpers.update({ ...item, descriptionStyle })} />
-                  <BlockStyleEditor label={`卡片 ${itemIndex + 1} 區塊樣式`} style={item.blockStyle} onChange={(blockStyle) => itemHelpers.update({ ...item, blockStyle })} />
-                </div>
-              )}
-            />
-          </div>
-        )}
-      />
+                )}
+              />
+            </div>
+          )}
+        />
+      </div>
       <SeoEditor seo={page.seo} onChange={(seo) => onChange({ ...page, seo })} />
     </div>
   );
@@ -390,16 +408,19 @@ export function AdminDashboard({ initialData }: AdminDashboardProps) {
   const [isSaving, setIsSaving] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [previewSection, setPreviewSection] = useState<PreviewSection>("hero");
+  const [uploadingKeys, setUploadingKeys] = useState<Record<string, boolean>>({});
+  const [previewTarget, setPreviewTarget] = useState<PreviewTarget>({ page: "home", section: "hero" });
   const [previewViewport, setPreviewViewport] = useState<"desktop" | "mobile">("desktop");
 
   useEffect(() => {
     setData(initialData);
     setPendingUploads({});
+    setUploadingKeys({});
     setSavedSnapshot(JSON.stringify(initialData));
   }, [initialData]);
 
   const hasPendingUploads = Object.keys(pendingUploads).length > 0;
+  const hasActiveUploads = Object.keys(uploadingKeys).length > 0;
   const isDirty = JSON.stringify(data) !== savedSnapshot || hasPendingUploads;
 
   function setPendingUpload(key: string, file: File | null) {
@@ -418,6 +439,22 @@ export function AdminDashboard({ initialData }: AdminDashboardProps) {
     });
   }
 
+  function setUploading(key: string, active: boolean) {
+    setUploadingKeys((current) => {
+      if (!active) {
+        if (!(key in current)) {
+          return current;
+        }
+
+        const next = { ...current };
+        delete next[key];
+        return next;
+      }
+
+      return { ...current, [key]: true };
+    });
+  }
+
   async function uploadImage(file: File, uploadKey: string) {
     const formData = new FormData();
     formData.append("file", file);
@@ -433,40 +470,44 @@ export function AdminDashboard({ initialData }: AdminDashboardProps) {
     return result.url;
   }
 
+  async function uploadImageAndUpdate(
+    key: string,
+    uploadKey: string,
+    applyUrl: (url: string) => void,
+    file: File | null,
+  ) {
+    if (!file) {
+      setPendingUpload(key, null);
+      return;
+    }
+
+    setPendingUpload(key, file);
+    setUploading(key, true);
+    setError(null);
+    setMessage(null);
+
+    try {
+      const url = await uploadImage(file, uploadKey);
+      applyUrl(url);
+      setPendingUpload(key, null);
+      setMessage("圖片已上傳到 Blob，請按儲存寫入 CMS JSON。");
+    } catch (uploadError) {
+      setError(uploadError instanceof Error ? uploadError.message : "圖片上傳失敗");
+    } finally {
+      setUploading(key, false);
+    }
+  }
+
   async function prepareDataForSave() {
-    const nextData: CmsData = structuredClone(data);
-
-    if (pendingUploads["site.logo"]) {
-      nextData.site.logo.url = await uploadImage(pendingUploads["site.logo"], "shared/logo");
-    }
-
-    if (pendingUploads["home.hero"]) {
-      nextData.home.hero.heroImage.url = await uploadImage(pendingUploads["home.hero"], "home/hero");
-    }
-
-    if (pendingUploads["consumer.hero"]) {
-      nextData.consumer.hero.heroImage.url = await uploadImage(pendingUploads["consumer.hero"], "consumer/hero");
-    }
-
-    if (pendingUploads["courier.hero"]) {
-      nextData.courier.hero.heroImage.url = await uploadImage(pendingUploads["courier.hero"], "courier/hero");
-    }
-
-    if (pendingUploads["merchant.hero"]) {
-      nextData.merchant.hero.heroImage.url = await uploadImage(pendingUploads["merchant.hero"], "merchant/hero");
-    }
-
-    for (const [index, card] of nextData.home.downloadCards.entries()) {
-      const pendingFile = pendingUploads[`home.downloadCards.${index}.image`];
-      if (pendingFile) {
-        card.image.url = await uploadImage(pendingFile, `home/${card.key}`);
-      }
-    }
-
-    return nextData;
+    return structuredClone(data);
   }
 
   async function handleSave() {
+    if (hasActiveUploads) {
+      setError("圖片仍在上傳中，請等待完成後再儲存。");
+      return;
+    }
+
     setIsSaving(true);
     setMessage(null);
     setError(null);
@@ -499,6 +540,7 @@ export function AdminDashboard({ initialData }: AdminDashboardProps) {
   return (
     <div className="grid gap-6 xl:grid-cols-[minmax(0,1.2fr)_420px]">
       <div className="space-y-6">
+        <div onMouseEnter={() => setPreviewTarget({ page: "home", section: "footer" })} onFocusCapture={() => setPreviewTarget({ page: "home", section: "footer" })}>
         <Panel title="網站設定" description="全站共用品牌資料、網址、Footer 與預設 SEO 圖片。">
           <div className="grid gap-4 md:grid-cols-2">
             <Field label="網站名稱" value={data.site.siteName} onChange={(value) => setData({ ...data, site: { ...data.site, siteName: value } })} />
@@ -506,7 +548,7 @@ export function AdminDashboard({ initialData }: AdminDashboardProps) {
             <Field label="組織名稱" value={data.site.organizationName} onChange={(value) => setData({ ...data, site: { ...data.site, organizationName: value } })} />
             <Field label="預設 SEO 圖片" value={data.site.defaultSeoImageUrl} onChange={(value) => setData({ ...data, site: { ...data.site, defaultSeoImageUrl: value } })} />
           </div>
-          <AdminImageUpload label="品牌 Logo" image={data.site.logo} pendingFile={pendingUploads["site.logo"] ?? null} onChange={(logo) => setData({ ...data, site: { ...data.site, logo } })} onFileChange={(file) => setPendingUpload("site.logo", file)} recommendation={imageSuggestionMap.logo} />
+          <AdminImageUpload label="品牌 Logo" image={data.site.logo} pendingFile={pendingUploads["site.logo"] ?? null} onChange={(logo) => setData({ ...data, site: { ...data.site, logo } })} onFileChange={(file) => uploadImageAndUpdate("site.logo", "shared/logo", (url) => setData((current) => ({ ...current, site: { ...current.site, logo: { ...current.site.logo, url } } })), file)} recommendation={imageSuggestionMap.logo} isUploading={Boolean(uploadingKeys["site.logo"])} />
           <Field label="Footer 標題" value={data.site.footerTitle} onChange={(value) => setData({ ...data, site: { ...data.site, footerTitle: value } })} multiline />
           <Field label="Footer 說明" value={data.site.footerDescription} onChange={(value) => setData({ ...data, site: { ...data.site, footerDescription: value } })} multiline />
           <TextStyleEditor label="Footer 標題樣式" style={data.site.footerTitleStyle} onChange={(footerTitleStyle) => setData({ ...data, site: { ...data.site, footerTitleStyle } })} />
@@ -525,7 +567,9 @@ export function AdminDashboard({ initialData }: AdminDashboardProps) {
             )}
           />
         </Panel>
+        </div>
 
+        <div onMouseEnter={() => setPreviewTarget({ page: "home", section: "header" })} onFocusCapture={() => setPreviewTarget({ page: "home", section: "header" })}>
         <Panel title="首頁 Header" description="導覽列、副標與右上 CTA。">
           <Field label="Header 副標" value={data.home.header.subtitle} onChange={(value) => setData({ ...data, home: { ...data.home, header: { ...data.home.header, subtitle: value } } })} />
           <TextStyleEditor label="Header 副標樣式" style={data.home.header.subtitleStyle} onChange={(subtitleStyle) => setData({ ...data, home: { ...data.home, header: { ...data.home.header, subtitleStyle } } })} />
@@ -536,7 +580,9 @@ export function AdminDashboard({ initialData }: AdminDashboardProps) {
             <Field label="Header 右上 CTA 連結" value={data.home.header.cta.href} onChange={(value) => setData({ ...data, home: { ...data.home, header: { ...data.home.header, cta: { ...data.home.header.cta, href: value } } } })} />
           </div>
         </Panel>
+        </div>
 
+        <div onMouseEnter={() => setPreviewTarget({ page: "home", section: "hero" })} onFocusCapture={() => setPreviewTarget({ page: "home", section: "hero" })}>
         <Panel title="首頁 Hero" description="主視覺文案、Badge、按鈕與圖片。">
           <Field label="Hero Badge" value={data.home.hero.badge} onChange={(value) => setData({ ...data, home: { ...data.home, hero: { ...data.home.hero, badge: value } } })} />
           <Field label="Hero 標題" value={data.home.hero.title} onChange={(value) => setData({ ...data, home: { ...data.home, hero: { ...data.home.hero, title: value } } })} multiline />
@@ -551,7 +597,7 @@ export function AdminDashboard({ initialData }: AdminDashboardProps) {
             <Field label="裝置 Badge 文案" value={data.home.hero.deviceBadge} onChange={(value) => setData({ ...data, home: { ...data.home, hero: { ...data.home.hero, deviceBadge: value } } })} />
             <Field label="第二顆 Badge 文案" value={data.home.hero.secondaryBadge} onChange={(value) => setData({ ...data, home: { ...data.home, hero: { ...data.home.hero, secondaryBadge: value } } })} />
           </div>
-          <AdminImageUpload label="Hero 圖片" image={data.home.hero.heroImage} pendingFile={pendingUploads["home.hero"] ?? null} onChange={(heroImage) => setData({ ...data, home: { ...data.home, hero: { ...data.home.hero, heroImage } } })} onFileChange={(file) => setPendingUpload("home.hero", file)} recommendation={imageSuggestionMap.hero} />
+          <AdminImageUpload label="Hero 圖片" image={data.home.hero.heroImage} pendingFile={pendingUploads["home.hero"] ?? null} onChange={(heroImage) => setData({ ...data, home: { ...data.home, hero: { ...data.home.hero, heroImage } } })} onFileChange={(file) => uploadImageAndUpdate("home.hero", "home/hero", (url) => setData((current) => ({ ...current, home: { ...current.home, hero: { ...current.home.hero, heroImage: { ...current.home.hero.heroImage, url } } } })), file)} recommendation={imageSuggestionMap.hero} isUploading={Boolean(uploadingKeys["home.hero"])} />
           <TextStyleEditor label="Hero Badge 樣式" style={data.home.hero.badgeStyle} onChange={(badgeStyle) => setData({ ...data, home: { ...data.home, hero: { ...data.home.hero, badgeStyle } } })} />
           <TextStyleEditor label="Hero 標題樣式" style={data.home.hero.titleStyle} onChange={(titleStyle) => setData({ ...data, home: { ...data.home, hero: { ...data.home.hero, titleStyle } } })} />
           <TextStyleEditor label="Hero 說明樣式" style={data.home.hero.subtitleStyle} onChange={(subtitleStyle) => setData({ ...data, home: { ...data.home, hero: { ...data.home.hero, subtitleStyle } } })} />
@@ -559,7 +605,9 @@ export function AdminDashboard({ initialData }: AdminDashboardProps) {
           <TextStyleEditor label="第二顆 Badge 樣式" style={data.home.hero.secondaryBadgeStyle} onChange={(secondaryBadgeStyle) => setData({ ...data, home: { ...data.home, hero: { ...data.home.hero, secondaryBadgeStyle } } })} />
           <BlockStyleEditor label="Hero 區塊樣式" style={data.home.hero.sectionStyle} onChange={(sectionStyle) => setData({ ...data, home: { ...data.home, hero: { ...data.home.hero, sectionStyle } } })} />
         </Panel>
+        </div>
 
+        <div onMouseEnter={() => setPreviewTarget({ page: "home", section: "features" })} onFocusCapture={() => setPreviewTarget({ page: "home", section: "features" })}>
         <Panel title="首頁特色卡片" description="Hero 右側 feature cards。">
           <BlockStyleEditor label="特色卡片容器樣式" style={data.home.features.sectionStyle} onChange={(sectionStyle) => setData({ ...data, home: { ...data.home, features: { ...data.home.features, sectionStyle } } })} />
           <AdminArrayEditor
@@ -580,7 +628,9 @@ export function AdminDashboard({ initialData }: AdminDashboardProps) {
             )}
           />
         </Panel>
+        </div>
 
+        <div onMouseEnter={() => setPreviewTarget({ page: "home", section: "features" })} onFocusCapture={() => setPreviewTarget({ page: "home", section: "features" })}>
         <Panel title="首頁下載卡" description="三個 App 下載卡與圖片。">
           <AdminArrayEditor
             label="下載卡"
@@ -600,7 +650,7 @@ export function AdminDashboard({ initialData }: AdminDashboardProps) {
                   <Field label="iOS URL" value={card.iosUrl} onChange={(value) => helpers.update({ ...card, iosUrl: value })} />
                   <Field label="Android URL" value={card.androidUrl} onChange={(value) => helpers.update({ ...card, androidUrl: value })} />
                 </div>
-                <AdminImageUpload label="卡片圖片" image={card.image} pendingFile={pendingUploads[`home.downloadCards.${index}.image`] ?? null} onChange={(image) => helpers.update({ ...card, image })} onFileChange={(file) => setPendingUpload(`home.downloadCards.${index}.image`, file)} recommendation={imageSuggestionMap.card} />
+                <AdminImageUpload label="卡片圖片" image={card.image} pendingFile={pendingUploads[`home.downloadCards.${index}.image`] ?? null} onChange={(image) => helpers.update({ ...card, image })} onFileChange={(file) => uploadImageAndUpdate(`home.downloadCards.${index}.image`, `home/${card.key}`, (url) => setData((current) => ({ ...current, home: { ...current.home, downloadCards: current.home.downloadCards.map((currentCard, currentIndex) => currentIndex === index ? { ...currentCard, image: { ...currentCard.image, url } } : currentCard) } })), file)} recommendation={imageSuggestionMap.card} isUploading={Boolean(uploadingKeys[`home.downloadCards.${index}.image`])} />
                 <TextStyleEditor label="Eyebrow 樣式" style={card.eyebrowStyle} onChange={(eyebrowStyle) => helpers.update({ ...card, eyebrowStyle })} />
                 <TextStyleEditor label="標題樣式" style={card.titleStyle} onChange={(titleStyle) => helpers.update({ ...card, titleStyle })} />
                 <TextStyleEditor label="受眾樣式" style={card.audienceStyle} onChange={(audienceStyle) => helpers.update({ ...card, audienceStyle })} />
@@ -619,7 +669,9 @@ export function AdminDashboard({ initialData }: AdminDashboardProps) {
             )}
           />
         </Panel>
+        </div>
 
+        <div onMouseEnter={() => setPreviewTarget({ page: "home", section: "launch-flow" })} onFocusCapture={() => setPreviewTarget({ page: "home", section: "launch-flow" })}>
         <Panel title="首頁 Launch Flow" description="左側介紹與右側步驟卡。">
           <Field label="左側 Eyebrow" value={data.home.launchFlow.eyebrow} onChange={(value) => setData({ ...data, home: { ...data.home, launchFlow: { ...data.home.launchFlow, eyebrow: value } } })} />
           <Field label="左側標題" value={data.home.launchFlow.title} onChange={(value) => setData({ ...data, home: { ...data.home, launchFlow: { ...data.home.launchFlow, title: value } } })} multiline />
@@ -649,17 +701,18 @@ export function AdminDashboard({ initialData }: AdminDashboardProps) {
             )}
           />
         </Panel>
+        </div>
 
         <Panel title="消費者頁" description="消費者頁 Hero、內容區塊與 SEO。">
-          <RolePageEditor title="消費者頁內容" page={data.consumer} pendingFile={pendingUploads["consumer.hero"] ?? null} onChange={(consumer) => setData({ ...data, consumer })} onFileChange={(file) => setPendingUpload("consumer.hero", file)} />
+          <RolePageEditor title="消費者頁內容" previewPage="consumer" page={data.consumer} pendingFile={pendingUploads["consumer.hero"] ?? null} onChange={(consumer) => setData({ ...data, consumer })} onFileChange={(file) => uploadImageAndUpdate("consumer.hero", "consumer/hero", (url) => setData((current) => ({ ...current, consumer: { ...current.consumer, hero: { ...current.consumer.hero, heroImage: { ...current.consumer.hero.heroImage, url } } } })), file)} onPreviewTarget={setPreviewTarget} />
         </Panel>
 
         <Panel title="騎手頁" description="騎手頁 Hero、內容區塊與 SEO。">
-          <RolePageEditor title="騎手頁內容" page={data.courier} pendingFile={pendingUploads["courier.hero"] ?? null} onChange={(courier) => setData({ ...data, courier })} onFileChange={(file) => setPendingUpload("courier.hero", file)} />
+          <RolePageEditor title="騎手頁內容" previewPage="courier" page={data.courier} pendingFile={pendingUploads["courier.hero"] ?? null} onChange={(courier) => setData({ ...data, courier })} onFileChange={(file) => uploadImageAndUpdate("courier.hero", "courier/hero", (url) => setData((current) => ({ ...current, courier: { ...current.courier, hero: { ...current.courier.hero, heroImage: { ...current.courier.hero.heroImage, url } } } })), file)} onPreviewTarget={setPreviewTarget} />
         </Panel>
 
         <Panel title="店家頁" description="店家頁 Hero、內容區塊與 SEO。">
-          <RolePageEditor title="店家頁內容" page={data.merchant} pendingFile={pendingUploads["merchant.hero"] ?? null} onChange={(merchant) => setData({ ...data, merchant })} onFileChange={(file) => setPendingUpload("merchant.hero", file)} />
+          <RolePageEditor title="店家頁內容" previewPage="merchant" page={data.merchant} pendingFile={pendingUploads["merchant.hero"] ?? null} onChange={(merchant) => setData({ ...data, merchant })} onFileChange={(file) => uploadImageAndUpdate("merchant.hero", "merchant/hero", (url) => setData((current) => ({ ...current, merchant: { ...current.merchant, hero: { ...current.merchant.hero, heroImage: { ...current.merchant.hero.heroImage, url } } } })), file)} onPreviewTarget={setPreviewTarget} />
         </Panel>
 
         <Panel title="SEO / GEO 設定" description="首頁與三個角色頁的 metadata 基礎欄位。">
@@ -683,20 +736,20 @@ export function AdminDashboard({ initialData }: AdminDashboardProps) {
           </div>
         </Panel>
 
-        <AdminSaveBar isSaving={isSaving || isPending} isDirty={isDirty} message={message} error={error} onSave={handleSave} />
+        <AdminSaveBar isSaving={isSaving || isPending || hasActiveUploads} isDirty={isDirty} message={message} error={error} onSave={handleSave} />
       </div>
 
       <aside className="xl:sticky xl:top-6 xl:h-[calc(100vh-3rem)]">
         <Panel title="即時預覽" description="使用與前台相同元件，支援桌機 / 手機切換與區塊定位。">
           <div className="flex flex-wrap gap-2">
             {([
-              ["header", "Header"],
-              ["hero", "Hero"],
-              ["features", "Features"],
-              ["launch-flow", "Launch Flow"],
-              ["footer", "Footer"],
+              [{ page: "home", section: "header" }, "Header"],
+              [{ page: "home", section: "hero" }, "Hero"],
+              [{ page: "home", section: "features" }, "Features"],
+              [{ page: "home", section: "launch-flow" }, "Launch Flow"],
+              [{ page: "home", section: "footer" }, "Footer"],
             ] as const).map(([key, label]) => (
-              <button key={key} type="button" onClick={() => setPreviewSection(key)} className={`rounded-full px-3 py-2 text-xs font-bold ${previewSection === key ? "bg-blue-600 text-white" : "bg-slate-100 text-slate-700"}`}>
+              <button key={`${key.page}-${key.section}`} type="button" onClick={() => setPreviewTarget(key)} className={`rounded-full px-3 py-2 text-xs font-bold ${previewTarget.page === key.page && previewTarget.section === key.section ? "bg-blue-600 text-white" : "bg-slate-100 text-slate-700"}`}>
                 {label}
               </button>
             ))}
@@ -705,8 +758,8 @@ export function AdminDashboard({ initialData }: AdminDashboardProps) {
             <button type="button" onClick={() => setPreviewViewport("desktop")} className={`rounded-full px-3 py-2 text-xs font-bold ${previewViewport === "desktop" ? "bg-slate-900 text-white" : "bg-slate-100 text-slate-700"}`}>桌機</button>
             <button type="button" onClick={() => setPreviewViewport("mobile")} className={`rounded-full px-3 py-2 text-xs font-bold ${previewViewport === "mobile" ? "bg-slate-900 text-white" : "bg-slate-100 text-slate-700"}`}>手機</button>
           </div>
-          <div className="h-[calc(100vh-15rem)] overflow-hidden rounded-[2rem] bg-slate-100 p-3">
-            <SiteHome site={data} embedded focusSection={previewSection} previewViewport={previewViewport} />
+          <div className="rounded-[2rem] bg-slate-100">
+            <AdminLivePreview site={data} target={previewTarget} viewport={previewViewport} />
           </div>
         </Panel>
       </aside>

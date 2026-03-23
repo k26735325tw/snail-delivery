@@ -8,11 +8,12 @@ import { getBlockStyle, getImageHeight, getImageStyle, getTextStyle } from "@/li
 
 type PageHeroProps = {
   hero: CmsRoleHero;
+  highlighted?: boolean;
 };
 
-export function PageHero({ hero }: PageHeroProps) {
+export function PageHero({ hero, highlighted = false }: PageHeroProps) {
   return (
-    <section className="hero-grid overflow-hidden">
+    <section className={`hero-grid overflow-hidden transition-shadow ${highlighted ? "ring-4 ring-blue/25" : ""}`} data-preview-section="hero">
       <div className="shell grid gap-10 pb-20 pt-14 md:grid-cols-[1.04fr_0.96fr] md:items-center md:pb-24 md:pt-20">
         <FadeIn className="space-y-7">
           <span className="pill bg-yellow text-ink" style={getTextStyle(hero.badgeStyle)}>

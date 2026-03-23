@@ -7,17 +7,19 @@ import { getBlockStyle, getImageStyle, getTextStyle } from "@/lib/cms-style";
 type SiteHeaderProps = {
   site: CmsData;
   embedded?: boolean;
+  highlighted?: boolean;
 };
 
-export function SiteHeader({ site, embedded = false }: SiteHeaderProps) {
+export function SiteHeader({ site, embedded = false, highlighted = false }: SiteHeaderProps) {
   const blockStyle = getBlockStyle(site.home.header.blockStyle);
 
   return (
     <header className={embedded ? "top-0 z-20" : "sticky top-0 z-50"}>
       <div className="shell pt-5">
         <div
-          className="flex flex-wrap items-center justify-between gap-4 border backdrop-blur"
+          className={`flex flex-wrap items-center justify-between gap-4 border backdrop-blur transition-shadow ${highlighted ? "ring-4 ring-blue/25 shadow-[0_24px_70px_rgba(27,111,255,0.18)]" : ""}`}
           style={blockStyle}
+          data-preview-section="header"
         >
           <Link href="/" className="flex min-w-0 items-center gap-3">
             <div className="relative h-11 w-11 shrink-0 overflow-hidden rounded-full bg-blue/10">

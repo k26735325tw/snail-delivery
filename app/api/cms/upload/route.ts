@@ -53,9 +53,13 @@ export async function POST(request: Request) {
       allowOverwrite: shouldOverwrite,
     });
 
+    const version = Date.now();
+
     return NextResponse.json({
       success: true,
-      url: blob.url,
+      url: `${blob.url}${blob.url.includes("?") ? "&" : "?"}v=${version}`,
+      rawUrl: blob.url,
+      version,
     });
   } catch (error) {
     return NextResponse.json(

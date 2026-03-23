@@ -16,6 +16,7 @@ type AdminImageUploadProps = {
     ratio: string;
     format: string;
   };
+  isUploading?: boolean;
 };
 
 export function AdminImageUpload({
@@ -25,6 +26,7 @@ export function AdminImageUpload({
   onChange,
   onFileChange,
   recommendation,
+  isUploading = false,
 }: AdminImageUploadProps) {
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -80,7 +82,7 @@ export function AdminImageUpload({
           </p>
         </div>
         <label className="cursor-pointer rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 transition hover:border-blue-500 hover:text-blue-600">
-          {pendingFile ? "更換待上傳圖片" : "選擇圖片"}
+          {isUploading ? "上傳中..." : pendingFile ? "更換待上傳圖片" : "選擇圖片"}
           <input
             ref={inputRef}
             type="file"
@@ -196,7 +198,9 @@ export function AdminImageUpload({
         </label>
       </div>
 
-      {pendingFile ? (
+      {isUploading ? (
+        <p className="text-xs font-medium text-blue-700">圖片已上傳到 Blob，記得按儲存寫入 CMS JSON。</p>
+      ) : pendingFile ? (
         <p className="text-xs font-medium text-amber-700">
           已選擇新圖片：{pendingFile.name}，按下儲存後會上傳至 Blob。
         </p>

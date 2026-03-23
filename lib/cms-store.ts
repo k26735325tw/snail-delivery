@@ -22,8 +22,22 @@ import { defaultBlockStyle, defaultImageAsset, defaultTextStyle, isValidColorVal
 
 const CMS_CONTENT_PATH = "cms/site-content.json";
 
+function looksCorruptedString(value: string) {
+  return value.includes("�") || /[ÃÅÆÇÐÑØÞßæçðñøþ]/.test(value);
+}
+
 function normalizeString(value: unknown, fallback: string) {
-  return typeof value === "string" && value.trim().length > 0 ? value.trim() : fallback;
+  if (typeof value !== "string") {
+    return fallback;
+  }
+
+  const trimmed = value.trim();
+
+  if (trimmed.length === 0 || looksCorruptedString(trimmed)) {
+    return fallback;
+  }
+
+  return trimmed;
 }
 
 function normalizeBoolean(value: unknown, fallback: boolean) {

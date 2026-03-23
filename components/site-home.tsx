@@ -76,24 +76,21 @@ export function SiteHome({
   }
 
   const featureColumnClass = site.home.features.cards.length > 2 ? "lg:grid-cols-3" : "lg:grid-cols-2";
-  const previewScaleClass = embedded
-    ? isMobilePreview
-      ? "mx-auto w-[390px] max-w-full overflow-auto rounded-[2rem] border border-slate-200 bg-white shadow-[0_20px_60px_rgba(15,23,42,0.16)]"
-      : "w-full overflow-auto rounded-[2rem] border border-slate-200 bg-white shadow-[0_20px_60px_rgba(15,23,42,0.16)]"
-    : "";
+  const previewScaleClass = "";
 
   return (
     <div className={previewScaleClass}>
-      <main className="min-h-screen overflow-hidden pb-10">
+      <main className="min-h-screen pb-10">
         <div ref={(node) => { sectionRefs.current.header = node; }}>
-          <SiteHeader site={site} embedded={embedded} />
+          <SiteHeader site={site} embedded={embedded} highlighted={focusSection === "header"} />
         </div>
 
         <div className="shell mt-6 space-y-8">
           <section
             ref={(node) => { sectionRefs.current.hero = node; }}
-            className="relative overflow-hidden border"
+            className={`relative overflow-hidden border transition-shadow ${focusSection === "hero" ? "ring-4 ring-blue/25 shadow-[0_24px_80px_rgba(27,111,255,0.18)]" : ""}`}
             style={getBlockStyle(site.home.hero.sectionStyle)}
+            data-preview-section="hero"
           >
             <div className="absolute -left-24 top-0 h-72 w-72 rounded-full bg-[#ffd84a]/30 blur-3xl" />
             <div className="absolute right-0 top-12 h-72 w-72 rounded-full bg-[#1b6fff]/18 blur-3xl" />
@@ -164,9 +161,9 @@ export function SiteHome({
                 </div>
               </div>
 
-              <div ref={(node) => { sectionRefs.current.features = node; }} className="grid gap-4">
+              <div ref={(node) => { sectionRefs.current.features = node; }} className={`grid gap-4 transition-shadow ${focusSection === "features" ? "rounded-[2rem] ring-4 ring-blue/25" : ""}`} data-preview-section="features">
                 {site.home.hero.heroImage.url ? (
-                  <div className="overflow-hidden rounded-[2rem] border border-white/80 bg-white/84 shadow-[0_22px_50px_rgba(14,29,56,0.08)]">
+                  <div className="overflow-hidden rounded-[2rem] border border-white/80 bg-white/84 shadow-[0_24px_70px_rgba(14,29,56,0.12)]">
                     <div className="relative w-full">
                       <Image
                         src={site.home.hero.heroImage.url}
@@ -191,7 +188,7 @@ export function SiteHome({
                   {site.home.features.cards.map((feature) => (
                     <article
                       key={`${feature.eyebrow}-${feature.title}`}
-                      className="flex h-full min-h-[220px] flex-col justify-between border"
+                      className="gradient-border flex h-full min-h-[220px] flex-col justify-between border transition duration-300 hover:-translate-y-1 hover:shadow-[0_24px_70px_rgba(14,29,56,0.14)]"
                       style={getBlockStyle(feature.blockStyle)}
                     >
                       <div>
@@ -216,7 +213,7 @@ export function SiteHome({
             {site.home.downloadCards.map((card) => (
               <article
                 key={card.key}
-                className="group relative overflow-hidden border transition duration-300 hover:-translate-y-1"
+                className="group gradient-border relative overflow-hidden border transition duration-300 hover:-translate-y-1 hover:shadow-[0_26px_80px_rgba(14,29,56,0.16)]"
                 style={getBlockStyle(card.blockStyle)}
               >
                 <div className="absolute inset-x-6 top-0 h-24 rounded-b-[2rem] bg-gradient-to-b from-[#ffd84a]/45 to-transparent" />
@@ -284,7 +281,7 @@ export function SiteHome({
             ))}
           </section>
 
-          <section id="launch-flow" ref={(node) => { sectionRefs.current["launch-flow"] = node; }} className="grid gap-6 lg:grid-cols-[minmax(280px,0.9fr)_minmax(0,1.1fr)]">
+          <section id="launch-flow" ref={(node) => { sectionRefs.current["launch-flow"] = node; }} className={`grid gap-6 transition-shadow lg:grid-cols-[minmax(280px,0.9fr)_minmax(0,1.1fr)] ${focusSection === "launch-flow" ? "rounded-[2rem] ring-4 ring-blue/25" : ""}`} data-preview-section="launch-flow">
             <div className="border" style={getBlockStyle(site.home.launchFlow.leftBlockStyle)}>
               <p className="uppercase tracking-[0.3em]" style={getTextStyle(site.home.launchFlow.eyebrowStyle)}>
                 {site.home.launchFlow.eyebrow}
@@ -304,7 +301,7 @@ export function SiteHome({
               {site.home.launchFlow.steps.map((step) => (
                 <article
                   key={step.index}
-                  className="border"
+                  className="gradient-border border transition duration-300 hover:-translate-y-1 hover:shadow-[0_24px_70px_rgba(14,29,56,0.14)]"
                   style={getBlockStyle(step.blockStyle)}
                 >
                   <p className="font-[var(--font-manrope)] tracking-[0.26em]" style={getTextStyle(step.indexStyle)}>
@@ -323,7 +320,7 @@ export function SiteHome({
         </div>
 
         <div ref={(node) => { sectionRefs.current.footer = node; }}>
-          <Footer site={site} />
+          <Footer site={site} highlighted={focusSection === "footer"} />
         </div>
 
         {!embedded && deviceChoice ? (

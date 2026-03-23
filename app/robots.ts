@@ -6,10 +6,13 @@ export default async function robots(): Promise<MetadataRoute.Robots> {
   const site = await getCmsData();
 
   return {
-    rules: {
-      userAgent: "*",
-      allow: "/",
-    },
+    rules: [
+      {
+        userAgent: "*",
+        allow: "/",
+        disallow: "/admin",
+      },
+    ],
     sitemap: `${site.site.siteUrl}/sitemap.xml`,
     host: site.site.siteUrl,
   };

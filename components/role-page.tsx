@@ -8,17 +8,19 @@ import type { CmsData, CmsRolePage } from "@/lib/cms-schema";
 type RolePageProps = {
   site: CmsData;
   page: CmsRolePage;
+  embedded?: boolean;
+  focusSection?: string | null;
 };
 
-export function RolePage({ site, page }: RolePageProps) {
+export function RolePage({ site, page, embedded = false, focusSection = null }: RolePageProps) {
   return (
     <main className="pb-10">
-      <SiteHeader site={site} />
+      <SiteHeader site={site} embedded={embedded} highlighted={focusSection === "header"} />
 
-      <PageHero hero={page.hero} />
+      <PageHero hero={page.hero} highlighted={focusSection === "hero"} />
 
       {page.sections.map((section) => (
-        <SectionShell key={section.id} section={section}>
+        <SectionShell key={section.id} section={section} highlighted={focusSection === section.id}>
           <div className="grid gap-5 md:grid-cols-3">
             {section.items.map((item, index) => (
               <FeatureCard
@@ -32,7 +34,7 @@ export function RolePage({ site, page }: RolePageProps) {
         </SectionShell>
       ))}
 
-      <Footer site={site} />
+      <Footer site={site} highlighted={focusSection === "footer"} />
     </main>
   );
 }
