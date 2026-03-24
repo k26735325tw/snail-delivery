@@ -179,7 +179,7 @@ function ImagePanel({ path, value, uploadKey }: { path: string; value: CmsImageA
         <button
           type="button"
           onClick={() => uploadRef.current?.click()}
-          className="rounded-full bg-blue-600 px-4 py-2 text-xs font-black text-white"
+          className="appearance-none rounded-full border border-slate-300 bg-white px-4 py-2 text-xs font-black text-slate-900 shadow-sm transition hover:border-slate-400 hover:bg-slate-100"
         >
           {editor.isUploadingPath(path) ? "上傳中" : "更換圖片"}
         </button>
