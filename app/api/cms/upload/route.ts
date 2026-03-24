@@ -36,23 +36,30 @@ export async function POST(request: Request) {
     const file = formData.get("file");
     const uploadKey = normalizeUploadKey(String(formData.get("uploadKey") ?? "shared/logo"));
 
-    if (!(file instanceof File)) {
+    if (
+      !file ||
+      typeof file === "string" ||
+      typeof (file as Blob).arrayBuffer !== "function" ||
+      typeof (file as { type?: unknown }).type !== "string"
+    ) {
       return NextResponse.json({ error: "Missing upload file" }, { status: 400 });
     }
 
-    if (!allowedContentTypes.has(file.type)) {
+    const uploadFile = file as Blob & { name?: string; type: string };
+
+    if (!allowedContentTypes.has(uploadFile.type)) {
       return NextResponse.json({ error: "Unsupported image type" }, { status: 400 });
     }
 
-    const filename = file.name.replace(/[^a-zA-Z0-9._-]+/g, "-");
+    const filename = (uploadFile.name ?? "upload-image").replace(/[^a-zA-Z0-9._-]+/g, "-");
     const extension = filename.includes(".") ? filename.slice(filename.lastIndexOf(".")) : "";
     const shouldOverwrite = shouldOverwriteUpload(uploadKey);
     const blobPath = shouldOverwrite
       ? `cms/${uploadKey}${extension}`
       : `cms/${uploadKey}/${Date.now()}-${filename}`;
-    const blob = await put(blobPath, file, {
+    const blob = await put(blobPath, uploadFile, {
       access: "public",
-      contentType: file.type,
+      contentType: uploadFile.type,
       addRandomSuffix: false,
       allowOverwrite: shouldOverwrite,
     });
