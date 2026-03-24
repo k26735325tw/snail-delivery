@@ -12,6 +12,17 @@ const hoverClass =
 const selectedClass =
   "bg-[#fff7c4]/76 shadow-[0_20px_54px_rgba(27,111,255,0.16)] ring-4 ring-[#1b6fff]/28 after:border-[#1b6fff]/70";
 
+function getTextDisplayStyle(style: CSSProperties | undefined, value: string): CSSProperties | undefined {
+  if (!value.includes("\n")) {
+    return style;
+  }
+
+  return {
+    ...style,
+    whiteSpace: "pre-wrap",
+  };
+}
+
 function useSelection(selection: CmsVisualSelection) {
   const editor = useCmsVisualEditor();
   const selected = Boolean(
@@ -80,36 +91,26 @@ export function EditableText<T extends ElementType>({
   const Tag = as as ElementType;
   const Wrapper = as === "span" ? "span" : "div";
   const { editor, selected, handleSelect } = useSelection(selection);
+  const displayStyle = getTextDisplayStyle(style, value);
 
   if (!editor) {
-    return <Tag className={className} style={style}>{value}</Tag>;
+    return <Tag className={className} style={displayStyle}>{value}</Tag>;
   }
 
   return (
     <Wrapper className={`${interactiveClass} ${hoverClass} ${selected ? selectedClass : ""} ${as === "span" ? "inline-block" : ""}`} onClick={handleSelect}>
       {selected ? (
-        multiline ? (
-          <textarea
-            autoFocus
-            value={value}
-            rows={Math.max(value.split("\n").length, 3)}
-            onClick={(event) => event.stopPropagation()}
-            onChange={(event) => editor.updateValue(selection.fieldPath ?? "", event.target.value)}
-            className={`w-full resize-y rounded-[1rem] border border-[#1b6fff]/25 bg-white/86 px-3 py-2 font-inherit text-inherit outline-none ${className}`}
-            style={style}
-          />
-        ) : (
-          <input
-            autoFocus
-            value={value}
-            onClick={(event) => event.stopPropagation()}
-            onChange={(event) => editor.updateValue(selection.fieldPath ?? "", event.target.value)}
-            className={`w-full rounded-[1rem] border border-[#1b6fff]/25 bg-white/86 px-3 py-2 font-inherit text-inherit outline-none ${className}`}
-            style={style}
-          />
-        )
+        <textarea
+          autoFocus
+          value={value}
+          rows={Math.max(value.split("\n").length, multiline ? 3 : 2)}
+          onClick={(event) => event.stopPropagation()}
+          onChange={(event) => editor.updateValue(selection.fieldPath ?? "", event.target.value)}
+          className={`w-full resize-y rounded-[1rem] border border-[#1b6fff]/25 bg-white/86 px-3 py-2 font-inherit text-inherit outline-none ${className}`}
+          style={style}
+        />
       ) : (
-        <Tag className={className} style={style}>{value}</Tag>
+        <Tag className={className} style={displayStyle}>{value}</Tag>
       )}
     </Wrapper>
   );
@@ -129,10 +130,11 @@ export function EditableLink({
   style?: CSSProperties;
 }) {
   const { editor, selected, handleSelect } = useSelection(selection);
+  const displayStyle = getTextDisplayStyle(style, value);
 
   if (!editor) {
     return (
-      <a href={href} className={className} style={style}>
+      <a href={href} className={className} style={displayStyle}>
         {value}
       </a>
     );
@@ -141,12 +143,13 @@ export function EditableLink({
   return (
     <div className={`${interactiveClass} ${hoverClass} ${selected ? selectedClass : ""} inline-flex`} onClick={handleSelect}>
       {selected ? (
-        <input
+        <textarea
           autoFocus
           value={value}
+          rows={Math.max(value.split("\n").length, 2)}
           onClick={(event) => event.stopPropagation()}
           onChange={(event) => editor.updateValue(selection.fieldPath ?? "", event.target.value)}
-          className={`rounded-[1rem] border border-[#1b6fff]/25 bg-white/86 px-3 py-2 font-inherit text-inherit outline-none ${className}`}
+          className={`resize-y rounded-[1rem] border border-[#1b6fff]/25 bg-white/86 px-3 py-2 font-inherit text-inherit outline-none ${className}`}
           style={style}
         />
       ) : (
@@ -154,7 +157,7 @@ export function EditableLink({
           href={href}
           onClick={handleSelect}
           className={className}
-          style={style}
+          style={displayStyle}
         >
           {value}
         </a>
