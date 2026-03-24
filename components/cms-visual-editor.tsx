@@ -164,9 +164,26 @@ function BlockStylePanel({ path, value }: { path: string; value: CmsBlockStyle }
   );
 }
 
+function getImageRecommendation(path: string, uploadKey?: string) {
+  if (path === "site.logo" || uploadKey === "shared/logo") {
+    return { dimensions: "240 × 240 px" };
+  }
+
+  if (path.endsWith(".heroImage") || uploadKey?.endsWith("/hero")) {
+    return { dimensions: "1600 × 1200 px" };
+  }
+
+  if (path.includes(".downloadCards.") || uploadKey?.startsWith("home/download-cards/")) {
+    return { dimensions: "1200 × 900 px" };
+  }
+
+  return null;
+}
+
 function ImagePanel({ path, value, uploadKey }: { path: string; value: CmsImageAsset; uploadKey?: string }) {
   const editor = useCmsVisualEditor();
   const uploadRef = useRef<HTMLInputElement | null>(null);
+  const recommendation = getImageRecommendation(path, uploadKey);
 
   if (!editor) {
     return null;
@@ -176,13 +193,21 @@ function ImagePanel({ path, value, uploadKey }: { path: string; value: CmsImageA
     <div className="space-y-4 rounded-[1.5rem] border border-slate-200 bg-slate-50 p-4">
       <div className="flex items-center justify-between gap-3">
         <p className="text-sm font-bold text-slate-900">圖片設定</p>
-        <button
-          type="button"
-          onClick={() => uploadRef.current?.click()}
-          className="appearance-none rounded-full border border-slate-300 bg-white px-4 py-2 text-xs font-black text-slate-900 shadow-sm transition hover:border-slate-400 hover:bg-slate-100"
-        >
-          {editor.isUploadingPath(path) ? "上傳中" : "更換圖片"}
-        </button>
+        <div className="flex flex-col items-end gap-2">
+          {recommendation ? (
+            <div className="text-right">
+              <p className="text-xs font-semibold text-slate-600">建議尺寸：{recommendation.dimensions}</p>
+              <p className="text-[11px] text-slate-400">請依此尺寸上傳，避免顯示比例異常</p>
+            </div>
+          ) : null}
+          <button
+            type="button"
+            onClick={() => uploadRef.current?.click()}
+            className="appearance-none rounded-full border border-slate-300 bg-white px-4 py-2 text-xs font-black text-slate-900 shadow-sm transition hover:border-slate-400 hover:bg-slate-100"
+          >
+            {editor.isUploadingPath(path) ? "上傳中" : "更換圖片"}
+          </button>
+        </div>
       </div>
       <input
         ref={uploadRef}
