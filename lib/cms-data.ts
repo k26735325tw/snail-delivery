@@ -3,6 +3,7 @@ import type {
   CmsContentItem,
   CmsData,
   CmsDownloadCard,
+  CmsFlexBlock,
   CmsHomeFeatureCard,
   CmsLaunchStep,
   CmsLinkGroup,
@@ -18,6 +19,7 @@ export type CmsArrayCollectionPath =
   | "home.features.cards"
   | "home.downloadCards"
   | "home.launchFlow.steps"
+  | "home.flexSection.blocks"
   | "home.partnersSection.items"
   | `${"consumer" | "courier" | "merchant"}.sections.${number}.items`;
 
@@ -114,6 +116,12 @@ function ensurePartnerItems(items: CmsPartnerItem[]) {
   );
 }
 
+function ensureFlexBlocks(blocks: CmsFlexBlock[]) {
+  return blocks.map((block, index) =>
+    ensureItemId(block, "flex-block", `${block.type || "block"}-${block.heading || block.caption || index + 1}`),
+  );
+}
+
 function ensureContentItems(items: CmsContentItem[], pageKey: "consumer" | "courier" | "merchant", sectionId: string) {
   return items.map((item, index) =>
     ensureItemId(item, `${pageKey}-card`, `${sectionId}-${item.title || item.eyebrow || "item"}-${index + 1}`),
@@ -137,6 +145,10 @@ export function ensureCmsStableIds(data: CmsData): CmsData {
       launchFlow: {
         ...data.home.launchFlow,
         steps: ensureLaunchSteps(data.home.launchFlow.steps),
+      },
+      flexSection: {
+        ...data.home.flexSection,
+        blocks: ensureFlexBlocks(data.home.flexSection.blocks),
       },
       partnersSection: {
         ...data.home.partnersSection,
@@ -235,6 +247,19 @@ function emptyPartnerItem(): CmsPartnerItem {
   };
 }
 
+function emptyFlexBlock(): CmsFlexBlock {
+  return {
+    id: createCmsId("flex-block", "block"),
+    type: "text",
+    heading: "新自訂內容",
+    body: "請填寫這個 block 的內容。",
+    mediaUrl: "",
+    mediaAlt: "",
+    caption: "",
+    linkUrl: "",
+  };
+}
+
 function emptyRoleCard(prefix: "consumer" | "courier" | "merchant"): CmsContentItem {
   return {
     id: createCmsId(`${prefix}-card`, "card"),
@@ -264,6 +289,10 @@ export function createArrayItemTemplate(collectionPath: CmsArrayCollectionPath, 
 
   if (collectionPath === "home.launchFlow.steps") {
     return emptyLaunchStep(currentData.home.launchFlow.steps.length);
+  }
+
+  if (collectionPath === "home.flexSection.blocks") {
+    return emptyFlexBlock();
   }
 
   if (collectionPath === "home.partnersSection.items") {

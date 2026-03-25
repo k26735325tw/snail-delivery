@@ -26,6 +26,10 @@ function shouldOverwriteUpload(uploadKey: string) {
   return overwriteUploadKeys.has(uploadKey) || uploadKey.startsWith("home/download-cards/");
 }
 
+function isLimitedVideoUpload(uploadKey: string) {
+  return uploadKey === "about/video" || uploadKey.startsWith("home/flex-section/video/");
+}
+
 function normalizePath(value: string) {
   return value.trim().toLowerCase().replace(/[^a-z0-9/-]+/g, "-");
 }
@@ -61,7 +65,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Unsupported upload type" }, { status: 400 });
     }
 
-    if (uploadKey === "about/video" && uploadFile.size > ABOUT_VIDEO_MAX_BYTES) {
+    if (isLimitedVideoUpload(uploadKey) && uploadFile.size > ABOUT_VIDEO_MAX_BYTES) {
       return NextResponse.json({ error: "Video file too large" }, { status: 413 });
     }
 

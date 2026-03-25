@@ -148,6 +148,10 @@ function replacePathPrefix(value: string | undefined, previousPrefix: string, ne
     : value;
 }
 
+function collectionAllowsEmpty(collectionPath: CmsArrayCollectionPath) {
+  return collectionPath === "home.flexSection.blocks";
+}
+
 export function CmsVisualEditorProvider({
   initialData,
   children,
@@ -264,7 +268,7 @@ export function CmsVisualEditorProvider({
   function removeArrayItem(collectionPath: CmsArrayCollectionPath, itemId: string) {
     const currentItems = [...getCollectionItems(collectionPath)];
 
-    if (currentItems.length <= 1) {
+    if (currentItems.length <= 1 && !collectionAllowsEmpty(collectionPath)) {
       setError("至少要保留一個項目，避免公開頁內容整塊消失。");
       return;
     }

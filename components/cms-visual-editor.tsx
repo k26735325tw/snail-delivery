@@ -181,6 +181,10 @@ function getImageRecommendation(path: string, uploadKey?: string) {
     return { dimensions: "1200 × 900 px" };
   }
 
+  if (path.includes(".flexSection.blocks.") || uploadKey?.startsWith("home/flex-section/image/")) {
+    return { dimensions: "1600 × 900 px" };
+  }
+
   return null;
 }
 
@@ -238,7 +242,84 @@ function ImagePanel({ path, value, uploadKey }: { path: string; value: CmsImageA
   );
 }
 
-function VideoPanel({ path, value, posterPath }: { path: string; value: string; posterPath?: string }) {
+function FlatImagePanel({
+  urlPath,
+  altPath,
+  url,
+  alt,
+  uploadKey,
+}: {
+  urlPath: string;
+  altPath: string;
+  url: string;
+  alt: string;
+  uploadKey: string;
+}) {
+  const editor = useCmsVisualEditor();
+  const uploadRef = useRef<HTMLInputElement | null>(null);
+  const recommendation = getImageRecommendation(urlPath, uploadKey);
+
+  if (!editor) {
+    return null;
+  }
+
+  return (
+    <div className="space-y-4 rounded-[1.5rem] border border-slate-200 bg-slate-50 p-4">
+      <div className="flex items-center justify-between gap-3">
+        <p className="text-sm font-bold text-slate-900">圖片設定</p>
+        <div className="flex flex-col items-end gap-2">
+          {recommendation ? (
+            <div className="text-right">
+              <p className="text-xs font-semibold text-slate-600">建議尺寸：{recommendation.dimensions}</p>
+              <p className="text-[11px] text-slate-400">請依此尺寸上傳，避免顯示比例異常</p>
+            </div>
+          ) : null}
+          <button
+            type="button"
+            onClick={() => uploadRef.current?.click()}
+            className="appearance-none rounded-full border border-slate-300 bg-white px-4 py-2 text-xs font-black text-slate-900 shadow-sm transition hover:border-slate-400 hover:bg-slate-100"
+          >
+            {editor.isUploadingPath(urlPath) ? "上傳中" : "更換圖片"}
+          </button>
+        </div>
+      </div>
+      <input
+        ref={uploadRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={async (event) => {
+          const file = event.target.files?.[0];
+
+          if (file) {
+            try {
+              const nextUrl = await editor.uploadFile(urlPath, file, uploadKey);
+              editor.updateValue(urlPath, nextUrl);
+            } catch {
+              // Error state is already handled in uploadFile.
+            }
+          }
+
+          event.target.value = "";
+        }}
+      />
+      <Field label="圖片 URL" value={url} onChange={(next) => editor.updateValue(urlPath, next)} />
+      <Field label="Alt 文字" value={alt} onChange={(next) => editor.updateValue(altPath, next)} />
+    </div>
+  );
+}
+
+function VideoPanel({
+  path,
+  value,
+  posterPath,
+  uploadKey = "about/video",
+}: {
+  path: string;
+  value: string;
+  posterPath?: string;
+  uploadKey?: string;
+}) {
   const editor = useCmsVisualEditor();
   const uploadRef = useRef<HTMLInputElement | null>(null);
 
@@ -251,7 +332,7 @@ function VideoPanel({ path, value, posterPath }: { path: string; value: string; 
       <div className="flex items-center justify-between gap-3">
         <div>
           <p className="text-sm font-bold text-slate-900">影片設定</p>
-          <p className="text-[11px] text-slate-500">支援 MP4 / WebM，上傳後會寫入 about 影片網址。</p>
+          <p className="text-[11px] text-slate-500">支援 MP4 / WebM，大小限制沿用既有 about 影片規則。</p>
         </div>
         <button
           type="button"
@@ -283,7 +364,7 @@ function VideoPanel({ path, value, posterPath }: { path: string; value: string; 
             }
 
             try {
-              const url = await editor.uploadFile(path, file, "about/video");
+              const url = await editor.uploadFile(path, file, uploadKey);
               editor.updateValue(path, url);
             } catch {
               // Error state is already handled in uploadFile.
@@ -411,6 +492,26 @@ function ItemEditorPanel({ itemPath, uploadKey }: { itemPath: string; uploadKey?
       {"videoHint" in record && typeof record.videoHint === "string" ? (
         <Field label="影片 Placeholder 文案" value={record.videoHint} onChange={(next) => editor.updateValue(`${itemPath}.videoHint`, next)} multiline />
       ) : null}
+      {"type" in record && typeof record.type === "string" ? (
+        <SelectField
+          label="Block 類型"
+          value={record.type}
+          options={["text", "image", "video"]}
+          onChange={(next) => editor.updateValue(`${itemPath}.type`, next)}
+        />
+      ) : null}
+      {"heading" in record && typeof record.heading === "string" ? (
+        <Field label="標題" value={record.heading} onChange={(next) => editor.updateValue(`${itemPath}.heading`, next)} multiline />
+      ) : null}
+      {"body" in record && typeof record.body === "string" ? (
+        <Field label="內文" value={record.body} onChange={(next) => editor.updateValue(`${itemPath}.body`, next)} multiline />
+      ) : null}
+      {"caption" in record && typeof record.caption === "string" ? (
+        <Field label="Caption" value={record.caption} onChange={(next) => editor.updateValue(`${itemPath}.caption`, next)} multiline />
+      ) : null}
+      {"linkUrl" in record && typeof record.linkUrl === "string" ? (
+        <Field label="連結 URL" value={record.linkUrl} onChange={(next) => editor.updateValue(`${itemPath}.linkUrl`, next)} />
+      ) : null}
       {"name" in record && typeof record.name === "string" ? (
         <Field label="公司名稱" value={record.name} onChange={(next) => editor.updateValue(`${itemPath}.name`, next)} />
       ) : null}
@@ -432,6 +533,25 @@ function ItemEditorPanel({ itemPath, uploadKey }: { itemPath: string; uploadKey?
           value={record.aboutVideoUrl}
           posterPath={"aboutVideoPoster" in record && typeof record.aboutVideoPoster === "string" ? `${itemPath}.aboutVideoPoster` : undefined}
         />
+      ) : null}
+      {"mediaUrl" in record && typeof record.mediaUrl === "string" && "type" in record && record.type === "image" ? (
+        <FlatImagePanel
+          urlPath={`${itemPath}.mediaUrl`}
+          altPath={`${itemPath}.mediaAlt`}
+          url={record.mediaUrl}
+          alt={typeof record.mediaAlt === "string" ? record.mediaAlt : ""}
+          uploadKey={`home/flex-section/image/${typeof record.id === "string" ? record.id : "block"}`}
+        />
+      ) : null}
+      {"mediaUrl" in record && typeof record.mediaUrl === "string" && "type" in record && record.type === "video" ? (
+        <VideoPanel
+          path={`${itemPath}.mediaUrl`}
+          value={record.mediaUrl}
+          uploadKey={`home/flex-section/video/${typeof record.id === "string" ? record.id : "block"}`}
+        />
+      ) : null}
+      {"mediaAlt" in record && typeof record.mediaAlt === "string" && (!("type" in record) || record.type !== "image") ? (
+        <Field label="媒體 Alt" value={record.mediaAlt} onChange={(next) => editor.updateValue(`${itemPath}.mediaAlt`, next)} />
       ) : null}
       {"image" in record && record.image && typeof record.image === "object" && "url" in record.image ? (
         <ImagePanel path={`${itemPath}.image`} value={record.image as CmsImageAsset} uploadKey={uploadKey} />

@@ -516,6 +516,11 @@ export const cmsDefaults: CmsData = {
         },
       ],
     },
+    flexSection: {
+      title: "自訂內容區",
+      description: "此區可放置文字、圖片或影片內容，依營運需求彈性調整。",
+      blocks: [],
+    },
     partnersSection: {
       title: "合作廠商",
       description: "此區預留合作廠商資訊，實際資料將於確認後更新。",

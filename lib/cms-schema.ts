@@ -125,6 +125,17 @@ export type CmsPartnerItem = {
   serviceScope: string;
 };
 
+export type CmsFlexBlock = {
+  id?: string;
+  type: "text" | "image" | "video";
+  heading: string;
+  body: string;
+  mediaUrl: string;
+  mediaAlt: string;
+  caption: string;
+  linkUrl: string;
+};
+
 export type CmsRoleHero = {
   badge: string;
   title: string;
@@ -227,6 +238,11 @@ export type CmsData = {
       leftBlockStyle: CmsBlockStyle;
       rightBlockStyle: CmsBlockStyle;
       steps: CmsLaunchStep[];
+    };
+    flexSection: {
+      title: string;
+      description: string;
+      blocks: CmsFlexBlock[];
     };
     partnersSection: {
       title: string;

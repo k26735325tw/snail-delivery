@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import { EditableBlock, EditableImageFrame, EditableLink, EditableText } from "@/components/cms-inline-edit";
 import { useCmsVisualEditor } from "@/components/cms-visual-context";
 import { Footer } from "@/components/footer";
+import { HomeFlexSection } from "@/components/home-flex-section";
 import { PartnersSection } from "@/components/partners-section";
 import { SiteHeader } from "@/components/site-header";
 import type { CmsData, CmsDownloadCard } from "@/lib/cms-schema";
@@ -690,6 +691,12 @@ export function SiteHome({
           partners={site.home.partnersSection.items}
           title={site.home.partnersSection.title}
           description={site.home.partnersSection.description}
+        />
+
+        <HomeFlexSection
+          title={site.home.flexSection.title}
+          description={site.home.flexSection.description}
+          blocks={site.home.flexSection.blocks}
         />
       </div>
 
