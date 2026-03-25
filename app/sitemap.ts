@@ -1,13 +1,12 @@
 import type { MetadataRoute } from "next";
 
-import { getCmsData } from "@/lib/cms-store";
+import { buildSiteUrl } from "@/lib/site";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const site = await getCmsData();
   const updatedAt = new Date();
 
-  return ["/", "/consumer", "/courier", "/merchant"].map((path) => ({
-    url: new URL(path, site.site.siteUrl).toString(),
+  return ["/", "/merchant", "/courier"].map((path) => ({
+    url: buildSiteUrl(path),
     lastModified: updatedAt,
     changeFrequency: "daily",
     priority: path === "/" ? 1 : 0.8,

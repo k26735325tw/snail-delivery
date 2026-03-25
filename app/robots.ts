@@ -1,9 +1,9 @@
 import type { MetadataRoute } from "next";
 
-import { getCmsData } from "@/lib/cms-store";
+import { getSiteUrl } from "@/lib/site";
 
 export default async function robots(): Promise<MetadataRoute.Robots> {
-  const site = await getCmsData();
+  const siteUrl = getSiteUrl();
 
   return {
     rules: [
@@ -13,7 +13,7 @@ export default async function robots(): Promise<MetadataRoute.Robots> {
         disallow: ["/admin", "/admin/visual"],
       },
     ],
-    sitemap: `${site.site.siteUrl}/sitemap.xml`,
-    host: site.site.siteUrl,
+    sitemap: `${siteUrl}sitemap.xml`,
+    host: siteUrl,
   };
 }

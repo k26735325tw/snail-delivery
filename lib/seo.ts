@@ -1,14 +1,11 @@
 import type { Metadata } from "next";
 
 import type { CmsData, CmsRolePage, CmsSeo } from "@/lib/cms-schema";
-
-function normalizeUrl(siteUrl: string, path: string) {
-  return new URL(path, siteUrl).toString();
-}
+import { buildSiteUrl, getSiteUrl } from "@/lib/site";
 
 export function buildMetadata(site: CmsData, seo: CmsSeo): Metadata {
-  const canonical = normalizeUrl(site.site.siteUrl, seo.canonicalPath);
-  const imageUrl = normalizeUrl(site.site.siteUrl, seo.ogImageUrl || site.site.defaultSeoImageUrl);
+  const canonical = buildSiteUrl(seo.canonicalPath);
+  const imageUrl = buildSiteUrl(seo.ogImageUrl || site.site.defaultSeoImageUrl);
 
   return {
     title: seo.pageTitle,
@@ -39,7 +36,7 @@ export function buildMetadata(site: CmsData, seo: CmsSeo): Metadata {
 }
 
 export function buildHomeJsonLd(site: CmsData) {
-  const siteUrl = site.site.siteUrl;
+  const siteUrl = getSiteUrl();
 
   return [
     {
@@ -47,7 +44,7 @@ export function buildHomeJsonLd(site: CmsData) {
       "@type": "Organization",
       name: site.site.organizationName,
       url: siteUrl,
-      logo: normalizeUrl(siteUrl, site.site.logo.url),
+      logo: buildSiteUrl(site.site.logo.url),
     },
     {
       "@context": "https://schema.org",
@@ -55,67 +52,26 @@ export function buildHomeJsonLd(site: CmsData) {
       name: site.site.siteName,
       url: siteUrl,
       description: site.home.seo.metaDescription,
-      potentialAction: {
-        "@type": "SearchAction",
-        target: `${siteUrl}/?q={search_term_string}`,
-        "query-input": "required name=search_term_string",
-      },
-    },
-    {
-      "@context": "https://schema.org",
-      "@type": "BreadcrumbList",
-      itemListElement: [
-        {
-          "@type": "ListItem",
-          position: 1,
-          name: "首頁",
-          item: siteUrl,
-        },
-      ],
-    },
-    {
-      "@context": "https://schema.org",
-      "@type": "HowTo",
-      name: site.home.launchFlow.title,
-      description: site.home.launchFlow.description,
-      step: site.home.launchFlow.steps.map((step, index) => ({
-        "@type": "HowToStep",
-        position: index + 1,
-        name: step.title,
-        text: step.description,
-      })),
     },
   ];
 }
 
 export function buildRoleJsonLd(site: CmsData, path: string, pageName: string, page: CmsRolePage) {
-  const siteUrl = site.site.siteUrl;
+  const siteUrl = getSiteUrl();
 
   return [
     {
       "@context": "https://schema.org",
-      "@type": "BreadcrumbList",
-      itemListElement: [
-        {
-          "@type": "ListItem",
-          position: 1,
-          name: "首頁",
-          item: siteUrl,
-        },
-        {
-          "@type": "ListItem",
-          position: 2,
-          name: pageName,
-          item: normalizeUrl(siteUrl, path),
-        },
-      ],
-    },
-    {
-      "@context": "https://schema.org",
       "@type": "WebPage",
-      name: page.seo.pageTitle,
+      name: pageName,
+      headline: page.hero.title,
       description: page.seo.metaDescription,
-      url: normalizeUrl(siteUrl, path),
+      url: buildSiteUrl(path),
+      isPartOf: {
+        "@type": "WebSite",
+        name: site.site.siteName,
+        url: siteUrl,
+      },
     },
   ];
 }
