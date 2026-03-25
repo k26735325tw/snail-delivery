@@ -2,6 +2,7 @@
 
 import { useRef } from "react";
 
+import { SiteAbout } from "@/components/site-about";
 import { CmsVisualEditorProvider, useCmsVisualEditor, type VisualPageKey } from "@/components/cms-visual-context";
 import { RolePage } from "@/components/role-page";
 import { SiteHome } from "@/components/site-home";
@@ -334,6 +335,24 @@ function ItemEditorPanel({ itemPath, uploadKey }: { itemPath: string; uploadKey?
       {"description" in record && typeof record.description === "string" ? (
         <Field label="說明" value={record.description} onChange={(next) => editor.updateValue(`${itemPath}.description`, next)} multiline />
       ) : null}
+      {"intro" in record && typeof record.intro === "string" ? (
+        <Field label="介紹文" value={record.intro} onChange={(next) => editor.updateValue(`${itemPath}.intro`, next)} multiline />
+      ) : null}
+      {"videoTitle" in record && typeof record.videoTitle === "string" ? (
+        <Field label="影片標題" value={record.videoTitle} onChange={(next) => editor.updateValue(`${itemPath}.videoTitle`, next)} />
+      ) : null}
+      {"videoDescription" in record && typeof record.videoDescription === "string" ? (
+        <Field label="影片說明" value={record.videoDescription} onChange={(next) => editor.updateValue(`${itemPath}.videoDescription`, next)} multiline />
+      ) : null}
+      {"videoHint" in record && typeof record.videoHint === "string" ? (
+        <Field label="影片 Placeholder 文案" value={record.videoHint} onChange={(next) => editor.updateValue(`${itemPath}.videoHint`, next)} multiline />
+      ) : null}
+      {"aboutVideoUrl" in record && typeof record.aboutVideoUrl === "string" ? (
+        <Field label="影片 URL" value={record.aboutVideoUrl} onChange={(next) => editor.updateValue(`${itemPath}.aboutVideoUrl`, next)} />
+      ) : null}
+      {"aboutVideoPoster" in record && typeof record.aboutVideoPoster === "string" ? (
+        <Field label="影片 Poster URL" value={record.aboutVideoPoster} onChange={(next) => editor.updateValue(`${itemPath}.aboutVideoPoster`, next)} />
+      ) : null}
       {"image" in record && record.image && typeof record.image === "object" && "url" in record.image ? (
         <ImagePanel path={`${itemPath}.image`} value={record.image as CmsImageAsset} uploadKey={uploadKey} />
       ) : null}
@@ -465,6 +484,7 @@ function VisualCanvas() {
     consumer: { label: "消費者", href: "/consumer" },
     courier: { label: "騎手", href: "/courier" },
     merchant: { label: "店家", href: "/merchant" },
+    about: { label: "關於我們", href: "/about" },
   };
 
   return (
@@ -503,6 +523,8 @@ function VisualCanvas() {
         <div className="rounded-[2.2rem] border border-slate-200 bg-white shadow-[0_28px_90px_rgba(15,23,42,0.08)]">
           {editor.currentPage === "home" ? (
             <SiteHome site={editor.data} />
+          ) : editor.currentPage === "about" ? (
+            <SiteAbout site={editor.data} />
           ) : (
             <RolePage site={editor.data} page={editor.data[editor.currentPage]} pageKey={editor.currentPage} />
           )}

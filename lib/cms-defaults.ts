@@ -1,3 +1,4 @@
+import { aboutDefaults } from "@/lib/about";
 import type { CmsData, CmsSeo } from "@/lib/cms-schema";
 import { defaultBlockStyle, defaultImageAsset, defaultTextStyle } from "@/lib/cms-style";
 
@@ -523,6 +524,9 @@ export const cmsDefaults: CmsData = {
       ogDescription:
         "GoGet 蝸牛外送 CMS V2，提供繁體中文後台、首頁下載入口、角色頁與 SEO / GEO 內容管理。",
     }),
+  },
+  about: {
+    ...aboutDefaults,
   },
   consumer: {
     hero: {

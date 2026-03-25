@@ -2,11 +2,12 @@
 
 import { useEffect, useRef, useState } from "react";
 
+import { SiteAbout } from "@/components/site-about";
 import { RolePage } from "@/components/role-page";
 import { SiteHome } from "@/components/site-home";
 import type { CmsData } from "@/lib/cms-schema";
 
-export type PreviewPage = "home" | "consumer" | "courier" | "merchant";
+export type PreviewPage = "home" | "consumer" | "courier" | "merchant" | "about";
 export type PreviewTarget = {
   page: PreviewPage;
   section: string | null;
@@ -106,6 +107,8 @@ export function AdminLivePreview({ site, viewport, target }: AdminLivePreviewPro
                 activeCardKey={target.cardKey ?? null}
                 activeCardIndex={target.cardIndex ?? null}
               />
+            ) : target.page === "about" ? (
+              <SiteAbout site={site} />
             ) : (
               <RolePage
                 site={site}

@@ -12,7 +12,7 @@ import {
 } from "@/lib/cms-data";
 import type { CmsData } from "@/lib/cms-schema";
 
-export type VisualPageKey = "home" | "consumer" | "courier" | "merchant";
+export type VisualPageKey = "home" | "consumer" | "courier" | "merchant" | "about";
 
 export type CmsVisualSelection = {
   id: string;

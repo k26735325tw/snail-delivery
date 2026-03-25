@@ -8,6 +8,7 @@ export const dynamic = "force-dynamic";
 
 function revalidateCmsPaths() {
   revalidatePath("/");
+  revalidatePath("/about");
   revalidatePath("/consumer");
   revalidatePath("/courier");
   revalidatePath("/merchant");

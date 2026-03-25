@@ -150,6 +150,17 @@ export type CmsRolePage = {
   seo: CmsSeo;
 };
 
+export type CmsAboutPage = {
+  title: string;
+  description: string;
+  intro: string;
+  videoTitle: string;
+  videoDescription: string;
+  videoHint: string;
+  aboutVideoUrl: string;
+  aboutVideoPoster: string;
+};
+
 export type CmsData = {
   site: {
     siteName: string;
@@ -208,6 +219,7 @@ export type CmsData = {
     };
     seo: CmsSeo;
   };
+  about: CmsAboutPage;
   consumer: CmsRolePage;
   courier: CmsRolePage;
   merchant: CmsRolePage;
