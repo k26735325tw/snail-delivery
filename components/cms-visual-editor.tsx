@@ -540,6 +540,9 @@ function ItemEditorPanel({ itemPath, uploadKey }: { itemPath: string; uploadKey?
       {"linkUrl" in record && typeof record.linkUrl === "string" ? (
         <Field label="連結 URL" value={record.linkUrl} onChange={(next) => editor.updateValue(`${itemPath}.linkUrl`, next)} />
       ) : null}
+      {"buttonLabel" in record && typeof record.buttonLabel === "string" ? (
+        <Field label="按鈕文案" value={record.buttonLabel} onChange={(next) => editor.updateValue(`${itemPath}.buttonLabel`, next)} />
+      ) : null}
       {"name" in record && typeof record.name === "string" ? (
         <Field label="公司名稱" value={record.name} onChange={(next) => editor.updateValue(`${itemPath}.name`, next)} />
       ) : null}

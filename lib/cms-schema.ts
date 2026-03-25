@@ -134,6 +134,7 @@ export type CmsFlexBlock = {
   mediaAlt: string;
   caption: string;
   linkUrl: string;
+  buttonLabel: string;
 };
 
 export type CmsRoleHero = {

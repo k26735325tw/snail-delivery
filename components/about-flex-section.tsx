@@ -16,8 +16,9 @@ function isExternalUrl(value: string) {
   return /^https?:\/\//i.test(value);
 }
 
-function renderBlockLink(href: string) {
+function renderBlockLink(href: string, buttonLabel: string) {
   const normalizedHref = href.trim();
+  const label = buttonLabel.trim() || "查看內容";
 
   if (!normalizedHref) {
     return null;
@@ -29,7 +30,7 @@ function renderBlockLink(href: string) {
       {...(isExternalUrl(normalizedHref) ? { target: "_blank", rel: "noreferrer" } : {})}
       className="inline-flex items-center rounded-full border border-[#0b4fd4]/20 bg-[#edf4ff] px-4 py-2 text-sm font-black text-[#0b4fd4] transition hover:border-[#0b4fd4] hover:bg-[#dfeaff]"
     >
-      查看內容
+      {label}
     </a>
   );
 }
@@ -142,7 +143,7 @@ function AboutFlexBlockCard({ block, index }: { block: CmsFlexBlock; index: numb
           />
         ) : null}
 
-        {renderBlockLink(block.linkUrl)}
+        {renderBlockLink(block.linkUrl, block.buttonLabel)}
       </article>
     </EditableBlock>
   );

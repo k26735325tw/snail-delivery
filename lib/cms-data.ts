@@ -265,6 +265,7 @@ function emptyFlexBlock(): CmsFlexBlock {
     mediaAlt: "",
     caption: "",
     linkUrl: "",
+    buttonLabel: "",
   };
 }
 
