@@ -118,9 +118,14 @@ function ensurePartnerItems(items: CmsPartnerItem[]) {
 }
 
 function ensureFlexBlocks(blocks: CmsFlexBlock[]) {
-  return blocks.map((block, index) =>
-    ensureItemId(block, "flex-block", `${block.type || "block"}-${block.heading || block.caption || index + 1}`),
-  );
+  return blocks.map((block, index) => {
+    const normalized = mergeMissingFields(block, emptyFlexBlock());
+    return ensureItemId(
+      normalized,
+      "flex-block",
+      `${normalized.type || "block"}-${normalized.heading || normalized.caption || index + 1}`,
+    );
+  });
 }
 
 function ensureContentItems(items: CmsContentItem[], pageKey: "consumer" | "courier" | "merchant", sectionId: string) {

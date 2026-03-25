@@ -12,13 +12,17 @@ type HomeFlexSectionProps = {
   blocks: CmsFlexBlock[];
 };
 
+function normalizeString(value: unknown) {
+  return typeof value === "string" ? value : "";
+}
+
 function isExternalUrl(value: string) {
   return /^https?:\/\//i.test(value);
 }
 
-function renderBlockLink(href: string, buttonLabel: string) {
-  const normalizedHref = href.trim();
-  const label = buttonLabel.trim() || "查看內容";
+function renderBlockLink(href: unknown, buttonLabel: unknown) {
+  const normalizedHref = normalizeString(href).trim();
+  const label = normalizeString(buttonLabel).trim() || "查看內容";
 
   if (!normalizedHref) {
     return null;
@@ -36,9 +40,15 @@ function renderBlockLink(href: string, buttonLabel: string) {
 }
 
 function FlexBlockCard({ block, index }: { block: CmsFlexBlock; index: number }) {
-  const isText = block.type === "text";
-  const isImage = block.type === "image";
-  const isVideo = block.type === "video";
+  const type = normalizeString(block.type);
+  const heading = normalizeString(block.heading);
+  const body = normalizeString(block.body);
+  const caption = normalizeString(block.caption);
+  const mediaUrl = normalizeString(block.mediaUrl);
+  const mediaAlt = normalizeString(block.mediaAlt);
+  const isText = type === "text";
+  const isImage = type === "image";
+  const isVideo = type === "video";
 
   return (
     <EditableBlock
@@ -54,11 +64,11 @@ function FlexBlockCard({ block, index }: { block: CmsFlexBlock; index: number })
       className="gradient-border border bg-white/84 p-6 shadow-[0_24px_70px_rgba(14,29,56,0.08)]"
     >
       <article className="space-y-5">
-        {isImage && block.mediaUrl ? (
+        {isImage && mediaUrl ? (
           <div className="relative aspect-[16/9] overflow-hidden rounded-[1.6rem] bg-[#eef5ff]">
             <Image
-              src={block.mediaUrl}
-              alt={block.mediaAlt || block.heading || "自訂內容圖片"}
+              src={mediaUrl}
+              alt={mediaAlt || heading || "自訂內容圖片"}
               fill
               unoptimized
               className="object-cover"
@@ -68,9 +78,9 @@ function FlexBlockCard({ block, index }: { block: CmsFlexBlock; index: number })
 
         {isVideo ? (
           <div className="overflow-hidden rounded-[1.6rem] bg-black">
-            {block.mediaUrl ? (
+            {mediaUrl ? (
               <video
-                src={block.mediaUrl}
+                src={mediaUrl}
                 controls
                 playsInline
                 className="aspect-video w-full bg-black object-contain"
@@ -83,10 +93,10 @@ function FlexBlockCard({ block, index }: { block: CmsFlexBlock; index: number })
           </div>
         ) : null}
 
-        {(isText || block.heading) ? (
+        {(isText || heading) ? (
           <EditableText
             as="h3"
-            value={block.heading}
+            value={heading}
             className="font-[var(--font-manrope)] text-2xl font-black tracking-[-0.04em] text-[#0e1d38]"
             multiline
             selection={{
@@ -103,10 +113,10 @@ function FlexBlockCard({ block, index }: { block: CmsFlexBlock; index: number })
           />
         ) : null}
 
-        {block.body ? (
+        {body ? (
           <EditableText
             as="p"
-            value={block.body}
+            value={body}
             className="text-base leading-8 text-[#44536d]"
             multiline
             selection={{
@@ -123,10 +133,10 @@ function FlexBlockCard({ block, index }: { block: CmsFlexBlock; index: number })
           />
         ) : null}
 
-        {block.caption ? (
+        {caption ? (
           <EditableText
             as="p"
-            value={block.caption}
+            value={caption}
             className="text-sm leading-7 text-[#5d6b87]"
             multiline
             selection={{
