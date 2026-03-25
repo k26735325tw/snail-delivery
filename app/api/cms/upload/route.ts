@@ -1,9 +1,9 @@
 import { put } from "@vercel/blob";
 import { NextResponse } from "next/server";
 
-export const dynamic = "force-dynamic";
+import { MAX_UPLOAD_BYTES } from "@/lib/upload-rules";
 
-const ABOUT_VIDEO_MAX_BYTES = 10 * 1024 * 1024;
+export const dynamic = "force-dynamic";
 
 const allowedContentTypes = new Set([
   "image/jpeg",
@@ -24,10 +24,6 @@ const overwriteUploadKeys = new Set([
 
 function shouldOverwriteUpload(uploadKey: string) {
   return overwriteUploadKeys.has(uploadKey) || uploadKey.startsWith("home/download-cards/");
-}
-
-function isLimitedVideoUpload(uploadKey: string) {
-  return uploadKey === "about/video" || uploadKey.startsWith("home/flex-section/video/");
 }
 
 function normalizePath(value: string) {
@@ -65,7 +61,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Unsupported upload type" }, { status: 400 });
     }
 
-    if (isLimitedVideoUpload(uploadKey) && uploadFile.size > ABOUT_VIDEO_MAX_BYTES) {
+    if (uploadFile.size > MAX_UPLOAD_BYTES) {
       return NextResponse.json({ error: "Video file too large" }, { status: 413 });
     }
 

@@ -11,6 +11,7 @@ import {
   type CmsArrayCollectionPath,
 } from "@/lib/cms-data";
 import type { CmsData } from "@/lib/cms-schema";
+import { getImageTooLargeMessage, getVideoTooLargeMessage } from "@/lib/upload-rules";
 
 export type VisualPageKey = "home" | "consumer" | "courier" | "merchant" | "about";
 
@@ -83,9 +84,7 @@ function normalizeUploadErrorMessage(input: {
     normalized.includes("entity too large") ||
     normalized.includes("unexpected end of multipart data")
   ) {
-    return isVideo
-      ? "影片檔案過大，請改用較小的 MP4/WebM 檔案後再試。"
-      : "圖片檔案過大，請改用較小的圖片檔案後再試。";
+    return isVideo ? getVideoTooLargeMessage() : getImageTooLargeMessage();
   }
 
   if (

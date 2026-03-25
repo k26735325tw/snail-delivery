@@ -18,8 +18,16 @@ import {
   SHADOW_OPTIONS,
   TEXT_ALIGN_OPTIONS,
 } from "@/lib/cms-style";
+import {
+  IMAGE_UPLOAD_ACCEPT,
+  MAX_UPLOAD_BYTES,
+  VIDEO_UPLOAD_ACCEPT,
+  getImageTooLargeMessage,
+  getImageUploadGuidance,
+  getVideoTooLargeMessage,
+  getVideoUploadGuidance,
+} from "@/lib/upload-rules";
 
-const ABOUT_VIDEO_MAX_BYTES = 10 * 1024 * 1024;
 const ABOUT_VIDEO_ACCEPTED_TYPES = new Set(["video/mp4", "video/webm"]);
 
 function Field({
@@ -181,6 +189,10 @@ function getImageRecommendation(path: string, uploadKey?: string) {
     return { dimensions: "1200 × 900 px" };
   }
 
+  if (path.includes(".partnersSection.items.")) {
+    return { dimensions: "1200 × 900 px" };
+  }
+
   if (path.includes(".flexSection.blocks.") || uploadKey?.startsWith("home/flex-section/image/")) {
     return { dimensions: "1600 × 900 px" };
   }
@@ -204,8 +216,7 @@ function ImagePanel({ path, value, uploadKey }: { path: string; value: CmsImageA
         <div className="flex flex-col items-end gap-2">
           {recommendation ? (
             <div className="text-right">
-              <p className="text-xs font-semibold text-slate-600">建議尺寸：{recommendation.dimensions}</p>
-              <p className="text-[11px] text-slate-400">請依此尺寸上傳，避免顯示比例異常</p>
+              <p className="text-xs font-semibold text-slate-600">{getImageUploadGuidance(recommendation.dimensions)}</p>
             </div>
           ) : null}
           <button
@@ -220,12 +231,18 @@ function ImagePanel({ path, value, uploadKey }: { path: string; value: CmsImageA
       <input
         ref={uploadRef}
         type="file"
-        accept="image/*"
+        accept={IMAGE_UPLOAD_ACCEPT}
         className="hidden"
         onChange={async (event) => {
           const file = event.target.files?.[0];
 
           if (file) {
+            if (file.size > MAX_UPLOAD_BYTES) {
+              editor.setErrorMessage(getImageTooLargeMessage());
+              event.target.value = "";
+              return;
+            }
+
             await editor.uploadImage(path, file, uploadKey);
           }
 
@@ -270,8 +287,7 @@ function FlatImagePanel({
         <div className="flex flex-col items-end gap-2">
           {recommendation ? (
             <div className="text-right">
-              <p className="text-xs font-semibold text-slate-600">建議尺寸：{recommendation.dimensions}</p>
-              <p className="text-[11px] text-slate-400">請依此尺寸上傳，避免顯示比例異常</p>
+              <p className="text-xs font-semibold text-slate-600">{getImageUploadGuidance(recommendation.dimensions)}</p>
             </div>
           ) : null}
           <button
@@ -286,12 +302,18 @@ function FlatImagePanel({
       <input
         ref={uploadRef}
         type="file"
-        accept="image/*"
+        accept={IMAGE_UPLOAD_ACCEPT}
         className="hidden"
         onChange={async (event) => {
           const file = event.target.files?.[0];
 
           if (file) {
+            if (file.size > MAX_UPLOAD_BYTES) {
+              editor.setErrorMessage(getImageTooLargeMessage());
+              event.target.value = "";
+              return;
+            }
+
             try {
               const nextUrl = await editor.uploadFile(urlPath, file, uploadKey);
               editor.updateValue(urlPath, nextUrl);
@@ -332,7 +354,7 @@ function VideoPanel({
       <div className="flex items-center justify-between gap-3">
         <div>
           <p className="text-sm font-bold text-slate-900">影片設定</p>
-          <p className="text-[11px] text-slate-500">支援 MP4 / WebM，大小限制沿用既有 about 影片規則。</p>
+          <p className="text-[11px] text-slate-500">{getVideoUploadGuidance("16:9")}</p>
         </div>
         <button
           type="button"
@@ -345,7 +367,7 @@ function VideoPanel({
       <input
         ref={uploadRef}
         type="file"
-        accept="video/mp4,video/webm"
+        accept={VIDEO_UPLOAD_ACCEPT}
         className="hidden"
         onChange={async (event) => {
           const file = event.target.files?.[0];
@@ -357,8 +379,8 @@ function VideoPanel({
               return;
             }
 
-            if (file.size > ABOUT_VIDEO_MAX_BYTES) {
-              editor.setErrorMessage("影片檔案過大，請改用較小的 MP4/WebM 檔案後再試。");
+            if (file.size > MAX_UPLOAD_BYTES) {
+              editor.setErrorMessage(getVideoTooLargeMessage());
               event.target.value = "";
               return;
             }

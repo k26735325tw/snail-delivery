@@ -36,6 +36,7 @@ import {
   TEXT_ALIGN_OPTIONS,
 } from "@/lib/cms-style";
 import { createCmsId } from "@/lib/cms-data";
+import { MAX_UPLOAD_BYTES, getImageTooLargeMessage } from "@/lib/upload-rules";
 
 type AdminDashboardProps = {
   initialData: CmsData;
@@ -330,6 +331,7 @@ function RolePageEditor({
           onChange={(heroImage) => onChange({ ...page, hero: { ...page.hero, heroImage } })}
           onFileChange={onFileChange}
           recommendation={imageSuggestionMap.hero}
+          maxBytes={MAX_UPLOAD_BYTES}
         />
         <TextStyleEditor label="Hero Badge 樣式" style={page.hero.badgeStyle} onChange={(badgeStyle) => onChange({ ...page, hero: { ...page.hero, badgeStyle } })} />
         <TextStyleEditor label="Hero 標題樣式" style={page.hero.titleStyle} onChange={(titleStyle) => onChange({ ...page, hero: { ...page.hero, titleStyle } })} />
@@ -471,6 +473,10 @@ export function AdminDashboard({ initialData }: AdminDashboardProps) {
     const response = await fetch("/api/cms/upload", { method: "POST", body: formData });
     const result = (await response.json()) as { error?: string; url?: string };
 
+    if (response.status === 413) {
+      throw new Error(getImageTooLargeMessage());
+    }
+
     if (!response.ok || !result.url) {
       throw new Error(result.error ?? "Upload failed");
     }
@@ -556,7 +562,7 @@ export function AdminDashboard({ initialData }: AdminDashboardProps) {
             <Field label="組織名稱" value={data.site.organizationName} onChange={(value) => setData({ ...data, site: { ...data.site, organizationName: value } })} />
             <Field label="預設 SEO 圖片" value={data.site.defaultSeoImageUrl} onChange={(value) => setData({ ...data, site: { ...data.site, defaultSeoImageUrl: value } })} />
           </div>
-          <AdminImageUpload label="品牌 Logo" image={data.site.logo} pendingFile={pendingUploads["site.logo"] ?? null} onChange={(logo) => setData({ ...data, site: { ...data.site, logo } })} onFileChange={(file) => uploadImageAndUpdate("site.logo", "shared/logo", (url) => setData((current) => ({ ...current, site: { ...current.site, logo: { ...current.site.logo, url } } })), file)} recommendation={imageSuggestionMap.logo} isUploading={Boolean(uploadingKeys["site.logo"])} />
+          <AdminImageUpload label="品牌 Logo" image={data.site.logo} pendingFile={pendingUploads["site.logo"] ?? null} onChange={(logo) => setData({ ...data, site: { ...data.site, logo } })} onFileChange={(file) => uploadImageAndUpdate("site.logo", "shared/logo", (url) => setData((current) => ({ ...current, site: { ...current.site, logo: { ...current.site.logo, url } } })), file)} recommendation={imageSuggestionMap.logo} maxBytes={MAX_UPLOAD_BYTES} isUploading={Boolean(uploadingKeys["site.logo"])} />
           <Field label="Footer 標題" value={data.site.footerTitle} onChange={(value) => setData({ ...data, site: { ...data.site, footerTitle: value } })} multiline />
           <Field label="Footer 說明" value={data.site.footerDescription} onChange={(value) => setData({ ...data, site: { ...data.site, footerDescription: value } })} multiline />
           <TextStyleEditor label="Footer 標題樣式" style={data.site.footerTitleStyle} onChange={(footerTitleStyle) => setData({ ...data, site: { ...data.site, footerTitleStyle } })} />
@@ -605,7 +611,7 @@ export function AdminDashboard({ initialData }: AdminDashboardProps) {
             <Field label="裝置 Badge 文案" value={data.home.hero.deviceBadge} onChange={(value) => setData({ ...data, home: { ...data.home, hero: { ...data.home.hero, deviceBadge: value } } })} />
             <Field label="第二顆 Badge 文案" value={data.home.hero.secondaryBadge} onChange={(value) => setData({ ...data, home: { ...data.home, hero: { ...data.home.hero, secondaryBadge: value } } })} />
           </div>
-          <AdminImageUpload label="Hero 圖片" image={data.home.hero.heroImage} pendingFile={pendingUploads["home.hero"] ?? null} onChange={(heroImage) => setData({ ...data, home: { ...data.home, hero: { ...data.home.hero, heroImage } } })} onFileChange={(file) => uploadImageAndUpdate("home.hero", "home/hero", (url) => setData((current) => ({ ...current, home: { ...current.home, hero: { ...current.home.hero, heroImage: { ...current.home.hero.heroImage, url } } } })), file)} recommendation={imageSuggestionMap.hero} isUploading={Boolean(uploadingKeys["home.hero"])} />
+          <AdminImageUpload label="Hero 圖片" image={data.home.hero.heroImage} pendingFile={pendingUploads["home.hero"] ?? null} onChange={(heroImage) => setData({ ...data, home: { ...data.home, hero: { ...data.home.hero, heroImage } } })} onFileChange={(file) => uploadImageAndUpdate("home.hero", "home/hero", (url) => setData((current) => ({ ...current, home: { ...current.home, hero: { ...current.home.hero, heroImage: { ...current.home.hero.heroImage, url } } } })), file)} recommendation={imageSuggestionMap.hero} maxBytes={MAX_UPLOAD_BYTES} isUploading={Boolean(uploadingKeys["home.hero"])} />
           <TextStyleEditor label="Hero Badge 樣式" style={data.home.hero.badgeStyle} onChange={(badgeStyle) => setData({ ...data, home: { ...data.home, hero: { ...data.home.hero, badgeStyle } } })} />
           <TextStyleEditor label="Hero 標題樣式" style={data.home.hero.titleStyle} onChange={(titleStyle) => setData({ ...data, home: { ...data.home, hero: { ...data.home.hero, titleStyle } } })} />
           <TextStyleEditor label="Hero 說明樣式" style={data.home.hero.subtitleStyle} onChange={(subtitleStyle) => setData({ ...data, home: { ...data.home, hero: { ...data.home.hero, subtitleStyle } } })} />
@@ -658,7 +664,7 @@ export function AdminDashboard({ initialData }: AdminDashboardProps) {
                   <Field label="iOS URL" value={card.iosUrl} onChange={(value) => helpers.update({ ...card, iosUrl: value })} />
                   <Field label="Android URL" value={card.androidUrl} onChange={(value) => helpers.update({ ...card, androidUrl: value })} />
                 </div>
-                <AdminImageUpload label="卡片圖片" image={card.image} pendingFile={pendingUploads[`home.downloadCards.${index}.image`] ?? null} onChange={(image) => helpers.update({ ...card, image })} onFileChange={(file) => uploadImageAndUpdate(`home.downloadCards.${index}.image`, `home/${card.key}`, (url) => setData((current) => ({ ...current, home: { ...current.home, downloadCards: current.home.downloadCards.map((currentCard, currentIndex) => currentIndex === index ? { ...currentCard, image: { ...currentCard.image, url } } : currentCard) } })), file)} recommendation={imageSuggestionMap.card} isUploading={Boolean(uploadingKeys[`home.downloadCards.${index}.image`])} />
+                <AdminImageUpload label="卡片圖片" image={card.image} pendingFile={pendingUploads[`home.downloadCards.${index}.image`] ?? null} onChange={(image) => helpers.update({ ...card, image })} onFileChange={(file) => uploadImageAndUpdate(`home.downloadCards.${index}.image`, `home/${card.key}`, (url) => setData((current) => ({ ...current, home: { ...current.home, downloadCards: current.home.downloadCards.map((currentCard, currentIndex) => currentIndex === index ? { ...currentCard, image: { ...currentCard.image, url } } : currentCard) } })), file)} recommendation={imageSuggestionMap.card} maxBytes={MAX_UPLOAD_BYTES} isUploading={Boolean(uploadingKeys[`home.downloadCards.${index}.image`])} />
                 <TextStyleEditor label="Eyebrow 樣式" style={card.eyebrowStyle} onChange={(eyebrowStyle) => helpers.update({ ...card, eyebrowStyle })} />
                 <TextStyleEditor label="標題樣式" style={card.titleStyle} onChange={(titleStyle) => helpers.update({ ...card, titleStyle })} />
                 <TextStyleEditor label="受眾樣式" style={card.audienceStyle} onChange={(audienceStyle) => helpers.update({ ...card, audienceStyle })} />

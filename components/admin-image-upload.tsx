@@ -4,6 +4,11 @@ import Image from "next/image";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import type { CmsImageAsset } from "@/lib/cms-schema";
+import {
+  IMAGE_UPLOAD_FORMAT_LABEL,
+  IMAGE_UPLOAD_ACCEPT,
+  getImageTooLargeMessage,
+} from "@/lib/upload-rules";
 
 type AdminImageUploadProps = {
   label: string;
@@ -16,6 +21,7 @@ type AdminImageUploadProps = {
     ratio: string;
     format: string;
   };
+  maxBytes: number;
   isUploading?: boolean;
 };
 
@@ -26,6 +32,7 @@ export function AdminImageUpload({
   onChange,
   onFileChange,
   recommendation,
+  maxBytes,
   isUploading = false,
 }: AdminImageUploadProps) {
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -65,7 +72,12 @@ export function AdminImageUpload({
     setError(null);
 
     if (!file.type.startsWith("image/")) {
-      setError("僅支援圖片格式");
+      setError(`僅支援 ${IMAGE_UPLOAD_FORMAT_LABEL} 圖片格式`);
+      return;
+    }
+
+    if (file.size > maxBytes) {
+      setError(getImageTooLargeMessage());
       return;
     }
 
@@ -78,7 +90,7 @@ export function AdminImageUpload({
         <div>
           <p className="text-sm font-extrabold text-slate-900">{label}</p>
           <p className="mt-1 text-xs text-slate-500">
-            建議尺寸：{recommendation.dimensions} ｜ 比例：{recommendation.ratio} ｜ 格式：{recommendation.format}
+            格式：{recommendation.format} ｜ 大小限制：20MB ｜ 建議尺寸：{recommendation.dimensions} ｜ 比例：{recommendation.ratio}
           </p>
         </div>
         <label className="cursor-pointer rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 transition hover:border-blue-500 hover:text-blue-600">
@@ -86,7 +98,7 @@ export function AdminImageUpload({
           <input
             ref={inputRef}
             type="file"
-            accept="image/png,image/jpeg,image/webp,image/svg+xml"
+            accept={IMAGE_UPLOAD_ACCEPT}
             className="hidden"
             onChange={handleChange}
           />
