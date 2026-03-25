@@ -117,9 +117,29 @@ function ensurePartnerItems(items: CmsPartnerItem[]) {
   );
 }
 
-function ensureFlexBlocks(blocks: CmsFlexBlock[]) {
-  return blocks.map((block, index) => {
-    const normalized = mergeMissingFields(block, emptyFlexBlock());
+function normalizeFlexBlockType(value: unknown): CmsFlexBlock["type"] {
+  if (typeof value !== "string") {
+    return "text";
+  }
+
+  const normalized = value.trim().toLowerCase();
+
+  if (normalized === "image" || normalized === "video") {
+    return normalized;
+  }
+
+  return "text";
+}
+
+function ensureFlexBlocks(blocks: unknown) {
+  const list = Array.isArray(blocks) ? blocks : [];
+
+  return list.map((block, index) => {
+    const normalized = {
+      ...mergeMissingFields(block, emptyFlexBlock()),
+      type: normalizeFlexBlockType(isRecord(block) ? block.type : undefined),
+    };
+
     return ensureItemId(
       normalized,
       "flex-block",

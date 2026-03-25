@@ -12,8 +12,54 @@ type HomeFlexSectionProps = {
   blocks: CmsFlexBlock[];
 };
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
+}
+
 function normalizeString(value: unknown) {
   return typeof value === "string" ? value : "";
+}
+
+function normalizeBlockType(value: unknown): CmsFlexBlock["type"] {
+  if (typeof value !== "string") {
+    return "text";
+  }
+
+  const normalized = value.trim().toLowerCase();
+
+  if (normalized === "image" || normalized === "video") {
+    return normalized;
+  }
+
+  return "text";
+}
+
+function normalizeBlocks(value: unknown): CmsFlexBlock[] {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return value.map((entry, index) => {
+    const block = isRecord(entry) ? entry : {};
+    const type = normalizeBlockType(block.type);
+    const heading = normalizeString(block.heading);
+    const caption = normalizeString(block.caption);
+
+    return {
+      id:
+        typeof block.id === "string" && block.id.trim()
+          ? block.id
+          : `home-flex-block-${type}-${heading || caption || index + 1}`,
+      type,
+      heading,
+      body: normalizeString(block.body),
+      mediaUrl: normalizeString(block.mediaUrl),
+      mediaAlt: normalizeString(block.mediaAlt),
+      caption,
+      linkUrl: normalizeString(block.linkUrl),
+      buttonLabel: normalizeString(block.buttonLabel),
+    };
+  });
 }
 
 function isExternalUrl(value: string) {
@@ -161,8 +207,11 @@ function FlexBlockCard({ block, index }: { block: CmsFlexBlock; index: number })
 
 export function HomeFlexSection({ title, description, blocks }: HomeFlexSectionProps) {
   const editor = useCmsVisualEditor();
+  const safeTitle = normalizeString(title);
+  const safeDescription = normalizeString(description);
+  const safeBlocks = normalizeBlocks(blocks as unknown);
 
-  if (blocks.length === 0 && !editor) {
+  if (safeBlocks.length === 0 && !editor) {
     return null;
   }
 
@@ -184,7 +233,7 @@ export function HomeFlexSection({ title, description, blocks }: HomeFlexSectionP
           <div className="max-w-3xl">
             <EditableText
               as="p"
-              value={title}
+              value={safeTitle}
               className="font-[var(--font-manrope)] text-sm font-extrabold uppercase tracking-[0.28em] text-[#0b4fd4]"
               selection={{
                 id: "home.flexSection.title",
@@ -195,7 +244,7 @@ export function HomeFlexSection({ title, description, blocks }: HomeFlexSectionP
             />
             <EditableText
               as="p"
-              value={description}
+              value={safeDescription}
               className="mt-4 text-lg leading-8 text-[#44536d]"
               multiline
               selection={{
@@ -209,9 +258,9 @@ export function HomeFlexSection({ title, description, blocks }: HomeFlexSectionP
           </div>
 
           <div className="mt-8">
-            {blocks.length > 0 ? (
+            {safeBlocks.length > 0 ? (
               <div className="grid gap-6">
-                {blocks.map((block, index) => (
+                {safeBlocks.map((block, index) => (
                   <FlexBlockCard key={block.id ?? `${block.type}-${index}`} block={block} index={index} />
                 ))}
               </div>
