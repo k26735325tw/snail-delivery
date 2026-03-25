@@ -115,6 +115,16 @@ export type CmsLaunchStep = {
   blockStyle: CmsBlockStyle;
 };
 
+export type CmsPartnerItem = {
+  id?: string;
+  image: CmsImageAsset;
+  name: string;
+  nameUrl: string;
+  contactInfo: string;
+  contactUrl: string;
+  serviceScope: string;
+};
+
 export type CmsRoleHero = {
   badge: string;
   title: string;
@@ -217,6 +227,11 @@ export type CmsData = {
       leftBlockStyle: CmsBlockStyle;
       rightBlockStyle: CmsBlockStyle;
       steps: CmsLaunchStep[];
+    };
+    partnersSection: {
+      title: string;
+      description: string;
+      items: CmsPartnerItem[];
     };
     seo: CmsSeo;
   };

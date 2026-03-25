@@ -6,6 +6,7 @@ import type {
   CmsHomeFeatureCard,
   CmsLaunchStep,
   CmsLinkGroup,
+  CmsPartnerItem,
 } from "@/lib/cms-schema";
 import { cmsDefaults } from "@/lib/cms-defaults";
 import { defaultBlockStyle, defaultImageAsset, defaultTextStyle } from "@/lib/cms-style";
@@ -17,6 +18,7 @@ export type CmsArrayCollectionPath =
   | "home.features.cards"
   | "home.downloadCards"
   | "home.launchFlow.steps"
+  | "home.partnersSection.items"
   | `${"consumer" | "courier" | "merchant"}.sections.${number}.items`;
 
 function isRecord(value: unknown): value is JsonRecord {
@@ -106,6 +108,12 @@ function ensureLaunchSteps(steps: CmsLaunchStep[]) {
   );
 }
 
+function ensurePartnerItems(items: CmsPartnerItem[]) {
+  return items.map((item, index) =>
+    ensureItemId(item, "partner-card", `${item.name || item.contactInfo || "partner"}-${index + 1}`),
+  );
+}
+
 function ensureContentItems(items: CmsContentItem[], pageKey: "consumer" | "courier" | "merchant", sectionId: string) {
   return items.map((item, index) =>
     ensureItemId(item, `${pageKey}-card`, `${sectionId}-${item.title || item.eyebrow || "item"}-${index + 1}`),
@@ -129,6 +137,10 @@ export function ensureCmsStableIds(data: CmsData): CmsData {
       launchFlow: {
         ...data.home.launchFlow,
         steps: ensureLaunchSteps(data.home.launchFlow.steps),
+      },
+      partnersSection: {
+        ...data.home.partnersSection,
+        items: ensurePartnerItems(data.home.partnersSection.items),
       },
     },
     consumer: {
@@ -211,6 +223,18 @@ function emptyLaunchStep(stepCount = 0): CmsLaunchStep {
   };
 }
 
+function emptyPartnerItem(): CmsPartnerItem {
+  return {
+    id: createCmsId("partner-card", "partner"),
+    image: defaultImageAsset("", "請填寫合作廠商圖片 alt", { desktopHeight: 220, mobileHeight: 220 }),
+    name: "新合作廠商",
+    nameUrl: "",
+    contactInfo: "請填寫聯絡資訊",
+    contactUrl: "",
+    serviceScope: "請填寫服務範圍",
+  };
+}
+
 function emptyRoleCard(prefix: "consumer" | "courier" | "merchant"): CmsContentItem {
   return {
     id: createCmsId(`${prefix}-card`, "card"),
@@ -240,6 +264,10 @@ export function createArrayItemTemplate(collectionPath: CmsArrayCollectionPath, 
 
   if (collectionPath === "home.launchFlow.steps") {
     return emptyLaunchStep(currentData.home.launchFlow.steps.length);
+  }
+
+  if (collectionPath === "home.partnersSection.items") {
+    return emptyPartnerItem();
   }
 
   const roleMatch = collectionPath.match(/^(consumer|courier|merchant)\.sections\.\d+\.items$/);

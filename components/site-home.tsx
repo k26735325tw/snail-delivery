@@ -9,7 +9,6 @@ import { Footer } from "@/components/footer";
 import { PartnersSection } from "@/components/partners-section";
 import { SiteHeader } from "@/components/site-header";
 import type { CmsData, CmsDownloadCard } from "@/lib/cms-schema";
-import { partners, partnersSection } from "@/lib/partners";
 import { getBlockStyle, getImageHeight, getImageStyle, getTextStyle } from "@/lib/cms-style";
 import { detectDevice } from "@/utils/device";
 
@@ -688,9 +687,9 @@ export function SiteHome({
         </section>
 
         <PartnersSection
-          partners={partners}
-          title={partnersSection.title}
-          description={partnersSection.description}
+          partners={site.home.partnersSection.items}
+          title={site.home.partnersSection.title}
+          description={site.home.partnersSection.description}
         />
       </div>
 

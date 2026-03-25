@@ -516,6 +516,11 @@ export const cmsDefaults: CmsData = {
         },
       ],
     },
+    partnersSection: {
+      title: "合作廠商",
+      description: "此區預留合作廠商資訊，實際資料將於確認後更新。",
+      items: [],
+    },
     seo: defaultSeo({
       pageTitle: "GoGet 蝸牛外送 | CMS V2 可視化後台",
       metaDescription:

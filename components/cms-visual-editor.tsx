@@ -411,6 +411,21 @@ function ItemEditorPanel({ itemPath, uploadKey }: { itemPath: string; uploadKey?
       {"videoHint" in record && typeof record.videoHint === "string" ? (
         <Field label="影片 Placeholder 文案" value={record.videoHint} onChange={(next) => editor.updateValue(`${itemPath}.videoHint`, next)} multiline />
       ) : null}
+      {"name" in record && typeof record.name === "string" ? (
+        <Field label="公司名稱" value={record.name} onChange={(next) => editor.updateValue(`${itemPath}.name`, next)} />
+      ) : null}
+      {"nameUrl" in record && typeof record.nameUrl === "string" ? (
+        <Field label="公司名稱連結" value={record.nameUrl} onChange={(next) => editor.updateValue(`${itemPath}.nameUrl`, next)} />
+      ) : null}
+      {"contactInfo" in record && typeof record.contactInfo === "string" ? (
+        <Field label="聯絡資訊" value={record.contactInfo} onChange={(next) => editor.updateValue(`${itemPath}.contactInfo`, next)} />
+      ) : null}
+      {"contactUrl" in record && typeof record.contactUrl === "string" ? (
+        <Field label="聯絡資訊連結" value={record.contactUrl} onChange={(next) => editor.updateValue(`${itemPath}.contactUrl`, next)} />
+      ) : null}
+      {"serviceScope" in record && typeof record.serviceScope === "string" ? (
+        <Field label="服務範圍" value={record.serviceScope} onChange={(next) => editor.updateValue(`${itemPath}.serviceScope`, next)} multiline />
+      ) : null}
       {"aboutVideoUrl" in record && typeof record.aboutVideoUrl === "string" ? (
         <VideoPanel
           path={`${itemPath}.aboutVideoUrl`}
