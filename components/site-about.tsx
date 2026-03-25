@@ -125,7 +125,7 @@ export function SiteAbout({ site }: SiteAboutProps) {
                     poster={site.about.aboutVideoPoster || undefined}
                     controls
                     playsInline
-                    className="h-full w-full bg-black object-cover"
+                    className="h-full w-full bg-black object-contain"
                   />
                 )
               ) : (
