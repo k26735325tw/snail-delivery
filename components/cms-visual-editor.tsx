@@ -19,6 +19,9 @@ import {
   TEXT_ALIGN_OPTIONS,
 } from "@/lib/cms-style";
 
+const ABOUT_VIDEO_MAX_BYTES = 10 * 1024 * 1024;
+const ABOUT_VIDEO_ACCEPTED_TYPES = new Set(["video/mp4", "video/webm"]);
+
 function Field({
   label,
   value,
@@ -267,6 +270,18 @@ function VideoPanel({ path, value, posterPath }: { path: string; value: string; 
           const file = event.target.files?.[0];
 
           if (file) {
+            if (!ABOUT_VIDEO_ACCEPTED_TYPES.has(file.type)) {
+              editor.setErrorMessage("目前只支援 MP4 / WebM 格式影片。");
+              event.target.value = "";
+              return;
+            }
+
+            if (file.size > ABOUT_VIDEO_MAX_BYTES) {
+              editor.setErrorMessage("影片檔案過大，請改用較小的 MP4/WebM 檔案後再試。");
+              event.target.value = "";
+              return;
+            }
+
             try {
               const url = await editor.uploadFile(path, file, "about/video");
               editor.updateValue(path, url);

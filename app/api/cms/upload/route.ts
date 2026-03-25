@@ -3,6 +3,8 @@ import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
 
+const ABOUT_VIDEO_MAX_BYTES = 10 * 1024 * 1024;
+
 const allowedContentTypes = new Set([
   "image/jpeg",
   "image/png",
@@ -59,6 +61,10 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Unsupported upload type" }, { status: 400 });
     }
 
+    if (uploadKey === "about/video" && uploadFile.size > ABOUT_VIDEO_MAX_BYTES) {
+      return NextResponse.json({ error: "Video file too large" }, { status: 413 });
+    }
+
     const filename = (uploadFile.name ?? "upload-image").replace(/[^a-zA-Z0-9._-]+/g, "-");
     const extension = filename.includes(".") ? filename.slice(filename.lastIndexOf(".")) : "";
     const shouldOverwrite = shouldOverwriteUpload(uploadKey);
@@ -81,9 +87,15 @@ export async function POST(request: Request) {
       version,
     });
   } catch (error) {
+    const message = error instanceof Error ? error.message : "Failed to upload asset";
+
+    if (message.toLowerCase().includes("unexpected end of multipart data")) {
+      return NextResponse.json({ error: "Video file too large" }, { status: 413 });
+    }
+
     return NextResponse.json(
       {
-        error: error instanceof Error ? error.message : "Failed to upload asset",
+        error: message,
       },
       { status: 500 },
     );

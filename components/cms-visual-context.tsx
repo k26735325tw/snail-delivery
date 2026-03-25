@@ -51,10 +51,53 @@ type CmsVisualContextValue = {
   message: string | null;
   error: string | null;
   isUploadingPath: (path: string) => boolean;
+  setErrorMessage: (message: string | null) => void;
   editorTopOffset: number;
 };
 
 const CmsVisualContext = createContext<CmsVisualContextValue | null>(null);
+
+function tryParseJsonObject(text: string) {
+  try {
+    const parsed = JSON.parse(text) as unknown;
+    return parsed && typeof parsed === "object" ? (parsed as Record<string, unknown>) : null;
+  } catch {
+    return null;
+  }
+}
+
+function normalizeUploadErrorMessage(input: {
+  status: number;
+  text: string;
+  json: Record<string, unknown> | null;
+  fileType: string;
+}) {
+  const raw = String(input.json?.error ?? input.text ?? "").trim();
+  const normalized = raw.toLowerCase();
+  const isVideo = input.fileType.startsWith("video/");
+
+  if (
+    input.status === 413 ||
+    normalized.includes("request entity too large") ||
+    normalized.includes("payload too large") ||
+    normalized.includes("entity too large") ||
+    normalized.includes("unexpected end of multipart data")
+  ) {
+    return isVideo
+      ? "影片檔案過大，請改用較小的 MP4/WebM 檔案後再試。"
+      : "圖片檔案過大，請改用較小的圖片檔案後再試。";
+  }
+
+  if (
+    normalized.includes("unsupported upload type") ||
+    normalized.includes("unsupported video type") ||
+    normalized.includes("unsupported image type")
+  ) {
+    return isVideo ? "目前只支援 MP4 / WebM 格式影片。" : "目前只支援常見圖片格式。";
+  }
+
+  return isVideo ? "影片上傳失敗，請稍後再試。" : "圖片上傳失敗，請稍後再試。";
+}
 
 function splitPath(path: string) {
   return path.split(".").filter(Boolean);
@@ -264,10 +307,19 @@ export function CmsVisualEditorProvider({
         method: "POST",
         body: formData,
       });
-      const result = (await response.json()) as { error?: string; url?: string };
+      const responseText = await response.text();
+      const parsed = tryParseJsonObject(responseText);
+      const result = parsed as { error?: string; url?: string } | null;
 
-      if (!response.ok || !result.url) {
-        throw new Error(result.error ?? "檔案上傳失敗");
+      if (!response.ok || !result?.url) {
+        throw new Error(
+          normalizeUploadErrorMessage({
+            status: response.status,
+            text: responseText,
+            json: parsed,
+            fileType: file.type,
+          }),
+        );
       }
 
       return result.url;
@@ -353,6 +405,7 @@ export function CmsVisualEditorProvider({
     message,
     error,
     isUploadingPath: (path) => Boolean(uploadingPaths[path]),
+    setErrorMessage: setError,
     editorTopOffset: 88,
   };
 
