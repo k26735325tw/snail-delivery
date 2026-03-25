@@ -20,6 +20,7 @@ export type CmsArrayCollectionPath =
   | "home.downloadCards"
   | "home.launchFlow.steps"
   | "home.flexSection.blocks"
+  | "about.flexSection.blocks"
   | "home.partnersSection.items"
   | `${"consumer" | "courier" | "merchant"}.sections.${number}.items`;
 
@@ -153,6 +154,13 @@ export function ensureCmsStableIds(data: CmsData): CmsData {
       partnersSection: {
         ...data.home.partnersSection,
         items: ensurePartnerItems(data.home.partnersSection.items),
+      },
+    },
+    about: {
+      ...data.about,
+      flexSection: {
+        ...data.about.flexSection,
+        blocks: ensureFlexBlocks(data.about.flexSection.blocks),
       },
     },
     consumer: {
@@ -292,6 +300,10 @@ export function createArrayItemTemplate(collectionPath: CmsArrayCollectionPath, 
   }
 
   if (collectionPath === "home.flexSection.blocks") {
+    return emptyFlexBlock();
+  }
+
+  if (collectionPath === "about.flexSection.blocks") {
     return emptyFlexBlock();
   }
 

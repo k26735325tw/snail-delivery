@@ -180,6 +180,11 @@ export type CmsAboutPage = {
   videoHint: string;
   aboutVideoUrl: string;
   aboutVideoPoster: string;
+  flexSection: {
+    title: string;
+    description: string;
+    blocks: CmsFlexBlock[];
+  };
 };
 
 export type CmsData = {

@@ -1,5 +1,6 @@
 "use client";
 
+import { AboutFlexSection } from "@/components/about-flex-section";
 import { EditableBlock, EditableText } from "@/components/cms-inline-edit";
 import { Footer } from "@/components/footer";
 import { SiteHeader } from "@/components/site-header";
@@ -159,6 +160,12 @@ export function SiteAbout({ site }: SiteAboutProps) {
             </div>
           </div>
         </EditableBlock>
+
+        <AboutFlexSection
+          title={site.about.flexSection.title}
+          description={site.about.flexSection.description}
+          blocks={site.about.flexSection.blocks}
+        />
       </div>
 
       <Footer site={site} />

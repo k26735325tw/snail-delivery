@@ -193,7 +193,11 @@ function getImageRecommendation(path: string, uploadKey?: string) {
     return { dimensions: "1200 × 900 px" };
   }
 
-  if (path.includes(".flexSection.blocks.") || uploadKey?.startsWith("home/flex-section/image/")) {
+  if (
+    path.includes(".flexSection.blocks.") ||
+    uploadKey?.startsWith("home/flex-section/image/") ||
+    uploadKey?.startsWith("about/flex-section/image/")
+  ) {
     return { dimensions: "1600 × 900 px" };
   }
 
@@ -479,6 +483,8 @@ function ItemEditorPanel({ itemPath, uploadKey }: { itemPath: string; uploadKey?
   }
 
   const record = item as Record<string, unknown>;
+  const isAboutFlexBlock = itemPath.startsWith("about.flexSection.blocks.");
+  const flexMediaBaseKey = isAboutFlexBlock ? "about/flex-section" : "home/flex-section";
 
   return (
     <div className="space-y-4 rounded-[1.5rem] border border-slate-200 bg-slate-50 p-4">
@@ -562,14 +568,14 @@ function ItemEditorPanel({ itemPath, uploadKey }: { itemPath: string; uploadKey?
           altPath={`${itemPath}.mediaAlt`}
           url={record.mediaUrl}
           alt={typeof record.mediaAlt === "string" ? record.mediaAlt : ""}
-          uploadKey={`home/flex-section/image/${typeof record.id === "string" ? record.id : "block"}`}
+          uploadKey={`${flexMediaBaseKey}/image/${typeof record.id === "string" ? record.id : "block"}`}
         />
       ) : null}
       {"mediaUrl" in record && typeof record.mediaUrl === "string" && "type" in record && record.type === "video" ? (
         <VideoPanel
           path={`${itemPath}.mediaUrl`}
           value={record.mediaUrl}
-          uploadKey={`home/flex-section/video/${typeof record.id === "string" ? record.id : "block"}`}
+          uploadKey={`${flexMediaBaseKey}/video/${typeof record.id === "string" ? record.id : "block"}`}
         />
       ) : null}
       {"mediaAlt" in record && typeof record.mediaAlt === "string" && (!("type" in record) || record.type !== "image") ? (

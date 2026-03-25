@@ -8,4 +8,9 @@ export const aboutDefaults = {
   videoHint: "品牌影片即將上線。",
   aboutVideoUrl: "",
   aboutVideoPoster: "",
+  flexSection: {
+    title: "About 自訂內容區",
+    description: "此區可補充品牌故事、圖片或影片內容，依實際營運需求彈性調整。",
+    blocks: [],
+  },
 };

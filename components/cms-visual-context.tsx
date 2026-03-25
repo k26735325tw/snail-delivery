@@ -142,7 +142,7 @@ function replacePathPrefix(value: string | undefined, previousPrefix: string, ne
 }
 
 function collectionAllowsEmpty(collectionPath: CmsArrayCollectionPath) {
-  return collectionPath === "home.flexSection.blocks";
+  return collectionPath === "home.flexSection.blocks" || collectionPath === "about.flexSection.blocks";
 }
 
 export function CmsVisualEditorProvider({
