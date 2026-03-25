@@ -23,6 +23,17 @@ function parseJsonText(text: string) {
   return JSON.parse(text.replace(/^\uFEFF/, ""));
 }
 
+function getFallbackCmsData() {
+  return normalizeCmsData(cmsDefaults);
+}
+
+function reportCmsReadFailure(error: unknown) {
+  console.error(
+    "[cms-store] Falling back to cmsDefaults because CMS blob could not be read.",
+    error,
+  );
+}
+
 function getAtPath(source: unknown, path: string) {
   return path.split(".").filter(Boolean).reduce<unknown>((current, part) => {
     if (current && typeof current === "object") {
@@ -111,6 +122,15 @@ async function readCmsBlobRaw() {
   return parseJsonText(text);
 }
 
+async function readCmsBlobRawSafe() {
+  try {
+    return await readCmsBlobRaw();
+  } catch (error) {
+    reportCmsReadFailure(error);
+    return null;
+  }
+}
+
 export async function seedCmsDataIfMissing() {
   const existingUrl = await getCmsBlobUrl();
 
@@ -131,12 +151,23 @@ export async function seedCmsDataIfMissing() {
 export async function getCmsData(): Promise<CmsData> {
   noStore();
 
-  const raw = (await readCmsBlobRaw()) ?? (await seedCmsDataIfMissing(), cmsDefaults);
-  return normalizeCmsData(raw);
+  const raw = await readCmsBlobRawSafe();
+
+  if (raw) {
+    return normalizeCmsData(raw);
+  }
+
+  try {
+    await seedCmsDataIfMissing();
+  } catch (error) {
+    reportCmsReadFailure(error);
+  }
+
+  return getFallbackCmsData();
 }
 
 export async function saveCmsData(data: CmsData, dirtyPaths: string[] = []) {
-  const existingRaw = (await readCmsBlobRaw()) ?? cmsDefaults;
+  const existingRaw = (await readCmsBlobRawSafe()) ?? cmsDefaults;
   let nextRaw = mergeMissingFields(applyLegacyAliases(existingRaw), cmsDefaults);
   const effectiveDirtyPaths = dirtyPaths.length > 0
     ? dirtyPaths
