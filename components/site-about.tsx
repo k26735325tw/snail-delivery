@@ -10,6 +10,12 @@ type SiteAboutProps = {
 };
 
 export function SiteAbout({ site }: SiteAboutProps) {
+  const videoUrl = site.about.aboutVideoUrl.trim();
+  const isEmbedVideo =
+    videoUrl.includes("youtube.com/embed") ||
+    videoUrl.includes("youtube-nocookie.com/embed") ||
+    videoUrl.includes("player.vimeo.com/video");
+
   return (
     <main className="min-h-screen pb-10">
       <SiteHeader site={site} />
@@ -104,14 +110,24 @@ export function SiteAbout({ site }: SiteAboutProps) {
 
           <div className="mt-8 overflow-hidden rounded-[1.8rem] border border-[#0e1d38]/10 bg-[#eef5ff]">
             <div className="aspect-video w-full">
-              {site.about.aboutVideoUrl ? (
-                <iframe
-                  src={site.about.aboutVideoUrl}
-                  title={site.about.videoTitle}
-                  className="h-full w-full"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                />
+              {videoUrl ? (
+                isEmbedVideo ? (
+                  <iframe
+                    src={videoUrl}
+                    title={site.about.videoTitle}
+                    className="h-full w-full"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  />
+                ) : (
+                  <video
+                    src={videoUrl}
+                    poster={site.about.aboutVideoPoster || undefined}
+                    controls
+                    playsInline
+                    className="h-full w-full bg-black object-cover"
+                  />
+                )
               ) : (
                 <div
                   className="flex h-full w-full items-center justify-center bg-[radial-gradient(circle_at_top_left,rgba(255,216,74,0.38),transparent_34%),linear-gradient(135deg,#f7fbff,#e8f0ff)] px-6 text-center"

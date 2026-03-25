@@ -235,6 +235,55 @@ function ImagePanel({ path, value, uploadKey }: { path: string; value: CmsImageA
   );
 }
 
+function VideoPanel({ path, value, posterPath }: { path: string; value: string; posterPath?: string }) {
+  const editor = useCmsVisualEditor();
+  const uploadRef = useRef<HTMLInputElement | null>(null);
+
+  if (!editor) {
+    return null;
+  }
+
+  return (
+    <div className="space-y-4 rounded-[1.5rem] border border-slate-200 bg-slate-50 p-4">
+      <div className="flex items-center justify-between gap-3">
+        <div>
+          <p className="text-sm font-bold text-slate-900">影片設定</p>
+          <p className="text-[11px] text-slate-500">支援 MP4 / WebM，上傳後會寫入 about 影片網址。</p>
+        </div>
+        <button
+          type="button"
+          onClick={() => uploadRef.current?.click()}
+          className="appearance-none rounded-full border border-slate-300 bg-white px-4 py-2 text-xs font-black text-slate-900 shadow-sm transition hover:border-slate-400 hover:bg-slate-100"
+        >
+          {editor.isUploadingPath(path) ? "上傳中" : "上傳影片"}
+        </button>
+      </div>
+      <input
+        ref={uploadRef}
+        type="file"
+        accept="video/mp4,video/webm"
+        className="hidden"
+        onChange={async (event) => {
+          const file = event.target.files?.[0];
+
+          if (file) {
+            try {
+              const url = await editor.uploadFile(path, file, "about/video");
+              editor.updateValue(path, url);
+            } catch {
+              // Error state is already handled in uploadFile.
+            }
+          }
+
+          event.target.value = "";
+        }}
+      />
+      <Field label="影片 URL" value={value} onChange={(next) => editor.updateValue(path, next)} />
+      {posterPath ? <Field label="Poster URL" value={String(editor.getValue(posterPath) ?? "")} onChange={(next) => editor.updateValue(posterPath, next)} /> : null}
+    </div>
+  );
+}
+
 function CardCrudPanel({
   collectionPath,
   itemId,
@@ -348,10 +397,11 @@ function ItemEditorPanel({ itemPath, uploadKey }: { itemPath: string; uploadKey?
         <Field label="影片 Placeholder 文案" value={record.videoHint} onChange={(next) => editor.updateValue(`${itemPath}.videoHint`, next)} multiline />
       ) : null}
       {"aboutVideoUrl" in record && typeof record.aboutVideoUrl === "string" ? (
-        <Field label="影片 URL" value={record.aboutVideoUrl} onChange={(next) => editor.updateValue(`${itemPath}.aboutVideoUrl`, next)} />
-      ) : null}
-      {"aboutVideoPoster" in record && typeof record.aboutVideoPoster === "string" ? (
-        <Field label="影片 Poster URL" value={record.aboutVideoPoster} onChange={(next) => editor.updateValue(`${itemPath}.aboutVideoPoster`, next)} />
+        <VideoPanel
+          path={`${itemPath}.aboutVideoUrl`}
+          value={record.aboutVideoUrl}
+          posterPath={"aboutVideoPoster" in record && typeof record.aboutVideoPoster === "string" ? `${itemPath}.aboutVideoPoster` : undefined}
+        />
       ) : null}
       {"image" in record && record.image && typeof record.image === "object" && "url" in record.image ? (
         <ImagePanel path={`${itemPath}.image`} value={record.image as CmsImageAsset} uploadKey={uploadKey} />

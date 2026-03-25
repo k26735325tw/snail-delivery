@@ -40,6 +40,7 @@ type CmsVisualContextValue = {
   updateValue: (path: string, value: unknown) => void;
   getValue: (path: string) => unknown;
   uploadImage: (imagePath: string, file: File, uploadKey?: string) => Promise<void>;
+  uploadFile: (path: string, file: File, uploadKey: string) => Promise<string>;
   save: () => Promise<void>;
   addArrayItem: (collectionPath: CmsArrayCollectionPath, afterItemId?: string | null) => void;
   duplicateArrayItem: (collectionPath: CmsArrayCollectionPath, itemId: string) => void;
@@ -249,17 +250,15 @@ export function CmsVisualEditorProvider({
     updateCollection(collectionPath, nextItems);
   }
 
-  async function uploadImage(imagePath: string, file: File, uploadKey?: string) {
-    const finalUploadKey = uploadKey ?? getImageUploadKey(imagePath, selected?.itemId);
-
-    setUploadingPaths((current) => ({ ...current, [imagePath]: true }));
+  async function uploadFile(path: string, file: File, uploadKey: string) {
+    setUploadingPaths((current) => ({ ...current, [path]: true }));
     setError(null);
     setMessage(null);
 
     try {
       const formData = new FormData();
       formData.append("file", file);
-      formData.append("uploadKey", finalUploadKey);
+      formData.append("uploadKey", uploadKey);
 
       const response = await fetch("/api/cms/upload", {
         method: "POST",
@@ -268,19 +267,31 @@ export function CmsVisualEditorProvider({
       const result = (await response.json()) as { error?: string; url?: string };
 
       if (!response.ok || !result.url) {
-        throw new Error(result.error ?? "圖片上傳失敗");
+        throw new Error(result.error ?? "檔案上傳失敗");
       }
 
-      updateValue(`${imagePath}.url`, result.url);
-      setMessage("圖片已上傳，按下儲存後會寫入正式 Blob CMS。");
+      return result.url;
     } catch (uploadError) {
-      setError(uploadError instanceof Error ? uploadError.message : "圖片上傳失敗");
+      setError(uploadError instanceof Error ? uploadError.message : "檔案上傳失敗");
+      throw uploadError;
     } finally {
       setUploadingPaths((current) => {
         const next = { ...current };
-        delete next[imagePath];
+        delete next[path];
         return next;
       });
+    }
+  }
+
+  async function uploadImage(imagePath: string, file: File, uploadKey?: string) {
+    const finalUploadKey = uploadKey ?? getImageUploadKey(imagePath, selected?.itemId);
+
+    try {
+      const url = await uploadFile(imagePath, file, finalUploadKey);
+      updateValue(`${imagePath}.url`, url);
+      setMessage("圖片已上傳，按下儲存後會寫入正式 Blob CMS。");
+    } catch {
+      // Error state is already handled in uploadFile.
     }
   }
 
@@ -331,6 +342,7 @@ export function CmsVisualEditorProvider({
     updateValue,
     getValue: (path) => getAtPath(data, path),
     uploadImage,
+    uploadFile,
     save,
     addArrayItem,
     duplicateArrayItem,

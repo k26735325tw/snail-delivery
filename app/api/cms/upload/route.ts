@@ -3,13 +3,21 @@ import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
 
-const allowedContentTypes = new Set(["image/jpeg", "image/png", "image/webp", "image/svg+xml"]);
+const allowedContentTypes = new Set([
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "image/svg+xml",
+  "video/mp4",
+  "video/webm",
+]);
 const overwriteUploadKeys = new Set([
   "shared/logo",
   "home/hero",
   "consumer/hero",
   "courier/hero",
   "merchant/hero",
+  "about/video",
 ]);
 
 function shouldOverwriteUpload(uploadKey: string) {
@@ -48,7 +56,7 @@ export async function POST(request: Request) {
     const uploadFile = file as Blob & { name?: string; type: string };
 
     if (!allowedContentTypes.has(uploadFile.type)) {
-      return NextResponse.json({ error: "Unsupported image type" }, { status: 400 });
+      return NextResponse.json({ error: "Unsupported upload type" }, { status: 400 });
     }
 
     const filename = (uploadFile.name ?? "upload-image").replace(/[^a-zA-Z0-9._-]+/g, "-");
@@ -75,7 +83,7 @@ export async function POST(request: Request) {
   } catch (error) {
     return NextResponse.json(
       {
-        error: error instanceof Error ? error.message : "Failed to upload image",
+        error: error instanceof Error ? error.message : "Failed to upload asset",
       },
       { status: 500 },
     );
