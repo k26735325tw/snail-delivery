@@ -1,4 +1,4 @@
-const DEFAULT_SITE_URL = "https://goget.top";
+const DEFAULT_SITE_URL = "https://snail-delivery.vercel.app";
 
 function normalizeSiteUrl(value: string) {
   return value.endsWith("/") ? value : `${value}/`;
