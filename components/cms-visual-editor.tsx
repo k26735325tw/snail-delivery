@@ -8,6 +8,7 @@ import { RolePage } from "@/components/role-page";
 import { SiteHome } from "@/components/site-home";
 import type { CmsArrayCollectionPath } from "@/lib/cms-data";
 import type { CmsBlockStyle, CmsData, CmsImageAsset, CmsTextStyle } from "@/lib/cms-schema";
+import type { CmsStatus } from "@/lib/cms-store";
 import {
   BRAND_COLOR_OPTIONS,
   FONT_SIZE_OPTIONS,
@@ -29,6 +30,26 @@ import {
 } from "@/lib/upload-rules";
 
 const ABOUT_VIDEO_ACCEPTED_TYPES = new Set(["video/mp4", "video/webm"]);
+
+function FallbackNotice() {
+  const editor = useCmsVisualEditor();
+
+  if (!editor || editor.cmsStatus.source !== "fallback") {
+    return null;
+  }
+
+  return (
+    <div className="rounded-[1.5rem] border border-amber-300 bg-amber-50 p-4 text-sm leading-6 text-amber-900">
+      <p className="font-black">目前使用備援資料</p>
+      <p className="mt-2">
+        {editor.cmsStatus.message ?? "Blob CMS 暫時不可讀，已切換到 fallback 模式。"}
+      </p>
+      <p className="mt-2 text-xs font-semibold uppercase tracking-[0.16em] text-amber-700">
+        source: {editor.cmsStatus.source} / reason: {editor.cmsStatus.reason}
+      </p>
+    </div>
+  );
+}
 
 function Field({
   label,
@@ -640,6 +661,8 @@ function VisualSidebar() {
         <p className="mt-2 text-sm leading-6 text-slate-500">點文字直接改內容，點圖片更換資產，點整張卡片進行 CRUD 與卡片專屬設定。</p>
       </div>
 
+      <FallbackNotice />
+
       {selection ? (
         <div className="space-y-4 overflow-y-auto pr-1">
           <div className="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-4">
@@ -693,10 +716,10 @@ function VisualSidebar() {
         <button
           type="button"
           onClick={() => editor.save()}
-          disabled={!editor.isDirty || editor.isSaving}
+          disabled={editor.cmsStatus.writeDisabled || !editor.isDirty || editor.isSaving}
           className="w-full rounded-full bg-slate-900 px-5 py-3 text-sm font-black text-white disabled:cursor-not-allowed disabled:bg-slate-300"
         >
-          {editor.isSaving ? "儲存中..." : "儲存到 Blob CMS"}
+          {editor.cmsStatus.writeDisabled ? "備援模式停用儲存" : editor.isSaving ? "儲存中..." : "儲存到 Blob CMS"}
         </button>
       </div>
     </div>
@@ -735,16 +758,21 @@ function VisualCanvas() {
             ))}
           </div>
           <div className="flex flex-wrap items-center gap-3">
+            {editor.cmsStatus.source === "fallback" ? (
+              <div className="rounded-full border border-amber-300 bg-amber-50 px-4 py-2 text-xs font-black text-amber-900">
+                備援模式：已停用儲存 / 發布
+              </div>
+            ) : null}
             <a href={pageMap[editor.currentPage].href} target="_blank" rel="noreferrer" className="rounded-full border border-slate-300 px-4 py-2 text-sm font-bold text-slate-700">
               開啟公開頁
             </a>
             <button
               type="button"
               onClick={() => editor.save()}
-              disabled={!editor.isDirty || editor.isSaving}
+              disabled={editor.cmsStatus.writeDisabled || !editor.isDirty || editor.isSaving}
               className="rounded-full bg-slate-900 px-5 py-2.5 text-sm font-black text-white disabled:cursor-not-allowed disabled:bg-slate-300"
             >
-              {editor.isSaving ? "儲存中..." : "儲存"}
+              {editor.cmsStatus.writeDisabled ? "備援模式停用儲存" : editor.isSaving ? "儲存中..." : "儲存"}
             </button>
           </div>
         </div>
@@ -773,9 +801,15 @@ function VisualCanvas() {
   );
 }
 
-export function CmsVisualEditor({ initialData }: { initialData: CmsData }) {
+export function CmsVisualEditor({
+  initialData,
+  initialStatus,
+}: {
+  initialData: CmsData;
+  initialStatus: CmsStatus;
+}) {
   return (
-    <CmsVisualEditorProvider initialData={initialData}>
+    <CmsVisualEditorProvider initialData={initialData} initialStatus={initialStatus}>
       <VisualCanvas />
     </CmsVisualEditorProvider>
   );

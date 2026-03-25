@@ -1,13 +1,13 @@
 import { NextResponse } from "next/server";
 
-import { getCmsData } from "@/lib/cms-store";
+import { getCmsSnapshot } from "@/lib/cms-store";
 
 export const dynamic = "force-dynamic";
 
 export async function GET() {
   try {
-    const data = await getCmsData();
-    return NextResponse.json(data);
+    const snapshot = await getCmsSnapshot();
+    return NextResponse.json(snapshot);
   } catch (error) {
     return NextResponse.json(
       {

@@ -11,6 +11,7 @@ import {
   type CmsArrayCollectionPath,
 } from "@/lib/cms-data";
 import type { CmsData } from "@/lib/cms-schema";
+import type { CmsStatus } from "@/lib/cms-store";
 import { uploadAsset } from "@/lib/blob-upload";
 import { getImageTooLargeMessage, getVideoTooLargeMessage } from "@/lib/upload-rules";
 
@@ -35,6 +36,7 @@ export type CmsVisualSelection = {
 type CmsVisualContextValue = {
   enabled: boolean;
   data: CmsData;
+  cmsStatus: CmsStatus;
   currentPage: VisualPageKey;
   setCurrentPage: (page: VisualPageKey) => void;
   selected: CmsVisualSelection | null;
@@ -147,12 +149,15 @@ function collectionAllowsEmpty(collectionPath: CmsArrayCollectionPath) {
 
 export function CmsVisualEditorProvider({
   initialData,
+  initialStatus,
   children,
 }: {
   initialData: CmsData;
+  initialStatus: CmsStatus;
   children: ReactNode;
 }) {
   const [data, setData] = useState(initialData);
+  const [cmsStatus, setCmsStatus] = useState(initialStatus);
   const [currentPage, setCurrentPage] = useState<VisualPageKey>("home");
   const [selected, setSelected] = useState<CmsVisualSelection | null>(null);
   const [isSaving, setIsSaving] = useState(false);
@@ -291,6 +296,12 @@ export function CmsVisualEditorProvider({
   }
 
   async function uploadFile(path: string, file: File, uploadKey: string) {
+    if (cmsStatus.writeDisabled) {
+      const message = cmsStatus.message ?? "目前使用備援資料，已停用儲存 / 發布。";
+      setError(message);
+      throw new Error(message);
+    }
+
     setUploadingPaths((current) => ({ ...current, [path]: true }));
     setError(null);
     setMessage(null);
@@ -336,6 +347,12 @@ export function CmsVisualEditorProvider({
       return;
     }
 
+    if (cmsStatus.writeDisabled) {
+      setError(cmsStatus.message ?? "目前使用備援資料，已停用儲存 / 發布。");
+      setMessage(null);
+      return;
+    }
+
     setIsSaving(true);
     setError(null);
     setMessage(null);
@@ -351,7 +368,11 @@ export function CmsVisualEditorProvider({
           dirtyPaths: Array.from(dirtyPathsRef.current),
         }),
       });
-      const result = (await response.json()) as { data?: CmsData; error?: string };
+      const result = (await response.json()) as { data?: CmsData; error?: string; cmsStatus?: CmsStatus };
+
+      if (result.cmsStatus) {
+        setCmsStatus(result.cmsStatus);
+      }
 
       if (!response.ok || !result.data) {
         throw new Error(result.error ?? "儲存失敗");
@@ -371,6 +392,7 @@ export function CmsVisualEditorProvider({
   const value: CmsVisualContextValue = {
     enabled: true,
     data,
+    cmsStatus,
     currentPage,
     setCurrentPage,
     selected,

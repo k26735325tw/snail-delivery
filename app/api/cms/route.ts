@@ -1,7 +1,7 @@
 import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
 
-import { getCmsData, saveCmsData } from "@/lib/cms-store";
+import { CmsWriteLockedError, getCmsSnapshot, saveCmsData } from "@/lib/cms-store";
 import type { CmsData } from "@/lib/cms-schema";
 
 export const dynamic = "force-dynamic";
@@ -19,8 +19,8 @@ function revalidateCmsPaths() {
 
 export async function GET() {
   try {
-    const data = await getCmsData();
-    return NextResponse.json(data);
+    const snapshot = await getCmsSnapshot();
+    return NextResponse.json(snapshot);
   } catch (error) {
     return NextResponse.json(
       {
@@ -35,6 +35,7 @@ export async function PUT(request: Request) {
   try {
     const payload = (await request.json()) as { data: CmsData; dirtyPaths?: string[] };
     const { data, url } = await saveCmsData(payload.data, payload.dirtyPaths ?? []);
+    const snapshot = await getCmsSnapshot();
 
     revalidateCmsPaths();
 
@@ -42,8 +43,21 @@ export async function PUT(request: Request) {
       success: true,
       url,
       data,
+      cmsStatus: snapshot.status,
     });
   } catch (error) {
+    if (error instanceof CmsWriteLockedError) {
+      const snapshot = await getCmsSnapshot();
+
+      return NextResponse.json(
+        {
+          error: error.message,
+          cmsStatus: snapshot.status,
+        },
+        { status: 409 },
+      );
+    }
+
     return NextResponse.json(
       {
         error: error instanceof Error ? error.message : "Failed to save CMS data",

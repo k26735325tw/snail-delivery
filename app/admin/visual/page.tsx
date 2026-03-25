@@ -1,5 +1,5 @@
 import { CmsVisualEditor } from "@/components/cms-visual-editor";
-import { getCmsData } from "@/lib/cms-store";
+import { getCmsSnapshot } from "@/lib/cms-store";
 
 export const dynamic = "force-dynamic";
 export const metadata = {
@@ -10,7 +10,7 @@ export const metadata = {
 };
 
 export default async function AdminVisualPage() {
-  const cms = await getCmsData();
+  const cms = await getCmsSnapshot();
 
-  return <CmsVisualEditor initialData={cms} />;
+  return <CmsVisualEditor initialData={cms.data} initialStatus={cms.status} />;
 }

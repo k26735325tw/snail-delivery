@@ -10,6 +10,34 @@ import type {
 const CMS_CONTENT_PATH = "cms/site-content.json";
 
 type JsonRecord = Record<string, unknown>;
+export type CmsSource = "blob" | "fallback";
+export type CmsStatusReason =
+  | "ok"
+  | "forced_fallback"
+  | "blob_403"
+  | "blob_unavailable"
+  | "blob_missing"
+  | "blob_error"
+  | "default";
+
+export type CmsStatus = {
+  source: CmsSource;
+  reason: CmsStatusReason;
+  writeDisabled: boolean;
+  message: string | null;
+};
+
+export type CmsSnapshot = {
+  data: CmsData;
+  status: CmsStatus;
+};
+
+export class CmsWriteLockedError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "CmsWriteLockedError";
+  }
+}
 
 function isRecord(value: unknown): value is JsonRecord {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
@@ -23,8 +51,8 @@ function parseJsonText(text: string) {
   return JSON.parse(text.replace(/^\uFEFF/, ""));
 }
 
-function getFallbackCmsData() {
-  return normalizeCmsData(cmsDefaults);
+function getFallbackCmsData(): CmsData {
+  return normalizeCmsData(cloneValue(cmsDefaults));
 }
 
 function reportCmsReadFailure(error: unknown) {
@@ -32,6 +60,50 @@ function reportCmsReadFailure(error: unknown) {
     "[cms-store] Falling back to cmsDefaults because CMS blob could not be read.",
     error,
   );
+}
+
+function isBlob403Error(error: unknown) {
+  return error instanceof Error && error.message.includes("403");
+}
+
+function getFallbackStatus(reason: CmsStatusReason): CmsStatus {
+  if (reason === "forced_fallback") {
+    return {
+      source: "fallback",
+      reason,
+      writeDisabled: true,
+      message: "目前強制使用備援資料，已停用儲存 / 發布。",
+    };
+  }
+
+  if (reason === "blob_missing" || reason === "default") {
+    return {
+      source: "fallback",
+      reason,
+      writeDisabled: true,
+      message: "目前使用備援資料，尚未讀到 Blob CMS 主資料，已停用儲存 / 發布。",
+    };
+  }
+
+  return {
+    source: "fallback",
+    reason,
+    writeDisabled: true,
+    message: "Blob CMS 暫時不可讀，目前使用備援資料，已停用儲存 / 發布避免覆蓋原始資料。",
+  };
+}
+
+function getBlobStatus(): CmsStatus {
+  return {
+    source: "blob",
+    reason: "ok",
+    writeDisabled: false,
+    message: null,
+  };
+}
+
+function shouldForceFallback() {
+  return process.env.CMS_FORCE_FALLBACK === "1";
 }
 
 function getAtPath(source: unknown, path: string) {
@@ -122,15 +194,6 @@ async function readCmsBlobRaw() {
   return parseJsonText(text);
 }
 
-async function readCmsBlobRawSafe() {
-  try {
-    return await readCmsBlobRaw();
-  } catch (error) {
-    reportCmsReadFailure(error);
-    return null;
-  }
-}
-
 export async function seedCmsDataIfMissing() {
   const existingUrl = await getCmsBlobUrl();
 
@@ -148,26 +211,62 @@ export async function seedCmsDataIfMissing() {
   return result.url;
 }
 
-export async function getCmsData(): Promise<CmsData> {
+export async function getCmsSnapshot(): Promise<CmsSnapshot> {
   noStore();
 
-  const raw = await readCmsBlobRawSafe();
-
-  if (raw) {
-    return normalizeCmsData(raw);
+  if (shouldForceFallback()) {
+    return {
+      data: getFallbackCmsData(),
+      status: getFallbackStatus("forced_fallback"),
+    };
   }
 
   try {
-    await seedCmsDataIfMissing();
+    const raw = await readCmsBlobRaw();
+
+    if (raw) {
+      return {
+        data: normalizeCmsData(raw),
+        status: getBlobStatus(),
+      };
+    }
+
+    try {
+      await seedCmsDataIfMissing();
+    } catch (error) {
+      reportCmsReadFailure(error);
+    }
+
+    return {
+      data: getFallbackCmsData(),
+      status: getFallbackStatus("blob_missing"),
+    };
   } catch (error) {
     reportCmsReadFailure(error);
+
+    return {
+      data: getFallbackCmsData(),
+      status: getFallbackStatus(isBlob403Error(error) ? "blob_403" : "blob_unavailable"),
+    };
+  }
+}
+
+export async function getCmsData(): Promise<CmsData> {
+  return (await getCmsSnapshot()).data;
+}
+
+async function getWritableCmsRaw() {
+  const snapshot = await getCmsSnapshot();
+
+  if (snapshot.status.writeDisabled) {
+    throw new CmsWriteLockedError(snapshot.status.message ?? "目前使用備援資料，已停用儲存 / 發布。");
   }
 
-  return getFallbackCmsData();
+  return snapshot.data;
 }
 
 export async function saveCmsData(data: CmsData, dirtyPaths: string[] = []) {
-  const existingRaw = (await readCmsBlobRawSafe()) ?? cmsDefaults;
+  const existingRaw = await getWritableCmsRaw();
   let nextRaw = mergeMissingFields(applyLegacyAliases(existingRaw), cmsDefaults);
   const effectiveDirtyPaths = dirtyPaths.length > 0
     ? dirtyPaths
