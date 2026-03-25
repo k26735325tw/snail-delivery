@@ -79,6 +79,7 @@ export const cmsDefaults: CmsData = {
         { label: "店家", href: "/merchant" },
         { label: "後台", href: "/admin" },
       ],
+      aboutLink: { label: "關於我們", href: "/about" },
       cta: { label: "立即下載 App", href: "/#download-cards" },
       blockStyle: defaultBlockStyle({
         backgroundColor: "#ffffffcc",

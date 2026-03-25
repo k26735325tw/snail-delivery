@@ -180,6 +180,7 @@ export type CmsData = {
       subtitle: string;
       subtitleStyle: CmsTextStyle;
       navItems: CmsLinkItem[];
+      aboutLink: CmsLinkItem;
       cta: CmsLinkItem;
       blockStyle: CmsBlockStyle;
     };

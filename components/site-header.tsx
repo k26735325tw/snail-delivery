@@ -103,12 +103,18 @@ export function SiteHeader({ site, embedded = false, highlighted = false }: Site
                     }}
                   />
                 ))}
-                <Link
-                  href="/about"
+                <EditableLink
+                  href={site.home.header.aboutLink.href}
+                  value={site.home.header.aboutLink.label}
                   className="rounded-full px-4 py-2 text-sm font-bold text-ink/68 transition hover:bg-white hover:text-blue"
-                >
-                  關於我們
-                </Link>
+                  selection={{
+                    id: "home.header.about-link",
+                    kind: "link",
+                    label: "Header 關於我們",
+                    fieldPath: "home.header.aboutLink.label",
+                    hrefPath: "home.header.aboutLink.href",
+                  }}
+                />
               </nav>
 
               <EditableLink
