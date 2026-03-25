@@ -102,6 +102,12 @@ export function SiteHeader({ site, embedded = false, highlighted = false }: Site
                   }}
                 />
               ))}
+              <Link
+                href="/about"
+                className="rounded-full px-4 py-2 text-sm font-bold text-ink/68 transition hover:bg-white hover:text-blue"
+              >
+                關於我們
+              </Link>
             </nav>
 
             <EditableLink

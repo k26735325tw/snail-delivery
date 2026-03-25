@@ -6,8 +6,10 @@ import { useEffect, useRef, useState } from "react";
 import { EditableBlock, EditableImageFrame, EditableLink, EditableText } from "@/components/cms-inline-edit";
 import { useCmsVisualEditor } from "@/components/cms-visual-context";
 import { Footer } from "@/components/footer";
+import { PartnersSection } from "@/components/partners-section";
 import { SiteHeader } from "@/components/site-header";
 import type { CmsData, CmsDownloadCard } from "@/lib/cms-schema";
+import { partners, partnersSection } from "@/lib/partners";
 import { getBlockStyle, getImageHeight, getImageStyle, getTextStyle } from "@/lib/cms-style";
 import { detectDevice } from "@/utils/device";
 
@@ -684,6 +686,12 @@ export function SiteHome({
             ))}
           </EditableBlock>
         </section>
+
+        <PartnersSection
+          partners={partners}
+          title={partnersSection.title}
+          description={partnersSection.description}
+        />
       </div>
 
       <div ref={(node) => { sectionRefs.current.footer = node; }}>

@@ -5,7 +5,7 @@ import { buildSiteUrl } from "@/lib/site";
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const updatedAt = new Date();
 
-  return ["/", "/merchant", "/courier"].map((path) => ({
+  return ["/", "/merchant", "/courier", "/about"].map((path) => ({
     url: buildSiteUrl(path),
     lastModified: updatedAt,
     changeFrequency: "daily",
