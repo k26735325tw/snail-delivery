@@ -35,6 +35,7 @@ import {
   SPACING_OPTIONS,
   TEXT_ALIGN_OPTIONS,
 } from "@/lib/cms-style";
+import { uploadAsset } from "@/lib/blob-upload";
 import { createCmsId } from "@/lib/cms-data";
 import { MAX_UPLOAD_BYTES, getImageTooLargeMessage } from "@/lib/upload-rules";
 
@@ -466,21 +467,11 @@ export function AdminDashboard({ initialData }: AdminDashboardProps) {
   }
 
   async function uploadImage(file: File, uploadKey: string) {
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("uploadKey", uploadKey);
-
-    const response = await fetch("/api/cms/upload", { method: "POST", body: formData });
-    const result = (await response.json()) as { error?: string; url?: string };
-
-    if (response.status === 413) {
+    if (file.size > MAX_UPLOAD_BYTES) {
       throw new Error(getImageTooLargeMessage());
     }
 
-    if (!response.ok || !result.url) {
-      throw new Error(result.error ?? "Upload failed");
-    }
-
+    const result = await uploadAsset(file, uploadKey);
     return result.url;
   }
 

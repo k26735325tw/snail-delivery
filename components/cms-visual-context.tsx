@@ -11,6 +11,7 @@ import {
   type CmsArrayCollectionPath,
 } from "@/lib/cms-data";
 import type { CmsData } from "@/lib/cms-schema";
+import { uploadAsset } from "@/lib/blob-upload";
 import { getImageTooLargeMessage, getVideoTooLargeMessage } from "@/lib/upload-rules";
 
 export type VisualPageKey = "home" | "consumer" | "courier" | "merchant" | "about";
@@ -58,15 +59,6 @@ type CmsVisualContextValue = {
 
 const CmsVisualContext = createContext<CmsVisualContextValue | null>(null);
 
-function tryParseJsonObject(text: string) {
-  try {
-    const parsed = JSON.parse(text) as unknown;
-    return parsed && typeof parsed === "object" ? (parsed as Record<string, unknown>) : null;
-  } catch {
-    return null;
-  }
-}
-
 function normalizeUploadErrorMessage(input: {
   status: number;
   text: string;
@@ -79,6 +71,8 @@ function normalizeUploadErrorMessage(input: {
 
   if (
     input.status === 413 ||
+    normalized.includes("file is too large") ||
+    normalized.includes("maximum size") ||
     normalized.includes("request entity too large") ||
     normalized.includes("payload too large") ||
     normalized.includes("entity too large") ||
@@ -302,32 +296,19 @@ export function CmsVisualEditorProvider({
     setMessage(null);
 
     try {
-      const formData = new FormData();
-      formData.append("file", file);
-      formData.append("uploadKey", uploadKey);
-
-      const response = await fetch("/api/cms/upload", {
-        method: "POST",
-        body: formData,
-      });
-      const responseText = await response.text();
-      const parsed = tryParseJsonObject(responseText);
-      const result = parsed as { error?: string; url?: string } | null;
-
-      if (!response.ok || !result?.url) {
-        throw new Error(
-          normalizeUploadErrorMessage({
-            status: response.status,
-            text: responseText,
-            json: parsed,
-            fileType: file.type,
-          }),
-        );
-      }
-
+      const result = await uploadAsset(file, uploadKey);
       return result.url;
     } catch (uploadError) {
-      setError(uploadError instanceof Error ? uploadError.message : "檔案上傳失敗");
+      const message =
+        uploadError instanceof Error
+          ? normalizeUploadErrorMessage({
+              status: 500,
+              text: uploadError.message,
+              json: null,
+              fileType: file.type,
+            })
+          : "檔案上傳失敗";
+      setError(message);
       throw uploadError;
     } finally {
       setUploadingPaths((current) => {

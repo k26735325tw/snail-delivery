@@ -1,6 +1,7 @@
-import { put } from "@vercel/blob";
 import { NextResponse } from "next/server";
+import { handleUpload, type HandleUploadBody } from "@vercel/blob/client";
 
+import { normalizeUploadKey, shouldOverwriteUpload } from "@/lib/upload-paths";
 import { MAX_UPLOAD_BYTES } from "@/lib/upload-rules";
 
 export const dynamic = "force-dynamic";
@@ -13,91 +14,79 @@ const allowedContentTypes = new Set([
   "video/mp4",
   "video/webm",
 ]);
-const overwriteUploadKeys = new Set([
-  "shared/logo",
-  "home/hero",
-  "consumer/hero",
-  "courier/hero",
-  "merchant/hero",
-  "about/video",
-]);
 
-function shouldOverwriteUpload(uploadKey: string) {
-  return overwriteUploadKeys.has(uploadKey) || uploadKey.startsWith("home/download-cards/");
-}
-
-function normalizePath(value: string) {
-  return value.trim().toLowerCase().replace(/[^a-z0-9/-]+/g, "-");
-}
-
-function normalizeUploadKey(uploadKey: string) {
-  const value = normalizePath(uploadKey);
-
-  if (!value) {
-    return "shared/logo";
+function tryParseClientPayload(input: string | null) {
+  if (!input) {
+    return null;
   }
 
-  return value;
+  try {
+    const parsed = JSON.parse(input) as unknown;
+    return parsed && typeof parsed === "object" ? (parsed as Record<string, unknown>) : null;
+  } catch {
+    return null;
+  }
+}
+
+function isHandleUploadBody(value: unknown): value is HandleUploadBody {
+  if (!value || typeof value !== "object") {
+    return false;
+  }
+
+  const record = value as Record<string, unknown>;
+  return typeof record.type === "string" && "payload" in record;
 }
 
 export async function POST(request: Request) {
   try {
-    const formData = await request.formData();
-    const file = formData.get("file");
-    const uploadKey = normalizeUploadKey(String(formData.get("uploadKey") ?? "shared/logo"));
+    const body = (await request.json()) as unknown;
 
-    if (
-      !file ||
-      typeof file === "string" ||
-      typeof (file as Blob).arrayBuffer !== "function" ||
-      typeof (file as { type?: unknown }).type !== "string"
-    ) {
-      return NextResponse.json({ error: "Missing upload file" }, { status: 400 });
+    if (!isHandleUploadBody(body)) {
+      return NextResponse.json({ error: "Invalid upload payload" }, { status: 400 });
     }
 
-    const uploadFile = file as Blob & { name?: string; type: string };
+    const jsonResponse = await handleUpload({
+      body,
+      request,
+      onBeforeGenerateToken: async (_pathname, clientPayload) => {
+        const payload = tryParseClientPayload(clientPayload);
+        const fileType = typeof payload?.fileType === "string" ? payload.fileType : "";
+        const uploadKey = normalizeUploadKey(typeof payload?.uploadKey === "string" ? payload.uploadKey : "");
+        const fileSize = typeof payload?.fileSize === "number" ? payload.fileSize : null;
 
-    if (!allowedContentTypes.has(uploadFile.type)) {
+        if (!allowedContentTypes.has(fileType)) {
+          throw new Error("Unsupported upload type");
+        }
+
+        if (fileSize !== null && (!Number.isFinite(fileSize) || fileSize > MAX_UPLOAD_BYTES)) {
+          throw new Error("File too large");
+        }
+
+        return {
+          allowedContentTypes: [fileType],
+          maximumSizeInBytes: MAX_UPLOAD_BYTES,
+          addRandomSuffix: false,
+          allowOverwrite: shouldOverwriteUpload(uploadKey),
+        };
+      },
+      onUploadCompleted: async () => {
+        // No-op. The editor saves the returned URL into CMS data explicitly.
+      },
+    });
+
+    return NextResponse.json(jsonResponse);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Failed to prepare upload";
+    const normalized = message.toLowerCase();
+
+    if (normalized.includes("unsupported upload type")) {
       return NextResponse.json({ error: "Unsupported upload type" }, { status: 400 });
     }
 
-    if (uploadFile.size > MAX_UPLOAD_BYTES) {
+    if (normalized.includes("file is too large") || normalized.includes("maximum size")) {
       return NextResponse.json({ error: "Video file too large" }, { status: 413 });
     }
 
-    const filename = (uploadFile.name ?? "upload-image").replace(/[^a-zA-Z0-9._-]+/g, "-");
-    const extension = filename.includes(".") ? filename.slice(filename.lastIndexOf(".")) : "";
-    const shouldOverwrite = shouldOverwriteUpload(uploadKey);
-    const blobPath = shouldOverwrite
-      ? `cms/${uploadKey}${extension}`
-      : `cms/${uploadKey}/${Date.now()}-${filename}`;
-    const blob = await put(blobPath, uploadFile, {
-      access: "public",
-      contentType: uploadFile.type,
-      addRandomSuffix: false,
-      allowOverwrite: shouldOverwrite,
-    });
-
-    const version = Date.now();
-
-    return NextResponse.json({
-      success: true,
-      url: `${blob.url}${blob.url.includes("?") ? "&" : "?"}v=${version}`,
-      rawUrl: blob.url,
-      version,
-    });
-  } catch (error) {
-    const message = error instanceof Error ? error.message : "Failed to upload asset";
-
-    if (message.toLowerCase().includes("unexpected end of multipart data")) {
-      return NextResponse.json({ error: "Video file too large" }, { status: 413 });
-    }
-
-    return NextResponse.json(
-      {
-        error: message,
-      },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
