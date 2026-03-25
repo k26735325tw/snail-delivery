@@ -24,6 +24,43 @@ type SiteHomeProps = {
 
 const activeCardClass = "bg-[rgba(255,248,196,0.72)] ring-2 ring-[#1b6fff]/45 shadow-[0_24px_70px_rgba(27,111,255,0.16)] brightness-[1.02]";
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
+}
+
+function normalizeString(value: unknown) {
+  return typeof value === "string" ? value : "";
+}
+
+function normalizeStringArray(value: unknown) {
+  return Array.isArray(value) ? value.map((item) => normalizeString(item)) : [];
+}
+
+function normalizeImageAsset(value: unknown, fallback: CmsData["home"]["hero"]["heroImage"]) {
+  const record = isRecord(value) ? value : {};
+
+  return {
+    ...fallback,
+    ...record,
+    url: normalizeString(record.url),
+    alt: normalizeString(record.alt),
+    objectFit: record.objectFit === "contain" ? "contain" : fallback.objectFit,
+    focalX: typeof record.focalX === "number" ? record.focalX : fallback.focalX,
+    focalY: typeof record.focalY === "number" ? record.focalY : fallback.focalY,
+    desktopHeight: typeof record.desktopHeight === "number" ? record.desktopHeight : fallback.desktopHeight,
+    mobileHeight: typeof record.mobileHeight === "number" ? record.mobileHeight : fallback.mobileHeight,
+  };
+}
+
+function normalizeLinkItem(value: unknown) {
+  const record = isRecord(value) ? value : {};
+
+  return {
+    label: normalizeString(record.label),
+    href: normalizeString(record.href),
+  };
+}
+
 function getDeviceLabel(site: CmsData) {
   const device = detectDevice();
 
@@ -54,6 +91,80 @@ export function SiteHome({
   } | null>(null);
   const sectionRefs = useRef<Record<string, HTMLElement | null>>({});
   const isMobilePreview = embedded && previewViewport === "mobile";
+  const heroImage = normalizeImageAsset(site.home.hero.heroImage, site.home.hero.heroImage);
+  const navItems = Array.isArray(site.home.header.navItems) ? site.home.header.navItems.map((item) => normalizeLinkItem(item)) : [];
+  const featureCards = Array.isArray(site.home.features.cards)
+    ? site.home.features.cards.filter(isRecord).map((feature) => ({
+      ...feature,
+      id: typeof feature.id === "string" ? feature.id : undefined,
+      eyebrow: normalizeString(feature.eyebrow),
+      title: normalizeString(feature.title),
+      description: normalizeString(feature.description),
+    }))
+    : [];
+  const downloadCards = Array.isArray(site.home.downloadCards)
+    ? site.home.downloadCards.filter(isRecord).map((card) => ({
+      ...card,
+      id: typeof card.id === "string" ? card.id : undefined,
+      key: normalizeString(card.key),
+      eyebrow: normalizeString(card.eyebrow),
+      title: normalizeString(card.title),
+      description: normalizeString(card.description),
+      audience: normalizeString(card.audience),
+      iosUrl: normalizeString(card.iosUrl),
+      androidUrl: normalizeString(card.androidUrl),
+      image: normalizeImageAsset(card.image, site.home.hero.heroImage),
+      highlights: normalizeStringArray(card.highlights),
+    }))
+    : [];
+  const launchSteps = Array.isArray(site.home.launchFlow.steps)
+    ? site.home.launchFlow.steps.filter(isRecord).map((step) => ({
+      ...step,
+      id: typeof step.id === "string" ? step.id : undefined,
+      index: normalizeString(step.index),
+      title: normalizeString(step.title),
+      description: normalizeString(step.description),
+    }))
+    : [];
+  const partnerItems = Array.isArray(site.home.partnersSection.items)
+    ? site.home.partnersSection.items.filter(isRecord).map((partner) => ({
+      ...partner,
+      id: typeof partner.id === "string" ? partner.id : undefined,
+      image: normalizeImageAsset(partner.image, site.home.hero.heroImage),
+      name: normalizeString(partner.name),
+      nameUrl: normalizeString(partner.nameUrl),
+      contactInfo: normalizeString(partner.contactInfo),
+      contactUrl: normalizeString(partner.contactUrl),
+      serviceScope: normalizeString(partner.serviceScope),
+    }))
+    : [];
+  const safeSite = {
+    ...site,
+    home: {
+      ...site.home,
+      header: {
+        ...site.home.header,
+        navItems,
+      },
+      hero: {
+        ...site.home.hero,
+        heroImage,
+      },
+      features: {
+        ...site.home.features,
+        cards: featureCards,
+      },
+      downloadCards,
+      launchFlow: {
+        ...site.home.launchFlow,
+        steps: launchSteps,
+      },
+      partnersSection: {
+        ...site.home.partnersSection,
+        items: partnerItems,
+      },
+    },
+  };
 
   useEffect(() => {
     if (!focusSection) {
@@ -86,12 +197,12 @@ export function SiteHome({
     });
   }
 
-  const featureColumnClass = site.home.features.cards.length > 2 ? "lg:grid-cols-3" : "lg:grid-cols-2";
+  const featureColumnClass = featureCards.length > 2 ? "lg:grid-cols-3" : "lg:grid-cols-2";
 
   return (
     <main className="min-h-screen pb-10">
       <div ref={(node) => { sectionRefs.current.header = node; }}>
-        <SiteHeader site={site} embedded={embedded} highlighted={focusSection === "header"} />
+        <SiteHeader site={safeSite} embedded={embedded} highlighted={focusSection === "header"} />
       </div>
 
       <div className="shell mt-6 space-y-8">
@@ -127,19 +238,19 @@ export function SiteHome({
                     className="relative flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-[1.5rem] bg-[#0b4fd4] shadow-[0_20px_44px_rgba(11,79,212,0.32)]"
                   >
                     <Image
-                      src={site.site.logo.url}
-                      alt={site.site.logo.alt}
+                      src={safeSite.site.logo.url}
+                      alt={safeSite.site.logo.alt}
                       width={88}
                       height={88}
                       unoptimized
                       className="h-full w-full"
-                      style={getImageStyle(site.site.logo)}
+                      style={getImageStyle(safeSite.site.logo)}
                     />
                   </EditableImageFrame>
                   <div className="min-w-0">
                     <EditableText
                       as="p"
-                      value={site.site.siteName}
+                      value={safeSite.site.siteName}
                       className="truncate font-[var(--font-manrope)] text-xs font-extrabold uppercase tracking-[0.34em] text-[#0b4fd4]"
                       selection={{
                         id: "site.siteName.hero",
@@ -150,9 +261,9 @@ export function SiteHome({
                     />
                     <EditableText
                       as="p"
-                      value={site.home.hero.badge}
+                      value={safeSite.home.hero.badge}
                       className="break-words"
-                      style={getTextStyle(site.home.hero.badgeStyle)}
+                      style={getTextStyle(safeSite.home.hero.badgeStyle)}
                       selection={{
                         id: "home.hero.badge",
                         kind: "text",
@@ -166,9 +277,9 @@ export function SiteHome({
 
                 <EditableText
                   as="h1"
-                  value={site.home.hero.title}
+                  value={safeSite.home.hero.title}
                   className="mt-8 max-w-4xl break-words font-[var(--font-manrope)] tracking-[-0.08em]"
-                  style={getTextStyle(site.home.hero.titleStyle)}
+                  style={getTextStyle(safeSite.home.hero.titleStyle)}
                   multiline
                   selection={{
                     id: "home.hero.title",
@@ -181,9 +292,9 @@ export function SiteHome({
                 />
                 <EditableText
                   as="p"
-                  value={site.home.hero.subtitle}
+                  value={safeSite.home.hero.subtitle}
                   className="mt-5 max-w-3xl break-words"
-                  style={getTextStyle(site.home.hero.subtitleStyle)}
+                  style={getTextStyle(safeSite.home.hero.subtitleStyle)}
                   multiline
                   selection={{
                     id: "home.hero.subtitle",
@@ -198,9 +309,9 @@ export function SiteHome({
                 <div className="mt-8 flex flex-wrap items-center gap-3">
                   <EditableText
                     as="span"
-                    value={editor ? site.home.hero.deviceBadge : getDeviceLabel(site)}
+                    value={editor ? safeSite.home.hero.deviceBadge : getDeviceLabel(safeSite)}
                     className="rounded-full bg-[#0e1d38] px-4 py-2"
-                    style={getTextStyle(site.home.hero.deviceBadgeStyle)}
+                    style={getTextStyle(safeSite.home.hero.deviceBadgeStyle)}
                     selection={{
                       id: "home.hero.deviceBadge",
                       kind: "text",
@@ -211,9 +322,9 @@ export function SiteHome({
                   />
                   <EditableText
                     as="span"
-                    value={site.home.hero.secondaryBadge}
+                    value={safeSite.home.hero.secondaryBadge}
                     className="rounded-full bg-[#ffd84a] px-4 py-2"
-                    style={getTextStyle(site.home.hero.secondaryBadgeStyle)}
+                    style={getTextStyle(safeSite.home.hero.secondaryBadgeStyle)}
                     selection={{
                       id: "home.hero.secondaryBadge",
                       kind: "text",
@@ -226,8 +337,8 @@ export function SiteHome({
 
                 <div className="mt-8 flex flex-wrap gap-3">
                   <EditableLink
-                    href={site.home.hero.primaryHref}
-                    value={site.home.hero.primaryLabel}
+                    href={safeSite.home.hero.primaryHref}
+                    value={safeSite.home.hero.primaryLabel}
                     className="inline-flex items-center justify-center rounded-full bg-[#0e1d38] px-6 py-3.5 text-base font-black text-white transition hover:bg-[#16325f]"
                     selection={{
                       id: "home.hero.primary",
@@ -238,8 +349,8 @@ export function SiteHome({
                     }}
                   />
                   <EditableLink
-                    href={site.home.hero.secondaryHref}
-                    value={site.home.hero.secondaryLabel}
+                    href={safeSite.home.hero.secondaryHref}
+                    value={safeSite.home.hero.secondaryLabel}
                     className="inline-flex items-center justify-center rounded-full border border-[#0e1d38]/12 bg-white/84 px-6 py-3.5 text-base font-black text-[#0e1d38] transition hover:border-[#0b4fd4] hover:text-[#0b4fd4]"
                     selection={{
                       id: "home.hero.secondary",
@@ -253,7 +364,7 @@ export function SiteHome({
               </div>
 
               <div ref={(node) => { sectionRefs.current.features = node; }} className={`grid gap-4 transition-shadow ${focusSection === "features" ? "rounded-[2rem] ring-4 ring-blue/25" : ""}`} data-preview-section="features">
-                {site.home.hero.heroImage.url ? (
+                {heroImage.url ? (
                   <EditableImageFrame
                     selection={{
                       id: "home.hero.image",
@@ -266,15 +377,15 @@ export function SiteHome({
                   >
                     <div className="relative w-full">
                       <Image
-                        src={site.home.hero.heroImage.url}
-                        alt={site.home.hero.heroImage.alt}
+                        src={heroImage.url}
+                        alt={heroImage.alt}
                         width={1600}
-                        height={isMobilePreview ? site.home.hero.heroImage.mobileHeight : site.home.hero.heroImage.desktopHeight}
+                        height={isMobilePreview ? heroImage.mobileHeight : heroImage.desktopHeight}
                         unoptimized
                         className="w-full"
                         style={{
-                          ...getImageStyle(site.home.hero.heroImage, isMobilePreview),
-                          height: getImageHeight(site.home.hero.heroImage, isMobilePreview),
+                          ...getImageStyle(heroImage, isMobilePreview),
+                          height: getImageHeight(heroImage, isMobilePreview),
                         }}
                       />
                     </div>
@@ -292,7 +403,7 @@ export function SiteHome({
                   className={`grid gap-4 ${featureColumnClass}`}
                   style={getBlockStyle(site.home.features.sectionStyle)}
                 >
-                  {site.home.features.cards.map((feature, index) => (
+                  {featureCards.map((feature, index) => (
                     <EditableBlock
                       key={`${feature.eyebrow}-${feature.title}`}
                       selection={{
@@ -380,7 +491,7 @@ export function SiteHome({
           }}
           className="grid gap-6 lg:grid-cols-3"
         >
-          {site.home.downloadCards.map((card, index) => (
+          {downloadCards.map((card, index) => (
             <EditableBlock
               key={card.id}
               selection={{
@@ -608,10 +719,10 @@ export function SiteHome({
               stylePath: "home.launchFlow.rightBlockStyle",
               collectionPath: "home.launchFlow.steps",
             }}
-            className={`grid gap-4 ${site.home.launchFlow.steps.length > 2 ? "md:grid-cols-3" : "md:grid-cols-2"}`}
+            className={`grid gap-4 ${launchSteps.length > 2 ? "md:grid-cols-3" : "md:grid-cols-2"}`}
             style={getBlockStyle(site.home.launchFlow.rightBlockStyle)}
           >
-            {site.home.launchFlow.steps.map((step, index) => (
+            {launchSteps.map((step, index) => (
               <EditableBlock
                 key={step.id}
                 selection={{
@@ -688,21 +799,21 @@ export function SiteHome({
         </section>
 
         <PartnersSection
-          partners={site.home.partnersSection.items}
-          title={site.home.partnersSection.title}
-          description={site.home.partnersSection.description}
+          partners={partnerItems}
+          title={safeSite.home.partnersSection.title}
+          description={safeSite.home.partnersSection.description}
         />
 
         <HomeFlexSection
-          title={site.home.flexSection.title}
-          description={site.home.flexSection.description}
-          blocks={site.home.flexSection.blocks}
+          title={safeSite.home.flexSection.title}
+          description={safeSite.home.flexSection.description}
+          blocks={safeSite.home.flexSection.blocks}
         />
       </div>
 
       <div ref={(node) => { sectionRefs.current.footer = node; }}>
         <Footer
-          site={site}
+          site={safeSite}
           highlighted={focusSection === "footer"}
           activeCardKey={focusSection === "footer" ? activeCardKey : null}
           activeCardIndex={focusSection === "footer" ? activeCardIndex : null}
