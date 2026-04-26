@@ -5,6 +5,7 @@ import Image from "next/image";
 import { EditableBlock, EditableText } from "@/components/cms-inline-edit";
 import { useCmsVisualEditor } from "@/components/cms-visual-context";
 import type { CmsFlexBlock } from "@/lib/cms-schema";
+import { defaultTextStyle, getTextStyle } from "@/lib/cms-style";
 
 type AboutFlexSectionProps = {
   title: string;
@@ -14,6 +15,17 @@ type AboutFlexSectionProps = {
 
 function normalizeString(value: unknown) {
   return typeof value === "string" ? value : "";
+}
+
+function normalizeTextStyle(value: unknown) {
+  return defaultTextStyle(typeof value === "object" && value && !Array.isArray(value) ? (value as Parameters<typeof defaultTextStyle>[0]) : {});
+}
+
+function normalizeBlocks(value: CmsFlexBlock[]) {
+  return value.map((block) => ({
+    ...block,
+    textStyle: normalizeTextStyle(block.textStyle),
+  }));
 }
 
 function isExternalUrl(value: string) {
@@ -60,6 +72,7 @@ function AboutFlexBlockCard({ block, index }: { block: CmsFlexBlock; index: numb
         itemPath: `about.flexSection.blocks.${index}`,
         itemId: block.id,
         itemIndex: index,
+        stylePath: isText ? `about.flexSection.blocks.${index}.textStyle` : undefined,
       }}
       className="gradient-border border bg-white/84 p-6 shadow-[0_24px_70px_rgba(14,29,56,0.08)]"
     >
@@ -97,6 +110,7 @@ function AboutFlexBlockCard({ block, index }: { block: CmsFlexBlock; index: numb
           <EditableText
             as="h3"
             value={heading}
+            style={getTextStyle(block.textStyle)}
             className="font-[var(--font-manrope)] text-2xl font-black tracking-[-0.04em] text-[#0e1d38]"
             multiline
             selection={{
@@ -104,6 +118,7 @@ function AboutFlexBlockCard({ block, index }: { block: CmsFlexBlock; index: numb
               kind: "text",
               label: `About 自訂內容 Block ${index + 1} 標題`,
               fieldPath: `about.flexSection.blocks.${index}.heading`,
+              stylePath: isText ? `about.flexSection.blocks.${index}.textStyle` : undefined,
               collectionPath: "about.flexSection.blocks",
               itemPath: `about.flexSection.blocks.${index}`,
               itemId: block.id,
@@ -117,6 +132,7 @@ function AboutFlexBlockCard({ block, index }: { block: CmsFlexBlock; index: numb
           <EditableText
             as="p"
             value={body}
+            style={getTextStyle(block.textStyle)}
             className="text-base leading-8 text-[#44536d]"
             multiline
             selection={{
@@ -124,6 +140,7 @@ function AboutFlexBlockCard({ block, index }: { block: CmsFlexBlock; index: numb
               kind: "text",
               label: `About 自訂內容 Block ${index + 1} 內文`,
               fieldPath: `about.flexSection.blocks.${index}.body`,
+              stylePath: isText ? `about.flexSection.blocks.${index}.textStyle` : undefined,
               collectionPath: "about.flexSection.blocks",
               itemPath: `about.flexSection.blocks.${index}`,
               itemId: block.id,
@@ -137,6 +154,7 @@ function AboutFlexBlockCard({ block, index }: { block: CmsFlexBlock; index: numb
           <EditableText
             as="p"
             value={caption}
+            style={getTextStyle(block.textStyle)}
             className="text-sm leading-7 text-[#5d6b87]"
             multiline
             selection={{
@@ -144,6 +162,7 @@ function AboutFlexBlockCard({ block, index }: { block: CmsFlexBlock; index: numb
               kind: "text",
               label: `About 自訂內容 Block ${index + 1} Caption`,
               fieldPath: `about.flexSection.blocks.${index}.caption`,
+              stylePath: isText ? `about.flexSection.blocks.${index}.textStyle` : undefined,
               collectionPath: "about.flexSection.blocks",
               itemPath: `about.flexSection.blocks.${index}`,
               itemId: block.id,
@@ -161,8 +180,9 @@ function AboutFlexBlockCard({ block, index }: { block: CmsFlexBlock; index: numb
 
 export function AboutFlexSection({ title, description, blocks }: AboutFlexSectionProps) {
   const editor = useCmsVisualEditor();
+  const safeBlocks = normalizeBlocks(blocks);
 
-  if (blocks.length === 0 && !editor) {
+  if (safeBlocks.length === 0 && !editor) {
     return null;
   }
 
@@ -209,9 +229,9 @@ export function AboutFlexSection({ title, description, blocks }: AboutFlexSectio
           </div>
 
           <div className="mt-8">
-            {blocks.length > 0 ? (
+            {safeBlocks.length > 0 ? (
               <div className="grid gap-6">
-                {blocks.map((block, index) => (
+                {safeBlocks.map((block, index) => (
                   <AboutFlexBlockCard key={block.id ?? `${block.type}-${index}`} block={block} index={index} />
                 ))}
               </div>

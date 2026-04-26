@@ -147,6 +147,10 @@ function collectionAllowsEmpty(collectionPath: CmsArrayCollectionPath) {
   return collectionPath === "home.flexSection.blocks" || collectionPath === "about.flexSection.blocks";
 }
 
+function collectionUsesTextStyle(collectionPath: CmsArrayCollectionPath) {
+  return collectionPath === "home.flexSection.blocks" || collectionPath === "about.flexSection.blocks";
+}
+
 export function CmsVisualEditorProvider({
   initialData,
   initialStatus,
@@ -241,7 +245,7 @@ export function CmsVisualEditorProvider({
       id: `${collectionPath}.${(nextItem as { id: string }).id}.block`,
       kind: "block",
       label: "新卡片",
-      stylePath: `${collectionPath}.${insertIndex}.blockStyle`,
+      stylePath: `${collectionPath}.${insertIndex}.${collectionUsesTextStyle(collectionPath) ? "textStyle" : "blockStyle"}`,
       collectionPath,
       itemPath: `${collectionPath}.${insertIndex}`,
       itemId: (nextItem as { id: string }).id,

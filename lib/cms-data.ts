@@ -286,6 +286,7 @@ function emptyFlexBlock(): CmsFlexBlock {
     type: "text",
     heading: "新自訂內容",
     body: "請填寫這個 block 的內容。",
+    textStyle: defaultTextStyle(),
     mediaUrl: "",
     mediaAlt: "",
     caption: "",

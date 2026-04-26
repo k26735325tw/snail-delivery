@@ -130,6 +130,7 @@ export type CmsFlexBlock = {
   type: "text" | "image" | "video";
   heading: string;
   body: string;
+  textStyle: CmsTextStyle;
   mediaUrl: string;
   mediaAlt: string;
   caption: string;

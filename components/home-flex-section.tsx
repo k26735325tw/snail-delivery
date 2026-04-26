@@ -5,6 +5,7 @@ import Image from "next/image";
 import { EditableBlock, EditableText } from "@/components/cms-inline-edit";
 import { useCmsVisualEditor } from "@/components/cms-visual-context";
 import type { CmsFlexBlock } from "@/lib/cms-schema";
+import { defaultTextStyle, getTextStyle } from "@/lib/cms-style";
 
 type HomeFlexSectionProps = {
   title: string;
@@ -34,6 +35,10 @@ function normalizeBlockType(value: unknown): CmsFlexBlock["type"] {
   return "text";
 }
 
+function normalizeTextStyle(value: unknown) {
+  return defaultTextStyle(typeof value === "object" && value && !Array.isArray(value) ? (value as Parameters<typeof defaultTextStyle>[0]) : {});
+}
+
 function normalizeBlocks(value: unknown): CmsFlexBlock[] {
   if (!Array.isArray(value)) {
     return [];
@@ -53,6 +58,7 @@ function normalizeBlocks(value: unknown): CmsFlexBlock[] {
       type,
       heading,
       body: normalizeString(block.body),
+      textStyle: normalizeTextStyle(block.textStyle),
       mediaUrl: normalizeString(block.mediaUrl),
       mediaAlt: normalizeString(block.mediaAlt),
       caption,
@@ -106,6 +112,7 @@ function FlexBlockCard({ block, index }: { block: CmsFlexBlock; index: number })
         itemPath: `home.flexSection.blocks.${index}`,
         itemId: block.id,
         itemIndex: index,
+        stylePath: isText ? `home.flexSection.blocks.${index}.textStyle` : undefined,
       }}
       className="gradient-border border bg-white/84 p-6 shadow-[0_24px_70px_rgba(14,29,56,0.08)]"
     >
@@ -143,6 +150,7 @@ function FlexBlockCard({ block, index }: { block: CmsFlexBlock; index: number })
           <EditableText
             as="h3"
             value={heading}
+            style={getTextStyle(block.textStyle)}
             className="font-[var(--font-manrope)] text-2xl font-black tracking-[-0.04em] text-[#0e1d38]"
             multiline
             selection={{
@@ -150,6 +158,7 @@ function FlexBlockCard({ block, index }: { block: CmsFlexBlock; index: number })
               kind: "text",
               label: `自訂內容 Block ${index + 1} 標題`,
               fieldPath: `home.flexSection.blocks.${index}.heading`,
+              stylePath: isText ? `home.flexSection.blocks.${index}.textStyle` : undefined,
               collectionPath: "home.flexSection.blocks",
               itemPath: `home.flexSection.blocks.${index}`,
               itemId: block.id,
@@ -163,6 +172,7 @@ function FlexBlockCard({ block, index }: { block: CmsFlexBlock; index: number })
           <EditableText
             as="p"
             value={body}
+            style={getTextStyle(block.textStyle)}
             className="text-base leading-8 text-[#44536d]"
             multiline
             selection={{
@@ -170,6 +180,7 @@ function FlexBlockCard({ block, index }: { block: CmsFlexBlock; index: number })
               kind: "text",
               label: `自訂內容 Block ${index + 1} 內文`,
               fieldPath: `home.flexSection.blocks.${index}.body`,
+              stylePath: isText ? `home.flexSection.blocks.${index}.textStyle` : undefined,
               collectionPath: "home.flexSection.blocks",
               itemPath: `home.flexSection.blocks.${index}`,
               itemId: block.id,
@@ -183,6 +194,7 @@ function FlexBlockCard({ block, index }: { block: CmsFlexBlock; index: number })
           <EditableText
             as="p"
             value={caption}
+            style={getTextStyle(block.textStyle)}
             className="text-sm leading-7 text-[#5d6b87]"
             multiline
             selection={{
@@ -190,6 +202,7 @@ function FlexBlockCard({ block, index }: { block: CmsFlexBlock; index: number })
               kind: "text",
               label: `自訂內容 Block ${index + 1} Caption`,
               fieldPath: `home.flexSection.blocks.${index}.caption`,
+              stylePath: isText ? `home.flexSection.blocks.${index}.textStyle` : undefined,
               collectionPath: "home.flexSection.blocks",
               itemPath: `home.flexSection.blocks.${index}`,
               itemId: block.id,

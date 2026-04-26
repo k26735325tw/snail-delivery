@@ -11,7 +11,6 @@ import type { CmsBlockStyle, CmsData, CmsImageAsset, CmsTextStyle } from "@/lib/
 import type { CmsStatus } from "@/lib/cms-store";
 import {
   BRAND_COLOR_OPTIONS,
-  FONT_SIZE_OPTIONS,
   FONT_WEIGHT_OPTIONS,
   LINE_HEIGHT_OPTIONS,
   OBJECT_FIT_OPTIONS,
@@ -115,6 +114,14 @@ function SelectField({
   );
 }
 
+const FLEX_TEXT_SIZE_OPTIONS = [
+  { label: "小", value: "sm" },
+  { label: "一般", value: "base" },
+  { label: "大", value: "lg" },
+  { label: "特大", value: "xl" },
+  { label: "超大", value: "2xl" },
+] as const;
+
 function ColorField({
   label,
   value,
@@ -166,7 +173,20 @@ function TextStylePanel({ path, value }: { path: string; value: CmsTextStyle }) 
     <div className="space-y-4 rounded-[1.5rem] border border-slate-200 bg-slate-50 p-4">
       <p className="text-sm font-bold text-slate-900">文字樣式</p>
       <div className="grid gap-4">
-        <SelectField label="字級" value={value.fontSize} options={FONT_SIZE_OPTIONS} onChange={(next) => editor.updateValue(`${path}.fontSize`, next)} />
+        <label className="space-y-2">
+          <span className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">文字大小</span>
+          <select
+            value={value.fontSize}
+            onChange={(event) => editor.updateValue(`${path}.fontSize`, event.target.value)}
+            className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-blue-500"
+          >
+            {FLEX_TEXT_SIZE_OPTIONS.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        </label>
         <SelectField label="字重" value={value.fontWeight} options={FONT_WEIGHT_OPTIONS} onChange={(next) => editor.updateValue(`${path}.fontWeight`, next)} />
         <SelectField label="對齊" value={value.textAlign} options={TEXT_ALIGN_OPTIONS} onChange={(next) => editor.updateValue(`${path}.textAlign`, next)} />
         <SelectField label="行高" value={value.lineHeight} options={LINE_HEIGHT_OPTIONS} onChange={(next) => editor.updateValue(`${path}.lineHeight`, next)} />
