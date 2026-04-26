@@ -35,8 +35,30 @@ function normalizeBlockType(value: unknown): CmsFlexBlock["type"] {
   return "text";
 }
 
+function normalizeBlockSize(value: unknown): CmsFlexBlock["blockSize"] {
+  if (value === "small" || value === "medium" || value === "large" || value === "full") {
+    return value;
+  }
+
+  return "medium";
+}
+
 function normalizeTextStyle(value: unknown) {
   return defaultTextStyle(typeof value === "object" && value && !Array.isArray(value) ? (value as Parameters<typeof defaultTextStyle>[0]) : {});
+}
+
+function getBlockSizeClass(blockSize: CmsFlexBlock["blockSize"]) {
+  switch (blockSize) {
+    case "small":
+      return "md:max-w-sm";
+    case "large":
+      return "md:max-w-4xl";
+    case "full":
+      return "md:max-w-full";
+    case "medium":
+    default:
+      return "md:max-w-2xl";
+  }
 }
 
 function normalizeBlocks(value: unknown): CmsFlexBlock[] {
@@ -59,6 +81,7 @@ function normalizeBlocks(value: unknown): CmsFlexBlock[] {
       heading,
       body: normalizeString(block.body),
       textStyle: normalizeTextStyle(block.textStyle),
+      blockSize: normalizeBlockSize(block.blockSize),
       mediaUrl: normalizeString(block.mediaUrl),
       mediaAlt: normalizeString(block.mediaAlt),
       caption,
@@ -101,6 +124,7 @@ function FlexBlockCard({ block, index }: { block: CmsFlexBlock; index: number })
   const isText = type === "text";
   const isImage = type === "image";
   const isVideo = type === "video";
+  const blockSizeClass = getBlockSizeClass(block.blockSize);
 
   return (
     <EditableBlock
@@ -114,7 +138,7 @@ function FlexBlockCard({ block, index }: { block: CmsFlexBlock; index: number })
         itemIndex: index,
         stylePath: isText ? `home.flexSection.blocks.${index}.textStyle` : undefined,
       }}
-      className="gradient-border border bg-white/84 p-6 shadow-[0_24px_70px_rgba(14,29,56,0.08)]"
+      className={`mx-auto w-full min-w-0 gradient-border border bg-white/84 p-6 shadow-[0_24px_70px_rgba(14,29,56,0.08)] ${blockSizeClass}`}
     >
       <article className="space-y-5">
         {isImage && mediaUrl ? (

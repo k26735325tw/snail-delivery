@@ -122,6 +122,13 @@ const FLEX_TEXT_SIZE_OPTIONS = [
   { label: "超大", value: "2xl" },
 ] as const;
 
+const FLEX_BLOCK_SIZE_OPTIONS = [
+  { label: "小", value: "small" },
+  { label: "中", value: "medium" },
+  { label: "大", value: "large" },
+  { label: "滿版", value: "full" },
+] as const;
+
 function ColorField({
   label,
   value,
@@ -568,6 +575,22 @@ function ItemEditorPanel({ itemPath, uploadKey }: { itemPath: string; uploadKey?
           options={["text", "image", "video"]}
           onChange={(next) => editor.updateValue(`${itemPath}.type`, next)}
         />
+      ) : null}
+      {"blockSize" in record && typeof record.blockSize === "string" ? (
+        <label className="space-y-2">
+          <span className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">區塊大小</span>
+          <select
+            value={record.blockSize}
+            onChange={(event) => editor.updateValue(`${itemPath}.blockSize`, event.target.value)}
+            className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-blue-500"
+          >
+            {FLEX_BLOCK_SIZE_OPTIONS.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        </label>
       ) : null}
       {"heading" in record && typeof record.heading === "string" ? (
         <Field label="標題" value={record.heading} onChange={(next) => editor.updateValue(`${itemPath}.heading`, next)} multiline />

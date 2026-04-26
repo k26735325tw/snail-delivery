@@ -6,6 +6,7 @@ export type CmsObjectFit = "cover" | "contain";
 export type CmsShadow = "none" | "sm" | "md" | "lg";
 export type CmsRadius = "none" | "md" | "lg" | "xl" | "2xl" | "full";
 export type CmsSpacing = "0" | "2" | "4" | "6" | "8" | "10" | "12" | "16";
+export type CmsBlockSize = "small" | "medium" | "large" | "full";
 
 export type CmsTextStyle = {
   fontSize: CmsFontSize;
@@ -131,6 +132,7 @@ export type CmsFlexBlock = {
   heading: string;
   body: string;
   textStyle: CmsTextStyle;
+  blockSize: CmsBlockSize;
   mediaUrl: string;
   mediaAlt: string;
   caption: string;
