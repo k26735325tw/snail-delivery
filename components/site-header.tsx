@@ -18,6 +18,12 @@ export function SiteHeader({ site, embedded = false, highlighted = false }: Site
   const editor = useCmsVisualEditor();
   const blockStyle = getBlockStyle(site.home.header.blockStyle);
   const topOffset = embedded ? 0 : editor?.editorTopOffset ?? 0;
+  const mobileNavItems = [
+    { label: "HOME", href: "/" },
+    ...site.home.header.navItems,
+    site.home.header.aboutLink,
+    site.home.header.cta,
+  ].filter((item, index, list) => list.findIndex((entry) => entry.label === item.label && entry.href === item.href) === index);
 
   return (
     <>
@@ -93,7 +99,7 @@ export function SiteHeader({ site, embedded = false, highlighted = false }: Site
                     key={`${item.href}-${item.label}-${index}`}
                     href={item.href}
                     value={item.label}
-                    className="rounded-full px-4 py-2 text-sm font-bold text-ink/68 transition hover:bg-white hover:text-blue"
+                    className="rounded-full px-4 py-2 text-sm font-bold text-ink/68 no-underline transition hover:bg-white hover:text-blue"
                     selection={{
                       id: `home.header.navItems.${index}`,
                       kind: "link",
@@ -106,7 +112,7 @@ export function SiteHeader({ site, embedded = false, highlighted = false }: Site
                 <EditableLink
                   href={site.home.header.aboutLink.href}
                   value={site.home.header.aboutLink.label}
-                  className="rounded-full px-4 py-2 text-sm font-bold text-ink/68 transition hover:bg-white hover:text-blue"
+                  className="rounded-full px-4 py-2 text-sm font-bold text-ink/68 no-underline transition hover:bg-white hover:text-blue"
                   selection={{
                     id: "home.header.about-link",
                     kind: "link",
@@ -120,7 +126,7 @@ export function SiteHeader({ site, embedded = false, highlighted = false }: Site
               <EditableLink
                 href={site.home.header.cta.href}
                 value={site.home.header.cta.label}
-                className="rounded-full bg-blue px-4 py-2 text-sm font-extrabold text-white transition hover:-translate-y-0.5"
+                className="rounded-full bg-blue px-4 py-2 text-sm font-extrabold text-white no-underline transition hover:-translate-y-0.5"
                 selection={{
                   id: "home.header.cta",
                   kind: "link",
@@ -129,11 +135,103 @@ export function SiteHeader({ site, embedded = false, highlighted = false }: Site
                   hrefPath: "home.header.cta.href",
                 }}
               />
+
+              <details className="group relative md:hidden">
+                <summary
+                  className="list-none appearance-none [&::-webkit-details-marker]:hidden flex cursor-pointer items-center gap-2 rounded-full border border-[#d9e4ff] bg-white px-3 py-2 text-xs font-extrabold text-ink shadow-sm transition hover:border-blue hover:text-blue"
+                  aria-label="開啟導覽選單"
+                >
+                  <span className="flex flex-col gap-1">
+                    <span className="h-0.5 w-4 rounded-full bg-current" />
+                    <span className="h-0.5 w-4 rounded-full bg-current" />
+                    <span className="h-0.5 w-4 rounded-full bg-current" />
+                  </span>
+                  <span>選單</span>
+                </summary>
+
+                <div className="mt-3 w-[min(92vw,320px)] max-w-full overflow-hidden rounded-[1.5rem] border border-[#d9e4ff] bg-white p-3 shadow-[0_24px_70px_rgba(27,111,255,0.16)]">
+                  <div className="grid gap-2">
+                    {mobileNavItems.map((item) => {
+                      if (item.href === "/") {
+                        return (
+                          <Link
+                            key={`${item.label}-${item.href}`}
+                            href={item.href}
+                            className="rounded-2xl border border-[#eef2ff] px-4 py-3 text-sm font-bold text-ink no-underline transition hover:bg-[#f6f9ff] hover:text-blue"
+                          >
+                            {item.label}
+                          </Link>
+                        );
+                      }
+
+                      if (item.href === site.home.header.cta.href && item.label === site.home.header.cta.label) {
+                        return (
+                          <EditableLink
+                            key={`${item.label}-${item.href}`}
+                            href={item.href}
+                            value={item.label}
+                            className="rounded-2xl border border-[#eef2ff] px-4 py-3 text-sm font-bold text-ink no-underline transition hover:bg-[#f6f9ff] hover:text-blue"
+                            selection={{
+                              id: "home.header.cta.mobile",
+                              kind: "link",
+                              label: "手機版 Header CTA",
+                              fieldPath: "home.header.cta.label",
+                              hrefPath: "home.header.cta.href",
+                            }}
+                          />
+                        );
+                      }
+
+                      if (item.href === site.home.header.aboutLink.href && item.label === site.home.header.aboutLink.label) {
+                        return (
+                          <EditableLink
+                            key={`${item.label}-${item.href}`}
+                            href={item.href}
+                            value={item.label}
+                            className="rounded-2xl border border-[#eef2ff] px-4 py-3 text-sm font-bold text-ink no-underline transition hover:bg-[#f6f9ff] hover:text-blue"
+                            selection={{
+                              id: "home.header.about-link.mobile",
+                              kind: "link",
+                              label: "手機版 Header 關於我們",
+                              fieldPath: "home.header.aboutLink.label",
+                              hrefPath: "home.header.aboutLink.href",
+                            }}
+                          />
+                        );
+                      }
+
+                      const navIndex = site.home.header.navItems.findIndex(
+                        (navItem) => navItem.label === item.label && navItem.href === item.href,
+                      );
+
+                      if (navIndex >= 0) {
+                        return (
+                          <EditableLink
+                            key={`${item.label}-${item.href}`}
+                            href={item.href}
+                            value={item.label}
+                            className="rounded-2xl border border-[#eef2ff] px-4 py-3 text-sm font-bold text-ink no-underline transition hover:bg-[#f6f9ff] hover:text-blue"
+                            selection={{
+                              id: `home.header.navItems.${navIndex}.mobile`,
+                              kind: "link",
+                              label: `手機版 Header 導航 ${navIndex + 1}`,
+                              fieldPath: `home.header.navItems.${navIndex}.label`,
+                              hrefPath: `home.header.navItems.${navIndex}.href`,
+                            }}
+                          />
+                        );
+                      }
+
+                      return null;
+                    })}
+                  </div>
+                </div>
+              </details>
             </div>
           </EditableBlock>
         </div>
       </header>
-      {!embedded ? <div aria-hidden="true" className="h-[84px] md:h-[92px]" /> : null}
+      {!embedded ? <div aria-hidden="true" className="hidden md:block md:h-[92px]" /> : null}
     </>
   );
 }

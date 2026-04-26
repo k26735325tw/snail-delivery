@@ -736,7 +736,7 @@ function VisualCanvas() {
   const pageMap: Record<VisualPageKey, { label: string; href: string }> = {
     home: { label: "首頁", href: "/" },
     consumer: { label: "消費者", href: "/consumer" },
-    courier: { label: "騎手", href: "/courier" },
+    courier: { label: "外送夥伴", href: "/courier" },
     merchant: { label: "店家", href: "/merchant" },
     about: { label: "關於我們", href: "/about" },
   };

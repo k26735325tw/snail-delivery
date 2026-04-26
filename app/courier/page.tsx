@@ -11,7 +11,7 @@ export async function generateMetadata() {
 
 export default async function CourierPage() {
   const cms = await getCmsData();
-  const jsonLd = buildRoleJsonLd(cms, "/courier", "騎手", cms.courier);
+  const jsonLd = buildRoleJsonLd(cms, "/courier", "外送夥伴", cms.courier);
 
   return (
     <>

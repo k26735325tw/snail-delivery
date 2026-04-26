@@ -712,8 +712,8 @@ export function AdminDashboard({ initialData }: AdminDashboardProps) {
           <RolePageEditor title="消費者頁內容" previewPage="consumer" page={data.consumer} pendingFile={pendingUploads["consumer.hero"] ?? null} onChange={(consumer) => setData({ ...data, consumer })} onFileChange={(file) => uploadImageAndUpdate("consumer.hero", "consumer/hero", (url) => setData((current) => ({ ...current, consumer: { ...current.consumer, hero: { ...current.consumer.hero, heroImage: { ...current.consumer.hero.heroImage, url } } } })), file)} onPreviewTarget={setPreviewTarget} />
         </Panel>
 
-        <Panel title="騎手頁" description="騎手頁 Hero、內容區塊與 SEO。">
-          <RolePageEditor title="騎手頁內容" previewPage="courier" page={data.courier} pendingFile={pendingUploads["courier.hero"] ?? null} onChange={(courier) => setData({ ...data, courier })} onFileChange={(file) => uploadImageAndUpdate("courier.hero", "courier/hero", (url) => setData((current) => ({ ...current, courier: { ...current.courier, hero: { ...current.courier.hero, heroImage: { ...current.courier.hero.heroImage, url } } } })), file)} onPreviewTarget={setPreviewTarget} />
+        <Panel title="外送夥伴頁" description="外送夥伴頁 Hero、內容區塊與 SEO。">
+          <RolePageEditor title="外送夥伴頁內容" previewPage="courier" page={data.courier} pendingFile={pendingUploads["courier.hero"] ?? null} onChange={(courier) => setData({ ...data, courier })} onFileChange={(file) => uploadImageAndUpdate("courier.hero", "courier/hero", (url) => setData((current) => ({ ...current, courier: { ...current.courier, hero: { ...current.courier.hero, heroImage: { ...current.courier.hero.heroImage, url } } } })), file)} onPreviewTarget={setPreviewTarget} />
         </Panel>
 
         <Panel title="店家頁" description="店家頁 Hero、內容區塊與 SEO。">
@@ -731,7 +731,7 @@ export function AdminDashboard({ initialData }: AdminDashboardProps) {
               <SeoEditor seo={data.consumer.seo} onChange={(seo) => setData({ ...data, consumer: { ...data.consumer, seo } })} />
             </div>
             <div>
-              <h3 className="mb-3 text-base font-black text-slate-900">騎手頁</h3>
+              <h3 className="mb-3 text-base font-black text-slate-900">外送夥伴頁</h3>
               <SeoEditor seo={data.courier.seo} onChange={(seo) => setData({ ...data, courier: { ...data.courier, seo } })} />
             </div>
             <div>

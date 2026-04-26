@@ -4,10 +4,10 @@ import { defaultBlockStyle, defaultImageAsset, defaultTextStyle } from "@/lib/cm
 
 const defaultSeo = (overrides: Partial<CmsSeo>): CmsSeo => ({
   pageTitle: "GoGet 蝸牛外送",
-  metaDescription: "GoGet 提供消費者、騎手、店家三端入口與 CMS 內容管理後台。",
+  metaDescription: "GoGet 提供消費者、外送夥伴、店家三端入口與 CMS 內容管理後台。",
   canonicalPath: "/",
   ogTitle: "GoGet 蝸牛外送",
-  ogDescription: "GoGet 提供消費者、騎手、店家三端入口與 CMS 內容管理後台。",
+  ogDescription: "GoGet 提供消費者、外送夥伴、店家三端入口與 CMS 內容管理後台。",
   ogImageUrl: "/logo.png",
   robotsIndex: true,
   robotsFollow: true,
@@ -26,7 +26,7 @@ export const cmsDefaults: CmsData = {
     organizationName: "GoGet 蝸牛外送",
     footerTitle: "同一套內容中樞，管理所有外送入口。",
     footerDescription:
-      "CMS 後台更新後，首頁、消費者、騎手、店家頁面會同步刷新，圖片也會直接上傳到 Vercel Blob。",
+      "CMS 後台更新後，首頁、消費者、外送夥伴、店家頁面會同步刷新，圖片也會直接上傳到 Vercel Blob。",
     footerTitleStyle: defaultTextStyle({
       fontSize: "2xl",
       fontWeight: "900",
@@ -43,7 +43,7 @@ export const cmsDefaults: CmsData = {
         title: "角色入口",
         links: [
           { label: "消費者", href: "/consumer" },
-          { label: "騎手", href: "/courier" },
+          { label: "外送夥伴", href: "/courier" },
           { label: "店家", href: "/merchant" },
         ],
       },
@@ -75,7 +75,7 @@ export const cmsDefaults: CmsData = {
       }),
       navItems: [
         { label: "消費者", href: "/consumer" },
-        { label: "騎手", href: "/courier" },
+        { label: "外送夥伴", href: "/courier" },
         { label: "店家", href: "/merchant" },
         { label: "後台", href: "/admin" },
       ],
@@ -94,7 +94,7 @@ export const cmsDefaults: CmsData = {
       badge: "Snail Delivery CMS V2",
       title: "一個後台，同步管理 GoGet 全站內容與下載入口。",
       subtitle:
-        "首頁、消費者、騎手、店家頁面共用同一份 CMS 資料，讓營運調整文案、圖片、下載連結與 SEO 設定時，不必改程式碼。",
+        "首頁、消費者、外送夥伴、店家頁面共用同一份 CMS 資料，讓營運調整文案、圖片、下載連結與 SEO 設定時，不必改程式碼。",
       primaryLabel: "查看下載入口",
       primaryHref: "#download-cards",
       secondaryLabel: "了解 Launch Flow",
@@ -295,8 +295,8 @@ export const cmsDefaults: CmsData = {
         key: "courier",
         eyebrow: "Courier App",
         title: "GoGet Turbo",
-        description: "讓外送騎手用更清楚的任務節奏與收入資訊，穩定接單與出勤。",
-        audience: "兼職與全職騎手",
+        description: "讓外送夥伴用更清楚的任務節奏與收入資訊，穩定接單與出勤。",
+        audience: "兼職與全職外送夥伴",
         image: defaultImageAsset("/images/rider.png", "GoGet Turbo App 畫面", {
           desktopHeight: 256,
           mobileHeight: 224,
@@ -427,7 +427,7 @@ export const cmsDefaults: CmsData = {
         {
           index: "01",
           title: "選擇角色",
-          description: "先確認你要下載消費者、騎手或店家端 App。",
+          description: "先確認你要下載消費者、外送夥伴或店家端 App。",
           indexStyle: defaultTextStyle({
             fontSize: "sm",
             fontWeight: "700",
@@ -602,9 +602,9 @@ export const cmsDefaults: CmsData = {
   courier: {
     hero: {
       badge: "Courier Experience",
-      title: "讓騎手在高節奏工作中，也能維持清楚決策與穩定收入預期。",
+      title: "讓外送夥伴在高節奏工作中，也能維持清楚決策與穩定收入預期。",
       description:
-        "GoGet 騎手端將收入、任務與工作節奏整理成一致介面，降低接單猶豫與資訊噪音。",
+        "GoGet 外送夥伴端將收入、任務與工作節奏整理成一致介面，降低接單猶豫與資訊噪音。",
       primaryLabel: "返回首頁",
       primaryHref: "/",
       secondaryLabel: "查看消費者頁",
@@ -615,7 +615,7 @@ export const cmsDefaults: CmsData = {
         { label: "收入資訊", value: "透明可追蹤" },
         { label: "排班方式", value: "彈性上線" },
       ],
-      heroImage: defaultImageAsset("/images/rider.png", "GoGet 騎手頁英雄圖", {
+      heroImage: defaultImageAsset("/images/rider.png", "GoGet 外送夥伴頁英雄圖", {
         desktopHeight: 340,
         mobileHeight: 240,
       }),
@@ -652,11 +652,11 @@ export const cmsDefaults: CmsData = {
     },
     sections: [],
     seo: defaultSeo({
-      pageTitle: "GoGet 騎手 | 任務與收入節奏",
-      metaDescription: "了解 GoGet 騎手端如何整理任務節奏、收入資訊與支援內容。",
+      pageTitle: "GoGet 外送夥伴 | 任務與收入節奏",
+      metaDescription: "了解 GoGet 外送夥伴端如何整理任務節奏、收入資訊與支援內容。",
       canonicalPath: "/courier",
-      ogTitle: "GoGet 騎手 | 任務與收入節奏",
-      ogDescription: "了解 GoGet 騎手端如何整理任務節奏、收入資訊與支援內容。",
+      ogTitle: "GoGet 外送夥伴 | 任務與收入節奏",
+      ogDescription: "了解 GoGet 外送夥伴端如何整理任務節奏、收入資訊與支援內容。",
     }),
   },
   merchant: {
@@ -791,7 +791,7 @@ cmsDefaults.courier.sections = [
   {
     id: "courier-pillars",
     badge: "Three Pillars",
-    title: "收入、彈性、安全，是騎手端最核心的三個承諾。",
+    title: "收入、彈性、安全，是外送夥伴端最核心的三個承諾。",
     description: "這些內容必須能被營運快速更新，才能反映實際招募策略。",
     badgeStyle: defaultTextStyle({ fontSize: "sm", fontWeight: "700", textColor: "brand.blueDeep" }),
     titleStyle: defaultTextStyle({ fontSize: "4xl", fontWeight: "900", textColor: "brand.ink", lineHeight: "tight" }),
@@ -811,7 +811,7 @@ cmsDefaults.courier.sections = [
       {
         eyebrow: "Flexibility",
         title: "排班更自由",
-        description: "讓兼職與全職騎手都能理解工作節奏。",
+        description: "讓兼職與全職外送夥伴都能理解工作節奏。",
         icon: "彈",
         eyebrowStyle: defaultTextStyle({ fontSize: "xs", fontWeight: "700", textColor: "brand.blueDeep" }),
         titleStyle: defaultTextStyle({ fontSize: "xl", fontWeight: "700", textColor: "brand.ink", lineHeight: "tight" }),
