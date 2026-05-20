@@ -36,6 +36,10 @@ function normalizeStringArray(value: unknown) {
   return Array.isArray(value) ? value.map((item) => normalizeString(item)) : [];
 }
 
+function hasImageUrl(value: unknown): value is string {
+  return typeof value === "string" && value.trim().length > 0;
+}
+
 function normalizeImageAsset(value: unknown, fallback: CmsData["home"]["hero"]["heroImage"]) {
   const record = isRecord(value) ? value : {};
 
@@ -237,15 +241,21 @@ export function SiteHome({
                     }}
                     className="relative flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-[1.5rem] bg-[#0b4fd4] shadow-[0_20px_44px_rgba(11,79,212,0.32)]"
                   >
-                    <Image
-                      src={safeSite.site.logo.url}
-                      alt={safeSite.site.logo.alt}
-                      width={88}
-                      height={88}
-                      unoptimized
-                      className="h-full w-full"
-                      style={getImageStyle(safeSite.site.logo)}
-                    />
+                    {hasImageUrl(safeSite.site.logo.url) ? (
+                      <Image
+                        src={safeSite.site.logo.url}
+                        alt={safeSite.site.logo.alt}
+                        width={88}
+                        height={88}
+                        unoptimized
+                        className="h-full w-full"
+                        style={getImageStyle(safeSite.site.logo)}
+                      />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center text-[10px] font-black uppercase tracking-[0.28em] text-white">
+                        GoGet
+                      </div>
+                    )}
                   </EditableImageFrame>
                   <div className="min-w-0">
                     <EditableText
@@ -524,18 +534,27 @@ export function SiteHome({
                   className="overflow-hidden rounded-[1.6rem] bg-[#eef5ff]"
                 >
                   <div className="relative w-full">
-                    <Image
-                      src={card.image.url}
-                      alt={card.image.alt}
-                      width={1200}
-                      height={isMobilePreview ? card.image.mobileHeight : card.image.desktopHeight}
-                      unoptimized
-                      className="w-full transition duration-500 group-hover:scale-[1.03]"
-                      style={{
-                        ...getImageStyle(card.image, isMobilePreview),
-                        height: getImageHeight(card.image, isMobilePreview),
-                      }}
-                    />
+                    {hasImageUrl(card.image.url) ? (
+                      <Image
+                        src={card.image.url}
+                        alt={card.image.alt}
+                        width={1200}
+                        height={isMobilePreview ? card.image.mobileHeight : card.image.desktopHeight}
+                        unoptimized
+                        className="w-full transition duration-500 group-hover:scale-[1.03]"
+                        style={{
+                          ...getImageStyle(card.image, isMobilePreview),
+                          height: getImageHeight(card.image, isMobilePreview),
+                        }}
+                      />
+                    ) : (
+                      <div
+                        aria-hidden="true"
+                        className="flex h-[220px] w-full items-center justify-center bg-[#eef5ff] text-xs font-bold uppercase tracking-[0.26em] text-slate-400"
+                      >
+                        無圖片
+                      </div>
+                    )}
                   </div>
                 </EditableImageFrame>
 

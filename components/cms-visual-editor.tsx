@@ -532,6 +532,7 @@ function ItemEditorPanel({ itemPath, uploadKey }: { itemPath: string; uploadKey?
 
   const record = item as Record<string, unknown>;
   const isAboutFlexBlock = itemPath.startsWith("about.flexSection.blocks.");
+  const isFlexBlock = itemPath.startsWith("home.flexSection.blocks.") || isAboutFlexBlock;
   const flexMediaBaseKey = isAboutFlexBlock ? "about/flex-section" : "home/flex-section";
 
   return (
@@ -576,11 +577,11 @@ function ItemEditorPanel({ itemPath, uploadKey }: { itemPath: string; uploadKey?
           onChange={(next) => editor.updateValue(`${itemPath}.type`, next)}
         />
       ) : null}
-      {"blockSize" in record && typeof record.blockSize === "string" ? (
+      {isFlexBlock ? (
         <label className="space-y-2">
           <span className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">區塊大小</span>
           <select
-            value={record.blockSize}
+            value={typeof record.blockSize === "string" ? record.blockSize : "medium"}
             onChange={(event) => editor.updateValue(`${itemPath}.blockSize`, event.target.value)}
             className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-blue-500"
           >
