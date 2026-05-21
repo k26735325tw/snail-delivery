@@ -39,7 +39,7 @@ export function SiteHeader({ site, embedded = false, highlighted = false }: Site
               label: "首頁 Header 區塊",
               stylePath: "home.header.blockStyle",
             }}
-            className={`flex flex-wrap items-center justify-between gap-4 border bg-white/90 backdrop-blur transition-shadow ${highlighted ? "ring-4 ring-blue/25 shadow-[0_24px_70px_rgba(27,111,255,0.18)]" : ""}`}
+            className={`flex items-start justify-between gap-3 border bg-white/90 backdrop-blur transition-shadow md:items-center md:gap-4 ${highlighted ? "ring-4 ring-blue/25 shadow-[0_24px_70px_rgba(27,111,255,0.18)]" : ""}`}
             style={blockStyle}
           >
             <Link href="/" className="flex min-w-0 items-center gap-3">
@@ -92,49 +92,51 @@ export function SiteHeader({ site, embedded = false, highlighted = false }: Site
               </div>
             </Link>
 
-            <div className="flex flex-wrap items-center justify-end gap-2">
-              <nav className="hidden items-center gap-1 md:flex">
-                {site.home.header.navItems.map((item, index) => (
+            <div className="flex shrink-0 items-start gap-2 md:items-center">
+              <div className="hidden items-center gap-2 md:flex">
+                <nav className="flex items-center gap-1">
+                  {site.home.header.navItems.map((item, index) => (
+                    <EditableLink
+                      key={`${item.href}-${item.label}-${index}`}
+                      href={item.href}
+                      value={item.label}
+                      className="rounded-full px-4 py-2 text-sm font-bold text-ink/68 no-underline transition hover:bg-white hover:text-blue"
+                      selection={{
+                        id: `home.header.navItems.${index}`,
+                        kind: "link",
+                        label: `Header 導航 ${index + 1}`,
+                        fieldPath: `home.header.navItems.${index}.label`,
+                        hrefPath: `home.header.navItems.${index}.href`,
+                      }}
+                    />
+                  ))}
                   <EditableLink
-                    key={`${item.href}-${item.label}-${index}`}
-                    href={item.href}
-                    value={item.label}
+                    href={site.home.header.aboutLink.href}
+                    value={site.home.header.aboutLink.label}
                     className="rounded-full px-4 py-2 text-sm font-bold text-ink/68 no-underline transition hover:bg-white hover:text-blue"
                     selection={{
-                      id: `home.header.navItems.${index}`,
+                      id: "home.header.about-link",
                       kind: "link",
-                      label: `Header 導航 ${index + 1}`,
-                      fieldPath: `home.header.navItems.${index}.label`,
-                      hrefPath: `home.header.navItems.${index}.href`,
+                      label: "Header 關於我們",
+                      fieldPath: "home.header.aboutLink.label",
+                      hrefPath: "home.header.aboutLink.href",
                     }}
                   />
-                ))}
+                </nav>
+
                 <EditableLink
-                  href={site.home.header.aboutLink.href}
-                  value={site.home.header.aboutLink.label}
-                  className="rounded-full px-4 py-2 text-sm font-bold text-ink/68 no-underline transition hover:bg-white hover:text-blue"
+                  href={site.home.header.cta.href}
+                  value={site.home.header.cta.label}
+                  className="rounded-full bg-blue px-4 py-2 text-sm font-extrabold text-white no-underline transition hover:-translate-y-0.5"
                   selection={{
-                    id: "home.header.about-link",
+                    id: "home.header.cta",
                     kind: "link",
-                    label: "Header 關於我們",
-                    fieldPath: "home.header.aboutLink.label",
-                    hrefPath: "home.header.aboutLink.href",
+                    label: "Header CTA",
+                    fieldPath: "home.header.cta.label",
+                    hrefPath: "home.header.cta.href",
                   }}
                 />
-              </nav>
-
-              <EditableLink
-                href={site.home.header.cta.href}
-                value={site.home.header.cta.label}
-                className="rounded-full bg-blue px-4 py-2 text-sm font-extrabold text-white no-underline transition hover:-translate-y-0.5"
-                selection={{
-                  id: "home.header.cta",
-                  kind: "link",
-                  label: "Header CTA",
-                  fieldPath: "home.header.cta.label",
-                  hrefPath: "home.header.cta.href",
-                }}
-              />
+              </div>
 
               <details className="group relative md:hidden">
                 <summary
@@ -231,7 +233,7 @@ export function SiteHeader({ site, embedded = false, highlighted = false }: Site
           </EditableBlock>
         </div>
       </header>
-      {!embedded ? <div aria-hidden="true" className="hidden md:block md:h-[92px]" /> : null}
+      {!embedded ? <div aria-hidden="true" className="h-[138px] md:h-[92px]" /> : null}
     </>
   );
 }
