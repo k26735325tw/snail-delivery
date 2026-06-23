@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>GoGet 蝸牛外送</title>
+    <meta name="description" content="GoGet 蝸牛外送 HTML + PHP 交接版。">
+    <link rel="stylesheet" href="/assets/css/style.css">
+  </head>
+  <body data-page="home">
+    <header class="site-header">
+      <div class="site-wrap site-header__inner">
+        <a class="brand" href="/">
+          <img id="site-logo" class="brand__logo" src="/images/logo.png" alt="GoGet 蝸牛外送品牌標誌">
+          <div class="brand__meta">
+            <span id="site-name" class="brand__name">GoGet 蝸牛外送</span>
+            <span id="site-subtitle" class="brand__subtitle">台灣本土最友善的外送平台</span>
+          </div>
+        </a>
+        <button id="nav-toggle" class="nav-toggle" type="button" aria-label="切換導覽選單" aria-expanded="false">
+          <span class="nav-toggle__bars" aria-hidden="true"><span></span><span></span><span></span></span>
+        </button>
+        <nav id="site-nav" class="site-nav" aria-label="主要導覽"></nav>
+        <div class="header__actions">
+          <a id="header-cta" class="btn btn--primary desktop-only" href="#download-cards">立即下載 App</a>
+        </div>
+      </div>
+    </header>
+
+    <main class="page-shell">
+      <div class="site-wrap">
+        <div id="page-error" class="error-banner" hidden></div>
+
+        <section class="hero">
+          <div class="panel hero__panel">
+            <div class="hero__grid">
+              <div class="hero__copy">
+                <span id="hero-badge" class="eyebrow">首頁</span>
+                <h1 id="hero-title"></h1>
+                <p id="hero-subtitle" class="hero__subtitle"></p>
+                <div id="hero-badges" class="hero__badge-row"></div>
+                <div id="hero-actions" class="hero__actions"></div>
+                <div id="hero-stats" class="hero__stats"></div>
+              </div>
+              <div id="hero-visual" class="hero__visual"></div>
+            </div>
+          </div>
+        </section>
+
+        <section id="features-section" class="section">
+          <div class="section__head">
+            <div>
+              <span class="eyebrow">Highlights</span>
+              <h2 class="section-title">核心特色</h2>
+            </div>
+          </div>
+          <div id="features-grid" class="grid grid--cards"></div>
+        </section>
+
+        <section id="downloads-section" class="section">
+          <div class="section__head">
+            <div>
+              <span class="eyebrow">Download</span>
+              <h2 class="section-title">下載入口</h2>
+            </div>
+          </div>
+          <div id="downloads-grid" class="grid"></div>
+        </section>
+
+        <section id="launch-section" class="launch">
+          <div class="panel launch__panel">
+            <div>
+              <span id="launch-eyebrow" class="eyebrow"></span>
+              <h2 id="launch-title" class="section-title"></h2>
+              <p id="launch-lead" class="section__lead"></p>
+            </div>
+            <div id="launch-steps" class="launch__steps"></div>
+          </div>
+        </section>
+
+        <section id="sections-section" class="section">
+          <div class="section__head">
+            <div>
+              <span class="eyebrow">Sections</span>
+              <h2 class="section-title">內容區</h2>
+            </div>
+          </div>
+          <div id="sections-grid" class="role-grid"></div>
+        </section>
+
+        <section id="about-section" class="section" hidden>
+          <div class="section__head">
+            <div>
+              <span class="eyebrow">About</span>
+              <h2 id="about-title" class="section-title">關於我們</h2>
+            </div>
+          </div>
+          <div class="panel card">
+            <div class="card__body">
+              <p id="about-lead" class="section__lead"></p>
+              <div class="grid grid--two" style="margin-top:18px;">
+                <div>
+                  <h3 id="about-video-title" class="card__title"></h3>
+                  <p id="about-video-desc" class="card__desc"></p>
+                  <p id="about-video-hint" class="muted"></p>
+                </div>
+                <div id="about-video" class="block-card__figure"></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="blocks-section" class="section">
+          <div class="section__head">
+            <div>
+              <span class="eyebrow">Blocks</span>
+              <h2 class="section-title">自訂內容區</h2>
+            </div>
+          </div>
+          <div id="blocks-grid" class="block-grid"></div>
+        </section>
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="site-wrap">
+        <div class="panel footer__panel">
+          <div class="footer__grid">
+            <div class="footer__brand">
+              <span class="eyebrow">GoGet</span>
+              <h2 id="footer-title" class="section-title"></h2>
+              <p id="footer-desc"></p>
+            </div>
+            <div id="footer-groups" class="footer__links"></div>
+            <div class="footer__links">
+              <h3>交接版本</h3>
+              <ul>
+                <li>HTML + PHP</li>
+                <li>不需要 Next.js</li>
+                <li>內容存在 JSON</li>
+              </ul>
+            </div>
+          </div>
+          <div class="footer__bottom">
+            <span id="footer-note"></span>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    <script src="/assets/js/site.js"></script>
+  </body>
+</html>

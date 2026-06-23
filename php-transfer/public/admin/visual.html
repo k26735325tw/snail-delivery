@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>內容後台 | GoGet 蝸牛外送</title>
+    <meta name="description" content="GoGet 蝸牛外送 PHP 後台。">
+    <link rel="stylesheet" href="/assets/css/style.css">
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="site-wrap site-header__inner">
+        <a class="brand" href="/index.html">
+          <img class="brand__logo" src="/images/logo.png" alt="GoGet 蝸牛外送品牌標誌">
+          <div class="brand__meta">
+            <span class="brand__name">GoGet 蝸牛外送</span>
+            <span class="brand__subtitle">HTML + PHP 交接後台</span>
+          </div>
+        </a>
+        <div class="header__actions">
+          <button id="reload-btn" class="btn btn--secondary" type="button">重新讀取</button>
+          <button id="backup-btn" class="btn btn--secondary" type="button">立即備份</button>
+          <button id="save-btn" class="btn btn--primary" type="button">儲存內容</button>
+        </div>
+      </div>
+    </header>
+
+    <main class="admin-shell">
+      <div class="site-wrap">
+        <div class="admin-toolbar">
+          <div class="admin-toolbar__status">
+            <span class="admin-badge">可編輯內容：站點 / 首頁 / 關於 / 店家 / 外送夥伴 / 消費者</span>
+            <span class="admin-badge">密碼儲存在 sessionStorage</span>
+          </div>
+          <div id="admin-status" class="notice" hidden></div>
+        </div>
+
+        <div class="admin-grid">
+          <aside class="admin-sidebar">
+            <div class="panel">
+              <div class="editor-section__head">
+                <h2>區段導覽</h2>
+              </div>
+              <nav id="admin-nav" class="admin-nav"></nav>
+            </div>
+          </aside>
+
+          <section class="admin-main">
+            <div class="panel">
+              <div id="admin-editor" class="editor-stack"></div>
+            </div>
+          </section>
+        </div>
+      </div>
+    </main>
+
+    <script src="/assets/js/admin.js"></script>
+  </body>
+</html>
